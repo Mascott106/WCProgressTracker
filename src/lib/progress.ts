@@ -1,0 +1,119 @@
+import { buildBracket } from "./bracket";
+import { buildKnockoutSchedule } from "./knockout-schedule";
+import {
+  isFinished,
+  isLive,
+  MATCH_DURATION_MINUTES,
+  MatchSummary,
+  ProgressData,
+  TOTAL_GAMES,
+} from "./types";
+
+const MATCH_DURATION_MS = MATCH_DURATION_MINUTES * 60 * 1000;
+
+export function tournamentBounds(summaries: MatchSummary[]) {
+  const kickoffs = summaries.map((m) => new Date(m.date).getTime());
+  const start = Math.min(...kickoffs);
+  const end = Math.max(...kickoffs) + MATCH_DURATION_MS;
+  return { start, end };
+}
+
+function getTimeProgressPercent(now: number, start: number, end: number): number {
+  if (now <= start) return 0;
+  if (now >= end) return 100;
+  return ((now - start) / (end - start)) * 100;
+}
+
+/** When the next status transition is expected (kickoff or end of live window). */
+export function msUntilNextStatusChange(
+  summaries: MatchSummary[],
+  now: number,
+): number {
+  let next = Infinity;
+
+  for (const match of summaries) {
+    if (isFinished(match.status)) continue;
+
+    const kickoff = new Date(match.date).getTime();
+    const end = kickoff + MATCH_DURATION_MS;
+
+    if (now < kickoff) next = Math.min(next, kickoff - now);
+    else if (isLive(match.status) || now < end) next = Math.min(next, end - now);
+  }
+
+  return Number.isFinite(next) ? next : 60 * 60 * 1000;
+}
+
+function getCalendarDayWindow(now: number, daysFromToday: number) {
+  const start = new Date(now);
+  start.setDate(start.getDate() + daysFromToday);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+
+  return {
+    start: start.getTime(),
+    end: end.getTime(),
+    dateIso: start.toISOString(),
+  };
+}
+
+function getScheduledMatchesForWindow(
+  summaries: MatchSummary[],
+  window: { start: number; end: number },
+): MatchSummary[] {
+  return summaries
+    .filter((m) => {
+      if (m.status !== "NS") return false;
+      const kickoff = new Date(m.date).getTime();
+      return kickoff >= window.start && kickoff < window.end;
+    })
+    .sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+}
+
+export function buildProgressData(
+  summaries: MatchSummary[],
+  now = Date.now(),
+): ProgressData {
+  const completed = summaries.filter((m) => isFinished(m.status));
+  const live = summaries.filter((m) => isLive(m.status));
+
+  const completedSorted = [...completed].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
+  const upcomingDays = [1, 2].map((offset) => {
+    const window = getCalendarDayWindow(now, offset);
+    return {
+      dateIso: window.dateIso,
+      matches: getScheduledMatchesForWindow(summaries, window),
+      isTomorrow: offset === 1,
+    };
+  });
+
+  const { start, end } = tournamentBounds(summaries);
+  const ttlMs = msUntilNextStatusChange(summaries, now);
+  const completedCount = completed.length;
+
+  return {
+    totalGames: TOTAL_GAMES,
+    completedGames: completedCount,
+    liveGames: live.length,
+    remainingGames: TOTAL_GAMES - completedCount,
+    progressPercent: Math.round((completedCount / TOTAL_GAMES) * 1000) / 10,
+    timeProgress: {
+      startAt: new Date(start).toISOString(),
+      endAt: new Date(end).toISOString(),
+      percent: getTimeProgressPercent(now, start, end),
+    },
+    lastCompleted: completedSorted[0] ?? null,
+    liveMatches: live,
+    upcomingDays,
+    bracket: buildBracket(summaries, now),
+    knockoutSchedule: buildKnockoutSchedule(summaries, now),
+    nextStatusChangeAt: new Date(now + ttlMs).toISOString(),
+  };
+}

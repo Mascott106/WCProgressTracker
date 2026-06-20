@@ -28,9 +28,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (optional — only for NEXT_PUBLIC_PREVIEW_BRACKET)
+# env files
 .env
 .env*.local
+
+# api cache (api-driven branch only)
+/data/
 
 # vercel
 .vercel

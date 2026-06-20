@@ -167,3 +167,22 @@ export function isKnockoutRound(round: string): boolean {
     round === "Third Place"
   );
 }
+
+export function hasMatchScore(
+  match: Pick<MatchSummary, "homeGoals" | "awayGoals">,
+): boolean {
+  return match.homeGoals !== null && match.awayGoals !== null;
+}
+
+/** Winning team name, or null if undecided / draw / no score. */
+export function getMatchWinnerTeam(
+  match: Pick<
+    MatchSummary,
+    "status" | "homeTeam" | "awayTeam" | "homeGoals" | "awayGoals"
+  >,
+): string | null {
+  if (!isFinished(match.status) || !hasMatchScore(match)) return null;
+  if (match.homeGoals! > match.awayGoals!) return match.homeTeam;
+  if (match.awayGoals! > match.homeGoals!) return match.awayTeam;
+  return null;
+}

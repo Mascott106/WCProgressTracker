@@ -9,7 +9,7 @@ API-driven fork of the progress tracker. Live scores and statuses come from [foo
 Everything from the static app, plus:
 
 - **Live scores** from football-data.org merged onto the canonical 104-match schedule
-- **Smart caching** — TTL based on kickoffs and match end times to stay within rate limits
+- **1-minute polling** — refreshes from football-data.org once per minute while the page is open
 - **API usage footer** — remaining requests per minute and cache expiry
 - **Mock mode** — fall back to time-based static progress without an API key
 
@@ -40,15 +40,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## API usage strategy (free tier)
 
-football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app is designed to use far less:
-
-| Situation | Upstream API calls |
-|-----------|-------------------|
-| Rest day (no matches) | **0** (24h cache) |
-| Before kickoff | **0** until kickoff |
-| During live match | **0** (no mid-game polling) |
-| After match (~2h 5m) | **1** for final score |
-| Busy match day (4 kickoff slots) | **~2–4** total |
+football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute** while the page is open — well within that limit (1 call/min).
 
 One call fetches all 104 matches:
 
@@ -59,12 +51,11 @@ X-Auth-Token: YOUR_TOKEN
 
 Protections built in:
 
-- Server-side cache (memory + `data/cache.json`) — `/api/progress` does **not** hit football-data.org while cache is valid
-- Fetches scheduled at **kickoff** and **~2h after kickoff**, not during play
-- Minimum **6s** between upstream calls; manual refresh blocked while cache is fresh
+- Server-side cache (memory + `data/cache.json`) — upstream fetch at most **once per minute**
+- Manual refresh blocked while the current minute's cache is still fresh
 - **429** responses extend cache and serve stale data instead of retrying
 
-The footer shows remaining requests this minute (`X-Requests-Available-Minute`) and when the next upstream fetch is allowed.
+The footer shows your football-data.org **per-minute** quota as `remaining/limit` (e.g. `9/10 left · per minute` on the free tier), plus when the rolling counter resets. This is not a daily limit.
 
 ## Architecture
 

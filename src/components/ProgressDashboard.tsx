@@ -159,11 +159,32 @@ export function ProgressDashboard() {
               ` · ${meta.matchedFixtures}/${meta.totalFixtures} fixtures matched`}
           </span>
           <div className="flex items-center gap-3">
-            {meta.apiRequestsRemaining !== null && (
-              <span>{meta.apiRequestsRemaining} requests left this minute</span>
-            )}
-            <span>
-              Next API fetch{" "}
+            {meta.apiRequestsRemaining !== null &&
+              meta.apiRequestsLimit !== null && (
+                <span
+                  title={`football-data.org free tier: ${meta.apiRequestsLimit} requests per minute (rolling window, not a daily cap).${
+                    meta.apiRequestResetAt
+                      ? ` Counter resets at ${new Date(meta.apiRequestResetAt).toLocaleTimeString()}.`
+                      : ""
+                  }`}
+                >
+                  API quota: {meta.apiRequestsRemaining}/{meta.apiRequestsLimit}{" "}
+                  left · per minute
+                  {meta.apiRequestResetAt &&
+                    new Date(meta.apiRequestResetAt).getTime() > Date.now() && (
+                      <>
+                        {" "}
+                        · resets{" "}
+                        <FormattedDate
+                          iso={meta.apiRequestResetAt}
+                          timeOnly
+                        />
+                      </>
+                    )}
+                </span>
+              )}
+            <span title="Data refreshes from football-data.org once per minute">
+              Next refresh{" "}
               <FormattedDate iso={meta.cacheExpiresAt} timeOnly />
             </span>
             <button
@@ -176,7 +197,7 @@ export function ProgressDashboard() {
               title={
                 meta.cacheExpiresAt &&
                 new Date(meta.cacheExpiresAt).getTime() > Date.now()
-                  ? "Cache still fresh — skipped to stay within free tier (10 req/min)"
+                  ? "Cache still fresh — next automatic fetch in under 1 minute"
                   : undefined
               }
               className="text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"

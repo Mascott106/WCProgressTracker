@@ -4,20 +4,14 @@
  */
 export const FREE_TIER_REQUESTS_PER_MINUTE = 10;
 
-/** Minimum gap between upstream API calls (spread load, stay under 10/min). */
-export const MIN_API_FETCH_INTERVAL_MS = 6_000;
+/** Poll football-data.org at most once per minute. */
+export const API_FETCH_INTERVAL_MS = 60_000;
 
 /** Ignore manual refresh if cache is still fresh. */
-export const FORCE_REFRESH_MIN_AGE_MS = 60_000;
+export const FORCE_REFRESH_MIN_AGE_MS = API_FETCH_INTERVAL_MS;
 
-/** After a match ends, wait before expecting FINISHED in the API. */
-export const POST_MATCH_BUFFER_MS = 5 * 60 * 1000;
-
-/** If a match runs long (ET/penalties), retry at most this often. */
+/** If a match runs long (ET/penalties), retry at most this often after errors. */
 export const OVERTIME_RETRY_MS = 30 * 60 * 1000;
-
-/** No matches soon — cache up to 24 hours. */
-export const REST_DAY_CACHE_MS = 24 * 60 * 60 * 1000;
 
 /** When rate-limited (429), back off this long before retrying upstream. */
 export const RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;

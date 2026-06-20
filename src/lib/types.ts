@@ -92,7 +92,7 @@ export interface BracketData {
 export interface ScheduleDay {
   dateIso: string;
   matches: MatchSummary[];
-  /** First entry is tomorrow for labeling */
+  isToday: boolean;
   isTomorrow: boolean;
 }
 

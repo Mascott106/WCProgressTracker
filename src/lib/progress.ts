@@ -1,5 +1,6 @@
 import { buildBracket } from "./bracket";
 import { buildKnockoutSchedule } from "./knockout-schedule";
+import { getScheduleDayWindow } from "./schedule-day";
 import {
   isFinished,
   isLive,
@@ -44,30 +45,17 @@ export function msUntilNextStatusChange(
   return Number.isFinite(next) ? next : 60 * 60 * 1000;
 }
 
-function getCalendarDayWindow(now: number, daysFromToday: number) {
-  const start = new Date(now);
-  start.setDate(start.getDate() + daysFromToday);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  return {
-    start: start.getTime(),
-    end: end.getTime(),
-    dateIso: start.toISOString(),
-  };
-}
-
 function getScheduledMatchesForWindow(
   summaries: MatchSummary[],
   window: { start: number; end: number },
+  notBefore?: number,
 ): MatchSummary[] {
+  const earliest = notBefore ?? window.start;
   return summaries
     .filter((m) => {
       if (m.status !== "NS") return false;
       const kickoff = new Date(m.date).getTime();
-      return kickoff >= window.start && kickoff < window.end;
+      return kickoff >= earliest && kickoff < window.end;
     })
     .sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -85,11 +73,16 @@ export function buildProgressData(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  const upcomingDays = [1, 2].map((offset) => {
-    const window = getCalendarDayWindow(now, offset);
+  const upcomingDays = [0, 1, 2].map((offset) => {
+    const window = getScheduleDayWindow(now, offset);
     return {
       dateIso: window.dateIso,
-      matches: getScheduledMatchesForWindow(summaries, window),
+      matches: getScheduledMatchesForWindow(
+        summaries,
+        window,
+        offset === 0 ? now : undefined,
+      ),
+      isToday: offset === 0,
       isTomorrow: offset === 1,
     };
   });

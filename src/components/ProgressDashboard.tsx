@@ -143,11 +143,11 @@ export function ProgressDashboard() {
         />
       </div>
 
-      {data.bracket.active ? (
-        <KnockoutBracket bracket={data.bracket} />
-      ) : (
+      {data.upcomingDays.some((day) => day.matches.length > 0) && (
         <UpcomingSchedule days={data.upcomingDays} />
       )}
+
+      {data.bracket.active && <KnockoutBracket bracket={data.bracket} />}
 
       <KnockoutRoundTimeline schedule={data.knockoutSchedule} />
 
@@ -183,7 +183,7 @@ export function ProgressDashboard() {
                     )}
                 </span>
               )}
-            <span title="Data refreshes from football-data.org once per minute">
+            <span title="Refreshes every minute during live matches and for ~10 minutes after; otherwise at the next kickoff">
               Next refresh{" "}
               <FormattedDate iso={meta.cacheExpiresAt} timeOnly />
             </span>
@@ -197,7 +197,7 @@ export function ProgressDashboard() {
               title={
                 meta.cacheExpiresAt &&
                 new Date(meta.cacheExpiresAt).getTime() > Date.now()
-                  ? "Cache still fresh — next automatic fetch in under 1 minute"
+                  ? "Cache still fresh — automatic refresh runs every minute during live play"
                   : undefined
               }
               className="text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"

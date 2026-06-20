@@ -1,7 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { FormattedDayLabel, FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
+import { SCHEDULE_DAY_TIMEZONE } from "@/lib/schedule-day";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
 
 function shortRound(round: string): string {
@@ -33,17 +35,37 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
   );
 }
 
-function ScheduleDayBox({ day }: { day: ScheduleDay }) {
+function scheduleDayLabel(iso: string) {
   return (
-    <div className="min-h-0 flex-1 rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
+    <FormattedDayLabel iso={iso} timeZone={SCHEDULE_DAY_TIMEZONE} />
+  );
+}
+
+function dayHeading(day: ScheduleDay): ReactNode {
+  if (day.isToday) {
+    return <>Rest of today — {scheduleDayLabel(day.dateIso)}</>;
+  }
+  if (day.isTomorrow) {
+    return <>Tomorrow — {scheduleDayLabel(day.dateIso)}</>;
+  }
+  return scheduleDayLabel(day.dateIso);
+}
+
+function ScheduleDayBox({
+  day,
+  fullWidth = false,
+}: {
+  day: ScheduleDay;
+  fullWidth?: boolean;
+}) {
+  return (
+    <div
+      className={`min-h-0 rounded-lg border border-border bg-surface-elevated/60 px-3 py-2 ${
+        fullWidth ? "shrink-0" : "flex-1"
+      }`}
+    >
       <h2 className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-        {day.isTomorrow ? (
-          <>
-            Tomorrow — <FormattedDayLabel iso={day.dateIso} />
-          </>
-        ) : (
-          <FormattedDayLabel iso={day.dateIso} />
-        )}
+        {dayHeading(day)}
         <span className="ml-2 text-muted/50">({day.matches.length} matches)</span>
       </h2>
 
@@ -61,11 +83,18 @@ function ScheduleDayBox({ day }: { day: ScheduleDay }) {
 }
 
 export function UpcomingSchedule({ days }: { days: ScheduleDay[] }) {
+  const [today, ...laterDays] = days;
+
   return (
-    <div className="grid shrink-0 grid-cols-2 gap-2">
-      {days.map((day) => (
-        <ScheduleDayBox key={day.dateIso} day={day} />
-      ))}
+    <div className="flex shrink-0 flex-col gap-2">
+      {today && <ScheduleDayBox day={today} fullWidth />}
+      {laterDays.length > 0 && (
+        <div className="grid shrink-0 grid-cols-2 gap-2">
+          {laterDays.map((day) => (
+            <ScheduleDayBox key={day.dateIso} day={day} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

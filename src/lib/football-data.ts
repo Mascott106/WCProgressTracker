@@ -1,18 +1,22 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 import path from "path";
 import {
   API_FETCH_INTERVAL_MS,
   FORCE_REFRESH_MIN_AGE_MS,
   FREE_TIER_REQUESTS_PER_MINUTE,
+  MATCH_DURATION_MS,
   OVERTIME_RETRY_MS,
+  POST_LIVE_POLL_MS,
   RATE_LIMIT_BACKOFF_MS,
+  REST_DAY_CACHE_MS,
 } from "./api-limits";
 import {
   buildProgressFromExternal,
   countMatchedFixtures,
+  mergeExternalMatches,
   type ExternalMatch,
 } from "./merge-api";
-import type { ProgressData } from "./types";
+import type { MatchSummary, ProgressData } from "./types";
 import { statusLabel, TOTAL_GAMES } from "./types";
 
 const API_BASE = "https://api.football-data.org/v4";
@@ -81,6 +85,21 @@ let memoryCache: CacheEntry | null = null;
 let lastUpstreamFetchAt = 0;
 let rateLimitUntil = 0;
 
+/** Remove persisted and in-memory API cache (called on server startup). */
+export async function clearApiCache(): Promise<void> {
+  memoryCache = null;
+  lastUpstreamFetchAt = 0;
+  rateLimitUntil = 0;
+
+  try {
+    await unlink(CACHE_FILE);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+
 function mapStatus(
   status: string,
   duration?: string | null,
@@ -142,6 +161,37 @@ export function toExternalMatches(
   });
 }
 
+function matchPollWindowEnd(kickoffMs: number): number {
+  return kickoffMs + MATCH_DURATION_MS + POST_LIVE_POLL_MS;
+}
+
+function isInActivePollingWindow(summaries: MatchSummary[], now: number): boolean {
+  return summaries.some((match) => {
+    const kickoff = new Date(match.date).getTime();
+    return now >= kickoff && now < matchPollWindowEnd(kickoff);
+  });
+}
+
+/**
+ * 1-minute polling during live play (+ 10 min after expected full time).
+ * Otherwise cache until the next kickoff, or up to 24h on rest days.
+ */
+export function computeCacheTtl(summaries: MatchSummary[], now: number): number {
+  if (isInActivePollingWindow(summaries, now)) {
+    return API_FETCH_INTERVAL_MS;
+  }
+
+  let nextFetch = REST_DAY_CACHE_MS;
+  for (const match of summaries) {
+    const kickoff = new Date(match.date).getTime();
+    if (kickoff > now) {
+      nextFetch = Math.min(nextFetch, kickoff - now);
+    }
+  }
+
+  return Math.max(nextFetch, API_FETCH_INTERVAL_MS);
+}
+
 async function readDiskCache(): Promise<CacheEntry | null> {
   try {
     const raw = await readFile(CACHE_FILE, "utf8");
@@ -156,18 +206,17 @@ async function writeDiskCache(entry: CacheEntry): Promise<void> {
   await writeFile(CACHE_FILE, JSON.stringify(entry, null, 2));
 }
 
-/** Enforce the 1-minute polling policy even for legacy cache entries. */
-function effectiveCacheExpiresAt(entry: CacheEntry): number {
-  return Math.min(entry.expiresAt, entry.fetchedAt + API_FETCH_INTERVAL_MS);
-}
-
 function isCacheFresh(entry: CacheEntry, now: number): boolean {
-  return effectiveCacheExpiresAt(entry) > now;
+  return entry.expiresAt > now;
 }
 
-function normalizeCacheEntry(entry: CacheEntry): CacheEntry {
-  const expiresAt = effectiveCacheExpiresAt(entry);
-  return expiresAt === entry.expiresAt ? entry : { ...entry, expiresAt };
+/** Shorten stale long cache when a match enters the live polling window. */
+function clampCacheForActiveWindow(entry: CacheEntry, now: number): CacheEntry {
+  const summaries = mergeExternalMatches(entry.matches);
+  if (!isInActivePollingWindow(summaries, now)) return entry;
+  const maxExpires = now + API_FETCH_INTERVAL_MS;
+  if (entry.expiresAt <= maxExpires) return entry;
+  return { ...entry, expiresAt: maxExpires };
 }
 
 function canFetchUpstream(now: number, requestsRemaining: number | null): boolean {
@@ -231,11 +280,11 @@ function toResponse(
     data: {
       ...data,
       // Client timer follows server cache schedule, not local kickoff math.
-      nextStatusChangeAt: new Date(effectiveCacheExpiresAt(entry)).toISOString(),
+      nextStatusChangeAt: new Date(entry.expiresAt).toISOString(),
     },
     meta: {
       source,
-      cacheExpiresAt: new Date(effectiveCacheExpiresAt(entry)).toISOString(),
+      cacheExpiresAt: new Date(entry.expiresAt).toISOString(),
       apiRequestsRemaining: entry.requestsRemaining,
       apiRequestsLimit: entry.requestsRemaining !== null ? FREE_TIER_REQUESTS_PER_MINUTE : null,
       apiRequestResetAt: entry.requestResetAt ?? null,
@@ -285,21 +334,16 @@ export async function getProgressFromApi(
 
   let entry: CacheEntry | null = null;
 
-  if (memoryCache) {
-    memoryCache = normalizeCacheEntry(memoryCache);
-    if (isCacheFresh(memoryCache, now)) {
-      entry = memoryCache;
-    }
+  if (memoryCache && isCacheFresh(memoryCache, now)) {
+    entry = clampCacheForActiveWindow(memoryCache, now);
+    memoryCache = entry;
   }
 
   if (!entry) {
     const disk = await readDiskCache();
     if (disk) {
-      entry = normalizeCacheEntry(disk);
+      entry = clampCacheForActiveWindow(disk, now);
       memoryCache = entry;
-      if (entry !== disk) {
-        await writeDiskCache(entry);
-      }
     }
   }
 
@@ -319,10 +363,11 @@ export async function getProgressFromApi(
 
     try {
       const { matches, requestsRemaining, requestResetAt } = await fetchMatches(apiKey);
+      const summaries = mergeExternalMatches(matches);
       entry = {
         matches,
         fetchedAt: now,
-        expiresAt: now + API_FETCH_INTERVAL_MS,
+        expiresAt: now + computeCacheTtl(summaries, now),
         requestsRemaining,
         requestResetAt,
       };

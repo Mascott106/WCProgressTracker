@@ -4,11 +4,17 @@
  */
 export const FREE_TIER_REQUESTS_PER_MINUTE = 10;
 
-/** Poll football-data.org at most once per minute. */
+/** Poll every minute while a match is live (+ shortly after). */
 export const API_FETCH_INTERVAL_MS = 60_000;
+
+/** Keep polling after expected full time to pick up final scores. */
+export const POST_LIVE_POLL_MS = 10 * 60 * 1000;
 
 /** Ignore manual refresh if cache is still fresh. */
 export const FORCE_REFRESH_MIN_AGE_MS = API_FETCH_INTERVAL_MS;
+
+/** No matches soon — cache up to 24 hours. */
+export const REST_DAY_CACHE_MS = 24 * 60 * 60 * 1000;
 
 /** If a match runs long (ET/penalties), retry at most this often after errors. */
 export const OVERTIME_RETRY_MS = 30 * 60 * 1000;

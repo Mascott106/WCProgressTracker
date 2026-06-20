@@ -9,7 +9,7 @@ API-driven fork of the progress tracker. Live scores and statuses come from [foo
 Everything from the static app, plus:
 
 - **Live scores** from football-data.org merged onto the canonical 104-match schedule
-- **1-minute polling** — refreshes from football-data.org once per minute while the page is open
+- **Live-aware polling** — refreshes every minute during live matches and for ~10 minutes after; otherwise waits until the next kickoff
 - **API usage footer** — remaining requests per minute and cache expiry
 - **Mock mode** — fall back to time-based static progress without an API key
 
@@ -40,7 +40,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## API usage strategy (free tier)
 
-football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute** while the page is open — well within that limit (1 call/min).
+football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute only while a match is live (plus ~10 minutes after)**, then caches until the next kickoff — typically **1–2 calls per match day**.
 
 One call fetches all 104 matches:
 
@@ -51,8 +51,8 @@ X-Auth-Token: YOUR_TOKEN
 
 Protections built in:
 
-- Server-side cache (memory + `data/cache.json`) — upstream fetch at most **once per minute**
-- Manual refresh blocked while the current minute's cache is still fresh
+- Server-side cache (memory + `data/cache.json`) — **1 min TTL during live windows**, up to **24h** on rest days; **cleared on server start** so stale TTLs never carry over
+- Manual refresh blocked while the current cache is still fresh
 - **429** responses extend cache and serve stale data instead of retrying
 
 The footer shows your football-data.org **per-minute** quota as `remaining/limit` (e.g. `9/10 left · per minute` on the free tier), plus when the rolling counter resets. This is not a daily limit.

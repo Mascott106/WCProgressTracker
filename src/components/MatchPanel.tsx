@@ -7,6 +7,8 @@ import {
 } from "@/lib/types";
 import { FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
+import { TeamName } from "@/components/TeamName";
+import { teamFlag } from "@/lib/team-flags";
 
 export function MatchRow({
   match,
@@ -46,7 +48,7 @@ export function MatchRow({
                 : ""
           }`}
         >
-          {match.homeTeam}
+          <TeamName name={match.homeTeam} />
         </span>
         <span className="shrink-0 text-muted/40">
           {hasScore ? (
@@ -66,7 +68,7 @@ export function MatchRow({
                 : ""
           }`}
         >
-          {match.awayTeam}
+          <TeamName name={match.awayTeam} />
         </span>
       </div>
 
@@ -116,9 +118,18 @@ export function MatchPanel({
 
       {featured && hasScore && (
         <p className="mb-1 text-xs font-semibold text-accent">
-          {winner
-            ? `${winner} wins ${featured.homeGoals}–${featured.awayGoals}`
-            : `Draw ${featured.homeGoals}–${featured.awayGoals}`}
+          {winner ? (
+            <>
+              {teamFlag(winner) && (
+                <span className="mr-1" aria-hidden>
+                  {teamFlag(winner)}
+                </span>
+              )}
+              {winner} wins {featured.homeGoals}–{featured.awayGoals}
+            </>
+          ) : (
+            `Draw ${featured.homeGoals}–${featured.awayGoals}`
+          )}
         </p>
       )}
 

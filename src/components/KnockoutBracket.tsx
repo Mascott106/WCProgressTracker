@@ -2,6 +2,7 @@
 
 import type { BracketData, BracketSlot } from "@/lib/types";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
+import { TeamName } from "@/components/TeamName";
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   if (!bracket.active) return null;
@@ -124,11 +125,10 @@ function TeamLine({
     <div
       className={`flex items-center justify-between gap-1 leading-tight ${large ? "text-xs" : "text-[10px]"}`}
     >
-      <span
+      <TeamName
+        name={name}
         className={`min-w-0 truncate ${wins ? "font-semibold text-accent" : placeholder ? "text-muted/45" : "text-foreground/90"}`}
-      >
-        {name}
-      </span>
+      />
       {goals !== null && (
         <span className="shrink-0 font-mono font-bold tabular-nums">{goals}</span>
       )}

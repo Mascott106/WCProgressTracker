@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { FormattedDayLabel, FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
+import { TeamName } from "@/components/TeamName";
 import { SCHEDULE_DAY_TIMEZONE } from "@/lib/schedule-day";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
 
@@ -21,9 +22,9 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
         className="text-[11px] tabular-nums text-muted/70"
       />
       <p className="text-sm font-medium leading-snug">
-        {match.homeTeam}
+        <TeamName name={match.homeTeam} />
         <span className="mx-1.5 font-normal text-muted/50">vs</span>
-        {match.awayTeam}
+        <TeamName name={match.awayTeam} />
       </p>
       <div className="flex flex-col items-end gap-0.5">
         <BroadcastLabel foxChannel={match.foxChannel} onTubi={match.onTubi} />

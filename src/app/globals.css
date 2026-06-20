@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --background: #071a12;
+  --foreground: #f0fdf4;
+  --accent: #fbbf24;
+  --accent-dim: #b45309;
+  --surface: #0f2e1f;
+  --surface-elevated: #163d2a;
+  --border: #1e4d35;
+  --muted: #86efac;
+  --muted-dim: #4ade80;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-dim: var(--muted-dim);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+.progress-glow {
+  box-shadow:
+    0 0 30px rgba(251, 191, 36, 0.5),
+    0 0 80px rgba(251, 191, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.field-pattern {
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(74, 222, 128, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #071a12 0%, #0a2418 50%, #071a12 100%);
+}
+
+@keyframes pulse-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.live-dot {
+  animation: pulse-live 1.5s ease-in-out infinite;
+}

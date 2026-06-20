@@ -38,14 +38,14 @@ export function ProgressDashboard() {
 
   if (loading || !data) {
     return (
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex min-h-[40vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
+    <div className="flex flex-col gap-3 pb-4">
       <ProgressBar
         percent={data.progressPercent}
         completed={data.completedGames}

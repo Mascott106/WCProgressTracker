@@ -2,7 +2,7 @@ import { ProgressDashboard } from "@/components/ProgressDashboard";
 
 export default function Home() {
   return (
-    <main className="field-pattern flex h-screen flex-col overflow-hidden px-10 py-5">
+    <main className="field-pattern flex min-h-screen flex-col px-10 py-5">
       <header className="mb-3 flex shrink-0 items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-accent">

@@ -124,7 +124,6 @@ export function ProgressDashboard() {
       <TimeProgressBar
         startAt={data.timeProgress.startAt}
         endAt={data.timeProgress.endAt}
-        initialPercent={data.timeProgress.percent}
       />
 
       <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">

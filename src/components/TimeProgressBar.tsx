@@ -6,7 +6,6 @@ import { FormattedDate } from "@/components/FormattedDate";
 interface TimeProgressBarProps {
   startAt: string;
   endAt: string;
-  initialPercent: number;
 }
 
 function computePercent(now: number, startAt: string, endAt: string): number {
@@ -17,18 +16,19 @@ function computePercent(now: number, startAt: string, endAt: string): number {
   return ((now - start) / (end - start)) * 100;
 }
 
-export function TimeProgressBar({
-  startAt,
-  endAt,
-  initialPercent,
-}: TimeProgressBarProps) {
-  const [percent, setPercent] = useState(initialPercent);
+export function TimeProgressBar({ startAt, endAt }: TimeProgressBarProps) {
+  const [percent, setPercent] = useState(() =>
+    computePercent(Date.now(), startAt, endAt),
+  );
 
   useEffect(() => {
-    const update = () => setPercent(computePercent(Date.now(), startAt, endAt));
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
+    let frame = 0;
+    const tick = () => {
+      setPercent(computePercent(Date.now(), startAt, endAt));
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [startAt, endAt]);
 
   const clampedPercent = Math.min(100, Math.max(0, percent));
@@ -49,7 +49,7 @@ export function TimeProgressBar({
 
       <div className="relative h-5 overflow-hidden rounded-lg bg-surface-elevated ring-1 ring-border">
         <div
-          className="absolute inset-y-0 left-0 rounded-lg bg-gradient-to-r from-sky-700 via-sky-400 to-cyan-300 transition-all duration-1000 ease-linear"
+          className="absolute inset-y-0 left-0 rounded-lg bg-gradient-to-r from-sky-700 via-sky-400 to-cyan-300"
           style={{ width: `${clampedPercent}%` }}
         />
         {[25, 50, 75].map((mark) => (

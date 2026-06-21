@@ -69,9 +69,9 @@ function applyLockedRecord(match: MatchSummary, locked: LockedMatchScore): Match
 }
 
 /**
- * Delay accepting final scores until 10 minutes after expected full time so
- * brief API corrections (e.g. VAR reversals) do not stick. Locked scores are
- * written once and never updated.
+ * Delay accepting final scores until 30 minutes after expected full time so
+ * API corrections (e.g. VAR reversals) can settle. Locked scores are written
+ * once and never updated.
  */
 export function applyScoreLocks(
   summaries: MatchSummary[],

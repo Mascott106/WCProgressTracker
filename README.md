@@ -11,7 +11,7 @@ Live World Cup 2026 progress for all **104 matches**. Scores and statuses come f
 - **Upcoming schedule** — rest of today, tomorrow, and the day after (6 AM Eastern day boundaries)
 - **Knockout bracket** — auto-activates June 28 with winner/loser propagation
 - **FOX / FS1 / Tubi** broadcast labels per match
-- **Live-aware polling** — refreshes every minute during live matches and for ~10 minutes after; otherwise waits until the next kickoff
+- **Live-aware polling** — refreshes every minute during live matches and for ~30 minutes after; otherwise waits until the next kickoff
 - **Kickoff-based fallback** — live games still show if the API is down or delayed
 - **Mock mode** — schedule + time-based status without an API key
 
@@ -56,7 +56,7 @@ NEXT_PUBLIC_PREVIEW_BRACKET=true
 
 ## API usage strategy (free tier)
 
-football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute only while a match is live (plus ~10 minutes after)**, then caches until the next kickoff — typically **1–2 calls per match day**.
+football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute while a match is live and for ~30 minutes after full time** (before locking the final score), then caches until the next kickoff — typically a few calls per match day.
 
 One call fetches all 104 matches:
 

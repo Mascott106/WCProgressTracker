@@ -4,11 +4,11 @@
  */
 export const FREE_TIER_REQUESTS_PER_MINUTE = 10;
 
-/** Poll every minute while a match is live (+ shortly after). */
+/** Poll every minute while a match is live (+ after full time until lock). */
 export const API_FETCH_INTERVAL_MS = 60_000;
 
-/** Keep polling after expected full time to pick up final scores. */
-export const POST_LIVE_POLL_MS = 10 * 60 * 1000;
+/** Keep polling after expected full time for VAR / score corrections. */
+export const POST_LIVE_POLL_MS = 30 * 60 * 1000;
 
 /** Wait this long after expected full time before locking a final score. */
 export const FINAL_SCORE_LOCK_DELAY_MS = POST_LIVE_POLL_MS;

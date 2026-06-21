@@ -202,7 +202,7 @@ function isInActivePollingWindow(summaries: MatchSummary[], now: number): boolea
 }
 
 /**
- * 1-minute polling during live play (+ 10 min after expected full time).
+ * 1-minute polling during live play (+ 30 min after expected full time).
  * Otherwise cache until the next kickoff, or up to 24h on rest days.
  */
 export function computeCacheTtl(summaries: MatchSummary[], now: number): number {

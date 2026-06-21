@@ -1,4 +1,5 @@
 import { ProgressDashboard } from "@/components/ProgressDashboard";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
 export default function Home() {
@@ -8,9 +9,7 @@ export default function Home() {
 
       <ProgressDashboard />
 
-      <p className="mt-auto pt-4 text-center text-[10px] text-muted/40">
-        Built by Scott Mendenko
-      </p>
+      <SiteFooter />
     </main>
   );
 }

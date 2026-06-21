@@ -13,7 +13,7 @@ export function SiteFooter() {
         onClick={toggleNerdMode}
         disabled={!ready}
         suppressHydrationWarning
-        className="cursor-default text-muted/40 disabled:cursor-default"
+        className="cursor-default border-0 bg-transparent p-0 font-inherit text-[10px] text-muted/40 disabled:cursor-default"
       >
         Scott Mendenko
       </button>

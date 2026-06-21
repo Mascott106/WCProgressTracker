@@ -8,6 +8,7 @@ import { TimeProgressBar } from "@/components/TimeProgressBar";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { KnockoutRoundTimeline } from "@/components/KnockoutRoundTimeline";
 import { UpcomingSchedule } from "@/components/UpcomingSchedule";
+import { useMatchProgressCelebrations } from "@/hooks/useMatchProgressCelebrations";
 import { useNerdMode } from "@/contexts/NerdModeContext";
 import type { ProgressApiMeta } from "@/lib/football-data";
 import { label } from "@/lib/nerd-mode-labels";
@@ -19,6 +20,8 @@ export function ProgressDashboard() {
   const [meta, setMeta] = useState<ProgressApiMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useMatchProgressCelebrations(data, nerdMode);
 
   const refresh = useCallback(async (force = false) => {
     try {

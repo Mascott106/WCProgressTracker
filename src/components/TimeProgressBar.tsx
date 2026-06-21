@@ -5,6 +5,7 @@ import { FormattedDate } from "@/components/FormattedDate";
 import { ExpGauge } from "@/components/ExpGauge";
 import { percentToLevelProgress } from "@/lib/exp-levels";
 import { label } from "@/lib/nerd-mode-labels";
+import { playLevelUpSound } from "@/lib/play-levelup";
 
 interface TimeProgressBarProps {
   startAt: string;
@@ -32,10 +33,24 @@ export function TimeProgressBar({
   useEffect(() => {
     let frame = 0;
     let active = true;
+    let seeded = false;
+    let prevLevel: number | null = null;
 
     const tick = () => {
       if (!active) return;
-      setPercent(computePercent(Date.now(), startAt, endAt));
+      const nextPercent = computePercent(Date.now(), startAt, endAt);
+      setPercent(nextPercent);
+
+      if (nerdMode) {
+        const clamped = Math.min(100, Math.max(0, nextPercent));
+        const level = percentToLevelProgress(clamped).level;
+        if (seeded && prevLevel !== null && level > prevLevel) {
+          playLevelUpSound();
+        }
+        seeded = true;
+        prevLevel = level;
+      }
+
       if (active) {
         frame = requestAnimationFrame(tick);
       }
@@ -47,7 +62,7 @@ export function TimeProgressBar({
       active = false;
       cancelAnimationFrame(frame);
     };
-  }, [startAt, endAt]);
+  }, [startAt, endAt, nerdMode]);
 
   const clampedPercent = Math.min(100, Math.max(0, percent));
 

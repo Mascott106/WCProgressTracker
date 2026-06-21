@@ -85,6 +85,30 @@ let memoryCache: CacheEntry | null = null;
 let lastUpstreamFetchAt = 0;
 let rateLimitUntil = 0;
 
+/** Clear API cache and warm progress data with a fresh upstream fetch on startup. */
+export async function warmProgressCacheOnStartup(): Promise<void> {
+  const { unlockMostRecentCompletedScore } = await import("./locked-scores");
+  const unlocked = unlockMostRecentCompletedScore();
+  await clearApiCache();
+
+  const apiKey = process.env.FOOTBALL_DATA_API_KEY;
+  if (!apiKey || process.env.NEXT_PUBLIC_USE_MOCK === "true") {
+    return;
+  }
+
+  try {
+    await getProgressFromApi(apiKey, { forceRefresh: true });
+    if (unlocked !== null) {
+      console.info(
+        `[wc-progress] Re-fetched API scores after unlocking match ${unlocked}`,
+      );
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "startup fetch failed";
+    console.warn(`[wc-progress] Startup API refresh skipped: ${message}`);
+  }
+}
+
 /** Remove persisted and in-memory API cache (called on server startup). */
 export async function clearApiCache(): Promise<void> {
   memoryCache = null;

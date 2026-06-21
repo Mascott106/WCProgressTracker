@@ -1,21 +1,25 @@
-# World Cup 2026 Progress Tracker (API-driven)
+# World Cup 2026 Progress Tracker
 
-API-driven fork of the progress tracker. Live scores and statuses come from [football-data.org](https://www.football-data.org/documentation/quickstart); the local schedule (`fixtures.json`) provides match IDs, knockout structure, and FOX/Tubi broadcast labels.
-
-**Static version:** see the `main` branch (no API key, static export).
+Live World Cup 2026 progress for all **104 matches**. Scores and statuses come from [football-data.org](https://www.football-data.org/documentation/quickstart); the local schedule (`fixtures.json`) provides match IDs, knockout structure, and FOX/Tubi broadcast labels.
 
 ## Features
 
-Everything from the static app, plus:
-
-- **Live scores** from football-data.org merged onto the canonical 104-match schedule
+- **Match progress bar** — completed games out of 104
+- **Real time bar** — elapsed tournament time from first kickoff to two hours after the final
+- **Live scores** from football-data.org merged onto the canonical schedule
+- **Live / last completed** match cards with flags and winners
+- **Upcoming schedule** — rest of today, tomorrow, and the day after (6 AM Eastern day boundaries)
+- **Knockout bracket** — auto-activates June 28 with winner/loser propagation
+- **FOX / FS1 / Tubi** broadcast labels per match
 - **Live-aware polling** — refreshes every minute during live matches and for ~10 minutes after; otherwise waits until the next kickoff
-- **API usage footer** — remaining requests per minute and cache expiry
-- **Mock mode** — fall back to time-based static progress without an API key
+- **Kickoff-based fallback** — live games still show if the API is down or delayed
+- **Mock mode** — schedule + time-based status without an API key
 
 ## Setup
 
 ```bash
+git clone https://github.com/Mascott106/WCProgressTracker.git
+cd WCProgressTracker
 npm install
 cp .env.example .env.local
 ```
@@ -37,6 +41,12 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+Preview the knockout bracket before June 28:
+
+```
+NEXT_PUBLIC_PREVIEW_BRACKET=true
+```
 
 ## API usage strategy (free tier)
 
@@ -79,23 +89,45 @@ Status mapping from football-data.org:
 | LIVE, IN_PLAY, PAUSED | Live |
 | FINISHED | Full time (+ AET/PEN from duration) |
 
+When the API still reports `NS` during play (common on the free tier), kickoff time is used to show **Live** until the API catches up.
+
 ## Deploy
 
-Requires a **Node.js host** (Vercel, etc.) — not a static export.
+Requires a **Node.js host** (VPS, Vercel, Railway, etc.) — not a static export.
 
 ```bash
 npm run build
 npm start
 ```
 
-Set `FOOTBALL_DATA_API_KEY` in your host's environment variables.
+Set `FOOTBALL_DATA_API_KEY` in your host's environment variables. Create a writable `data/` directory for the API cache.
 
-## Branches
+### VPS quick start (DigitalOcean)
 
-| Branch | Data source | Deploy |
-|--------|-------------|--------|
-| `main` | Static `fixtures.json` | Static (`out/`) |
-| `api-driven` | football-data.org + fixtures merge | Node server |
+```bash
+git clone https://github.com/Mascott106/WCProgressTracker.git
+cd WCProgressTracker
+npm ci && npm run build
+mkdir -p data
+# add .env.local with FOOTBALL_DATA_API_KEY, NODE_ENV=production, PORT=3000
+pm2 start npm --name wc-progress -- start
+```
+
+On a **512 MB** Droplet, build locally and `rsync` the project to the server instead of running `npm run build` on the VPS.
+
+## Data
+
+| File | Purpose |
+|------|---------|
+| `src/data/fixtures.json` | All 104 matches (June 11 – July 19, 2026) |
+| `src/lib/broadcast.ts` | FOX / FS1 / Tubi assignments per match |
+| `scripts/build-fixtures.mjs` | Regenerates `fixtures.json` from the embedded schedule |
+
+Regenerate fixtures after editing the schedule table:
+
+```bash
+npm run fixtures
+```
 
 ## Note on competition access
 

@@ -148,7 +148,26 @@ curl -s http://127.0.0.1:3000/api/progress | head
 
 If `curl` fails, check logs: `pm2 logs wc-progress --lines 30`
 
-On a **512 MB** Droplet, build locally and `rsync` the project to the server instead of running `npm run build` on the VPS.
+On a **512 MB** Droplet, add **swap** before building (prevents `npm run build` from being killed):
+
+```bash
+sudo ./scripts/setup-swap.sh
+```
+
+Or build on your Mac and deploy with `./scripts/update-site.sh --from-local` (no VPS build needed).
+
+#### 1b. Swap (512 MB droplets — run once)
+
+If `npm run build` exits with `Killed`, the Linux OOM killer ran out of RAM. Add 2 GB of swap:
+
+```bash
+cd ~/WCProgressTracker
+sudo ./scripts/setup-swap.sh
+```
+
+This creates `/swapfile`, enables it immediately, adds it to `/etc/fstab` (survives reboot), and sets `vm.swappiness=10` so swap is used only under memory pressure. Verify with `free -h`.
+
+You can also set a custom size: `sudo ./scripts/setup-swap.sh 3G`
 
 #### 2. Install nginx and open the firewall
 
@@ -256,7 +275,7 @@ The app clears its API cache on each server start.
 | `curl localhost:3000` fails on VPS | App not running | `pm2 status`, `pm2 logs wc-progress`, check `.env.local` |
 | `pm2: command not found` | PM2 not installed | `sudo npm install -g pm2` |
 | No `.env.local` after clone | Env files are gitignored | `cp .env.example .env.local` then edit |
-| Hidden env files | Dotfiles hidden from plain `ls` | `ls -la .env*` |
+| `npm run build` shows `Killed` | OOM on 512 MB RAM | `sudo ./scripts/setup-swap.sh` or use `./scripts/update-site.sh --from-local` |
 
 To temporarily expose port 3000 for debugging only (not recommended for production):
 

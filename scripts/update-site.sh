@@ -49,8 +49,12 @@ update_on_server() {
   npm ci
 
   log "npm run build"
+  if ! swapon --show 2>/dev/null | grep -q .; then
+    log "Warning: no swap detected — npm build may be OOM-killed on small droplets"
+    log "Run once: sudo ${REPO_ROOT}/scripts/setup-swap.sh"
+  fi
   if ! NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=384}" npm run build; then
-    die "Build failed (often OOM on 512 MB droplets). From your Mac run: ./scripts/update-site.sh --from-local"
+    die "Build failed (often OOM on 512 MB droplets). Run: sudo ./scripts/setup-swap.sh — or from Mac: ./scripts/update-site.sh --from-local"
   fi
 
   mkdir -p data

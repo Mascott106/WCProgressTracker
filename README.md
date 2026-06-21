@@ -24,7 +24,13 @@ npm install
 cp .env.example .env.local
 ```
 
-Register for a free token at [football-data.org](https://www.football-data.org/client/register), then add it to `.env.local`:
+Register for a free token at [football-data.org](https://www.football-data.org/client/register), then create your local env file (`.env.local` is **not** in Git — secrets stay off GitHub):
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local`:
 
 ```
 FOOTBALL_DATA_API_KEY=your_token_here
@@ -102,18 +108,146 @@ npm start
 
 Set `FOOTBALL_DATA_API_KEY` in your host's environment variables. Create a writable `data/` directory for the API cache.
 
-### VPS quick start (DigitalOcean)
+### VPS (DigitalOcean)
+
+These steps assume **Ubuntu 24.04** and the **`main`** branch.
+
+**How traffic flows:** Browser → **nginx (port 80/443)** → **Next.js (port 3000, localhost only)**. Do not browse to `http://YOUR_IP:3000` — UFW blocks port 3000 from the internet. Use `http://YOUR_IP` or your domain after nginx is configured.
+
+#### 1. Clone, build, and run the app
+
+The repo is public — no GitHub token needed for `git clone`.
+
+`.env.local` is **not** in Git (secrets stay off GitHub). Copy the template:
 
 ```bash
 git clone https://github.com/Mascott106/WCProgressTracker.git
 cd WCProgressTracker
 npm ci && npm run build
 mkdir -p data
-# add .env.local with FOOTBALL_DATA_API_KEY, NODE_ENV=production, PORT=3000
-pm2 start npm --name wc-progress -- start
+cp .env.example .env.local
+nano .env.local   # set FOOTBALL_DATA_API_KEY (and keep NODE_ENV=production, PORT=3000)
 ```
 
+Install **PM2** (not included with Node — required to keep the app running after logout):
+
+```bash
+sudo npm install -g pm2
+pm2 start npm --name wc-progress -- start
+pm2 save
+pm2 startup   # run the sudo command it prints so PM2 survives reboot
+```
+
+Verify the app responds **on the server** (this must work before nginx will help):
+
+```bash
+pm2 status
+curl -s http://127.0.0.1:3000 | head
+curl -s http://127.0.0.1:3000/api/progress | head
+```
+
+If `curl` fails, check logs: `pm2 logs wc-progress --lines 30`
+
 On a **512 MB** Droplet, build locally and `rsync` the project to the server instead of running `npm run build` on the VPS.
+
+#### 2. Install nginx and open the firewall
+
+```bash
+sudo apt update
+sudo apt install -y nginx certbot python3-certbot-nginx
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'   # HTTP 80 + HTTPS 443 only — not port 3000
+sudo ufw enable
+```
+
+If you use a **DigitalOcean Cloud Firewall** on the Droplet, allow inbound **SSH (22)**, **HTTP (80)**, and **HTTPS (443)** there too. You do **not** need to open port 3000 in DigitalOcean networking or UFW.
+
+#### 3. Nginx reverse proxy
+
+If you see the **default "Welcome to nginx"** page at `http://YOUR_IP`, nginx is running but not yet proxying to the app. You must add a site config **and remove the default site**.
+
+Point your domain's **A record** at the Droplet IP when you have one (Certbot requires a domain — it won't issue certs for a bare IP). For HTTP-only testing, use your Droplet IP as `server_name`.
+
+```bash
+sudo nano /etc/nginx/sites-available/wc-progress
+```
+
+Paste (replace `wc.example.com` with your domain, or your Droplet IP e.g. `67.205.131.84`):
+
+```nginx
+server {
+    listen 80;
+    server_name wc.example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Enable your site, **disable the default welcome page**, and reload:
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/wc-progress /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Visit **http://YOUR_DROPLET_IP** or **http://wc.example.com** — you should see the World Cup tracker, not the nginx welcome page.
+
+#### 4. HTTPS with Let's Encrypt (Certbot)
+
+Once DNS for your domain points at the Droplet:
+
+```bash
+sudo certbot --nginx -d wc.example.com
+```
+
+Certbot will ask for an email, agree to the terms, and optionally redirect HTTP → HTTPS. Choose **redirect** when prompted so all traffic uses HTTPS.
+
+Test automatic renewal (certs renew via a systemd timer):
+
+```bash
+sudo certbot renew --dry-run
+```
+
+Certbot edits your nginx config to add SSL. After it runs, your site is available at **https://wc.example.com**.
+
+#### 5. Updates
+
+```bash
+cd ~/WCProgressTracker
+git pull
+npm ci && npm run build
+pm2 restart wc-progress
+```
+
+The app clears its API cache on each server start.
+
+#### VPS troubleshooting
+
+| What you see | Cause | Fix |
+|--------------|-------|-----|
+| `http://YOUR_IP:3000` times out | Port 3000 blocked by UFW (by design) | Use `http://YOUR_IP` (port 80) via nginx |
+| Default **"Welcome to nginx"** page | Default site still active | Complete step 3 — add `wc-progress` site and `rm default` |
+| Blank page / connection refused on port 80 | nginx not installed or UFW blocking 80 | Step 2 — `nginx` + `ufw allow 'Nginx Full'` |
+| Port 80 works but wrong page | `proxy_pass` not pointing at app | Confirm `proxy_pass http://127.0.0.1:3000` and PM2 is running |
+| `curl localhost:3000` fails on VPS | App not running | `pm2 status`, `pm2 logs wc-progress`, check `.env.local` |
+| `pm2: command not found` | PM2 not installed | `sudo npm install -g pm2` |
+| No `.env.local` after clone | Env files are gitignored | `cp .env.example .env.local` then edit |
+| Hidden env files | Dotfiles hidden from plain `ls` | `ls -la .env*` |
+
+To temporarily expose port 3000 for debugging only (not recommended for production):
+
+```bash
+sudo ufw allow 3000
+# remove later: sudo ufw delete allow 3000
+```
 
 ## Data
 

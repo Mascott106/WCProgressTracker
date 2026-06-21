@@ -54,7 +54,14 @@ export function FormattedDate({
   );
 }
 
-export function FormattedDayLabel({ iso }: { iso: string }) {
+export function FormattedDayLabel({
+  iso,
+  timeZone,
+}: {
+  iso: string;
+  /** Defaults to the viewer's local timezone. */
+  timeZone?: string;
+}) {
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,9 +70,10 @@ export function FormattedDayLabel({ iso }: { iso: string }) {
         weekday: "long",
         month: "long",
         day: "numeric",
+        ...(timeZone ? { timeZone } : {}),
       }),
     );
-  }, [iso]);
+  }, [iso, timeZone]);
 
   return <span suppressHydrationWarning>{formatted ?? "Tomorrow"}</span>;
 }

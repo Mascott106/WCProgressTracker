@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "node scripts/build-fixtures.mjs && next build",
+    "start": "next start",
     "lint": "next lint",
     "fixtures": "node scripts/build-fixtures.mjs"
   },

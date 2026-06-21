@@ -25,11 +25,15 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 health_check() {
   log "Checking http://127.0.0.1:3000/api/progress"
-  if curl -sf http://127.0.0.1:3000/api/progress | head -c 200 >/dev/null; then
-    log "App is responding"
-  else
-    die "App not responding — run: pm2 logs ${PM2_NAME} --lines 30"
-  fi
+  local attempt
+  for attempt in 1 2 3 4 5 6 7 8 9 10; do
+    if curl -sf -o /dev/null http://127.0.0.1:3000/api/progress; then
+      log "App is responding"
+      return 0
+    fi
+    sleep 2
+  done
+  die "App not responding after ~20s — run: pm2 logs ${PM2_NAME} --lines 30"
 }
 
 update_on_server() {
@@ -60,7 +64,7 @@ update_on_server() {
   mkdir -p data
 
   log "pm2 restart ${PM2_NAME}"
-  pm2 restart "${PM2_NAME}"
+  pm2 restart "${PM2_NAME}" --update-env
 
   health_check
   log "Done"
@@ -86,7 +90,7 @@ deploy_from_local() {
   ssh "${host}" "cd ${APP_DIR} && npm ci --omit=dev && mkdir -p data && pm2 restart ${PM2_NAME}"
 
   log "Remote health check"
-  ssh "${host}" "curl -sf http://127.0.0.1:3000/api/progress | head -c 200 >/dev/null && echo OK" \
+  ssh "${host}" 'for i in 1 2 3 4 5 6 7 8 9 10; do curl -sf -o /dev/null http://127.0.0.1:3000/api/progress && echo OK && exit 0; sleep 2; done; exit 1' \
     || die "Remote health check failed — ssh in and run: pm2 logs ${PM2_NAME}"
 
   log "Done — site updated at ${host}"

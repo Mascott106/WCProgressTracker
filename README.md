@@ -220,6 +220,22 @@ Certbot edits your nginx config to add SSL. After it runs, your site is availabl
 
 #### 5. Updates
 
+**On the VPS** (if the droplet has enough RAM to build):
+
+```bash
+cd ~/WCProgressTracker
+./scripts/update-site.sh
+```
+
+**From your Mac** (recommended on 512 MB droplets — builds locally, rsyncs to the server):
+
+```bash
+./scripts/update-site.sh --from-local
+# or: ./scripts/update-site.sh --from-local deploy@YOUR_DROPLET_IP
+```
+
+Manual equivalent:
+
 ```bash
 cd ~/WCProgressTracker
 git pull

@@ -10,6 +10,9 @@ export const API_FETCH_INTERVAL_MS = 60_000;
 /** Keep polling after expected full time to pick up final scores. */
 export const POST_LIVE_POLL_MS = 10 * 60 * 1000;
 
+/** Wait this long after expected full time before locking a final score. */
+export const FINAL_SCORE_LOCK_DELAY_MS = POST_LIVE_POLL_MS;
+
 /** Ignore manual refresh if cache is still fresh. */
 export const FORCE_REFRESH_MIN_AGE_MS = API_FETCH_INTERVAL_MS;
 

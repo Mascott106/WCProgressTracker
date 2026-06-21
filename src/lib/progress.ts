@@ -1,4 +1,5 @@
 import { buildBracket } from "./bracket";
+import { applyScoreLocks } from "./locked-scores";
 import { applyScheduleStatuses } from "./match-status";
 import { buildKnockoutSchedule } from "./knockout-schedule";
 import { getScheduleDayWindow } from "./schedule-day";
@@ -10,6 +11,7 @@ import {
   ProgressData,
   TOTAL_GAMES,
 } from "./types";
+import { FINAL_SCORE_LOCK_DELAY_MS } from "./api-limits";
 
 const MATCH_DURATION_MS = MATCH_DURATION_MINUTES * 60 * 1000;
 
@@ -34,10 +36,16 @@ export function msUntilNextStatusChange(
   let next = Infinity;
 
   for (const match of summaries) {
-    if (isFinished(match.status)) continue;
-
     const kickoff = new Date(match.date).getTime();
     const end = kickoff + MATCH_DURATION_MS;
+
+    if (isFinished(match.status)) {
+      const lockAt = kickoff + MATCH_DURATION_MS + FINAL_SCORE_LOCK_DELAY_MS;
+      if (now < lockAt) {
+        next = Math.min(next, lockAt - now);
+      }
+      continue;
+    }
 
     if (now < kickoff) next = Math.min(next, kickoff - now);
     else if (isLive(match.status) || now < end) next = Math.min(next, end - now);
@@ -67,7 +75,7 @@ export function buildProgressData(
   summaries: MatchSummary[],
   now = Date.now(),
 ): ProgressData {
-  const resolved = applyScheduleStatuses(summaries, now);
+  const resolved = applyScoreLocks(applyScheduleStatuses(summaries, now), now);
   const completed = resolved.filter((m) => isFinished(m.status));
   const live = resolved.filter((m) => isLive(m.status));
 

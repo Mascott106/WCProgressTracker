@@ -2,11 +2,11 @@ import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 import path from "path";
 import {
   API_FETCH_INTERVAL_MS,
+  FINAL_SCORE_LOCK_DELAY_MS,
   FORCE_REFRESH_MIN_AGE_MS,
   FREE_TIER_REQUESTS_PER_MINUTE,
   MATCH_DURATION_MS,
   OVERTIME_RETRY_MS,
-  POST_LIVE_POLL_MS,
   RATE_LIMIT_BACKOFF_MS,
   REST_DAY_CACHE_MS,
 } from "./api-limits";
@@ -162,7 +162,12 @@ export function toExternalMatches(
 }
 
 function matchPollWindowEnd(kickoffMs: number): number {
-  return kickoffMs + MATCH_DURATION_MS + POST_LIVE_POLL_MS;
+  return (
+    kickoffMs +
+    MATCH_DURATION_MS +
+    FINAL_SCORE_LOCK_DELAY_MS +
+    API_FETCH_INTERVAL_MS
+  );
 }
 
 function isInActivePollingWindow(summaries: MatchSummary[], now: number): boolean {

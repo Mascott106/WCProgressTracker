@@ -97,14 +97,14 @@ export function mergeExternalMatches(
   return staticMatches.map((staticMatch) => {
     const api = findExternalMatch(staticMatch, external, used);
     const { foxChannel, onTubi } = getBroadcast(staticMatch.id);
-    const status = api?.status ?? "NS";
+    const kickoff = api?.date ?? staticMatch.date;
 
     return {
       id: staticMatch.id,
-      date: api?.date ?? staticMatch.date,
+      date: kickoff,
       round: staticMatch.round,
-      status,
-      statusLong: api?.statusLong ?? statusLabel(status),
+      status: api?.status ?? "NS",
+      statusLong: api?.statusLong ?? statusLabel("NS"),
       homeTeam: resolveTeamName(staticMatch.homeTeam, api?.homeTeam),
       awayTeam: resolveTeamName(staticMatch.awayTeam, api?.awayTeam),
       homeGoals: api?.homeGoals ?? staticMatch.homeGoals,

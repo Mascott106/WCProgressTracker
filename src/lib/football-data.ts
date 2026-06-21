@@ -382,7 +382,9 @@ export async function getProgressFromApi(
         );
         memoryCache = entry;
         await writeDiskCache(entry);
-        return toResponse(entry, "cache", now);
+        const message =
+          error instanceof Error ? error.message : "Failed to fetch from API";
+        return toResponse(entry, "cache", now, { apiError: message });
       }
       if (useStaticFallback) {
         return await staticFallbackResponse(now);

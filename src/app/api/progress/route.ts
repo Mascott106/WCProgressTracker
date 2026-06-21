@@ -33,6 +33,13 @@ export async function GET(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch progress";
-    return NextResponse.json({ error: message }, { status: 502 });
+    const result = await getProgressFromApi("", { useStaticFallback: true });
+    return NextResponse.json({
+      ...result,
+      meta: {
+        ...result.meta,
+        apiError: message,
+      },
+    });
   }
 }

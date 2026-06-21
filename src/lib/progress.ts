@@ -1,4 +1,5 @@
 import { buildBracket } from "./bracket";
+import { applyScheduleStatuses } from "./match-status";
 import { buildKnockoutSchedule } from "./knockout-schedule";
 import { getScheduleDayWindow } from "./schedule-day";
 import {
@@ -66,8 +67,9 @@ export function buildProgressData(
   summaries: MatchSummary[],
   now = Date.now(),
 ): ProgressData {
-  const completed = summaries.filter((m) => isFinished(m.status));
-  const live = summaries.filter((m) => isLive(m.status));
+  const resolved = applyScheduleStatuses(summaries, now);
+  const completed = resolved.filter((m) => isFinished(m.status));
+  const live = resolved.filter((m) => isLive(m.status));
 
   const completedSorted = [...completed].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -78,7 +80,7 @@ export function buildProgressData(
     return {
       dateIso: window.dateIso,
       matches: getScheduledMatchesForWindow(
-        summaries,
+        resolved,
         window,
         offset === 0 ? now : undefined,
       ),
@@ -87,8 +89,8 @@ export function buildProgressData(
     };
   });
 
-  const { start, end } = tournamentBounds(summaries);
-  const ttlMs = msUntilNextStatusChange(summaries, now);
+  const { start, end } = tournamentBounds(resolved);
+  const ttlMs = msUntilNextStatusChange(resolved, now);
   const completedCount = completed.length;
 
   return {
@@ -105,8 +107,8 @@ export function buildProgressData(
     lastCompleted: completedSorted[0] ?? null,
     liveMatches: live,
     upcomingDays,
-    bracket: buildBracket(summaries, now),
-    knockoutSchedule: buildKnockoutSchedule(summaries, now),
+    bracket: buildBracket(resolved, now),
+    knockoutSchedule: buildKnockoutSchedule(resolved, now),
     nextStatusChangeAt: new Date(now + ttlMs).toISOString(),
   };
 }

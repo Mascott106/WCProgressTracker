@@ -19,21 +19,21 @@ export function ProgressBar({
 
   return (
     <div className="shrink-0 space-y-3 py-2">
-      <div className="flex items-center gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
         <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-5xl font-bold tabular-nums tracking-tight text-accent">
+          <span className="font-mono text-3xl font-bold tabular-nums tracking-tight text-accent sm:text-5xl">
             {clampedPercent.toFixed(1)}
           </span>
-          <span className="text-xl font-semibold text-accent/60">%</span>
+          <span className="text-lg font-semibold text-accent/60 sm:text-xl">%</span>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <StatPill label="Done" value={completed} accent />
           <StatPill label="Live" value={live} live={live > 0} />
           <StatPill label="Left" value={remaining} />
         </div>
 
-        <span className="ml-auto font-mono text-base text-muted">
+        <span className="font-mono text-base text-muted sm:ml-auto">
           {completed}
           <span className="text-muted/40"> / </span>
           {total}

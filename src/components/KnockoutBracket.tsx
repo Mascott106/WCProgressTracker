@@ -13,7 +13,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
         Knockout Bracket
       </h2>
 
-      <div className="flex min-h-0 flex-1 gap-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:gap-2">
         {bracket.rounds.map((round) => (
           <BracketColumn
             key={round.name}
@@ -41,7 +41,7 @@ function BracketColumn({
 }) {
   return (
     <div
-      className={`flex min-w-0 flex-1 flex-col ${emphasize ? "min-w-[11rem]" : ""}`}
+      className={`flex min-w-0 flex-col sm:flex-1 ${emphasize ? "sm:min-w-[11rem]" : ""} border-l-2 border-border/40 pl-3 first:border-l-0 first:pl-0 sm:border-l-0 sm:pl-0`}
     >
       <p className="mb-1 shrink-0 text-center text-[9px] font-semibold uppercase tracking-widest text-muted/50">
         {label}
@@ -84,7 +84,7 @@ function BracketMatch({
 
   return (
     <div
-      className={`rounded border px-1.5 py-1 ${border} ${large ? "py-1.5" : ""}`}
+      className={`rounded border px-1.5 py-2 sm:py-1 ${border} ${large ? "sm:py-1.5" : ""}`}
       title={`Match ${slot.id}`}
     >
       <BroadcastLabel

@@ -35,15 +35,15 @@ export function TimeProgressBar({
 
   return (
     <div className="shrink-0 space-y-1.5 py-1">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-dim">
           Real time
         </span>
         <div className="flex items-baseline gap-1">
-          <span className="font-mono text-2xl font-bold tabular-nums tracking-tight text-sky-400">
+          <span className="font-mono text-xl font-bold tabular-nums tracking-tight text-sky-400 sm:text-2xl">
             {clampedPercent.toFixed(7)}
           </span>
-          <span className="text-sm font-semibold text-sky-400/60">%</span>
+          <span className="text-xs font-semibold text-sky-400/60 sm:text-sm">%</span>
         </div>
       </div>
 

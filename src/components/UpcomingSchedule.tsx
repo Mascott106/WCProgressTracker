@@ -15,7 +15,7 @@ function shortRound(round: string): string {
 
 function ScheduleRow({ match }: { match: MatchSummary }) {
   return (
-    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_4.5rem] items-center gap-x-2 border-b border-border/25 py-1.5 last:border-b-0">
+    <div className="flex flex-col gap-1 border-b border-border/25 py-2 last:border-b-0 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)_4.5rem] sm:items-center sm:gap-x-2 sm:py-1.5">
       <FormattedDate
         iso={match.date}
         timeOnly
@@ -26,9 +26,9 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
         <span className="mx-1.5 font-normal text-muted/50">vs</span>
         <TeamName name={match.awayTeam} />
       </p>
-      <div className="flex flex-col items-end gap-0.5">
+      <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-0.5">
         <BroadcastLabel foxChannel={match.foxChannel} onTubi={match.onTubi} />
-        <span className="truncate text-right text-[10px] text-muted/60">
+        <span className="truncate text-[10px] text-muted/60 sm:text-right">
           {shortRound(match.round)}
         </span>
       </div>
@@ -90,7 +90,7 @@ export function UpcomingSchedule({ days }: { days: ScheduleDay[] }) {
     <div className="flex shrink-0 flex-col gap-2">
       {today && <ScheduleDayBox day={today} fullWidth />}
       {laterDays.length > 0 && (
-        <div className="grid shrink-0 grid-cols-2 gap-2">
+        <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
           {laterDays.map((day) => (
             <ScheduleDayBox key={day.dateIso} day={day} />
           ))}

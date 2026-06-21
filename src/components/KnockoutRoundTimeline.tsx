@@ -35,7 +35,8 @@ export function KnockoutRoundTimeline({
         ) : null}
       </div>
 
-      <div className="flex items-start gap-0">
+      <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:overflow-visible sm:px-0">
+        <div className="flex min-w-max items-start gap-0 sm:min-w-0 sm:w-full">
         {schedule.milestones.map((milestone, index) => (
           <div key={milestone.name} className="flex min-w-0 flex-1 items-start">
             {index > 0 && (
@@ -59,6 +60,7 @@ export function KnockoutRoundTimeline({
             )}
           </div>
         ))}
+        </div>
       </div>
     </div>
   );

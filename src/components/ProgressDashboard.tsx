@@ -127,7 +127,7 @@ export function ProgressDashboard() {
         initialPercent={data.timeProgress.percent}
       />
 
-      <div className="grid shrink-0 grid-cols-2 gap-2">
+      <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
         <MatchPanel
           title="Live Now"
           matches={data.liveMatches.slice(0, 3)}
@@ -152,13 +152,13 @@ export function ProgressDashboard() {
       <KnockoutRoundTimeline schedule={data.knockoutSchedule} />
 
       {meta && (
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-2 text-[10px] text-muted/40">
+        <footer className="flex shrink-0 flex-col items-start gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center sm:justify-between">
           <span className="capitalize">
             Source: {meta.source.replace("-", " ")}
             {meta.matchedFixtures > 0 &&
               ` · ${meta.matchedFixtures}/${meta.totalFixtures} fixtures matched`}
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {meta.apiRequestsRemaining !== null &&
               meta.apiRequestsLimit !== null && (
                 <span
@@ -200,7 +200,7 @@ export function ProgressDashboard() {
                   ? "Cache still fresh — automatic refresh runs every minute during live play"
                   : undefined
               }
-              className="text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded px-2 py-1 text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
               Refresh
             </button>

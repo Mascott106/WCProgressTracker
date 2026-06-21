@@ -29,13 +29,20 @@ export function MatchRow({
   const awayWins = hasScore && winner === match.awayTeam;
 
   return (
-    <div className="flex items-center gap-3 py-0.5">
+    <div className="flex flex-col gap-1 py-0.5 sm:flex-row sm:items-center sm:gap-3">
       {showTime && (
-        <FormattedDate
-          iso={match.date}
-          timeOnly={timeOnly}
-          className="w-[5.5rem] shrink-0 text-[10px] tabular-nums text-muted/60"
-        />
+        <div className="flex items-center justify-between gap-2 sm:contents">
+          <FormattedDate
+            iso={match.date}
+            timeOnly={timeOnly}
+            className="w-auto shrink-0 text-[10px] tabular-nums text-muted/60 sm:w-[5.5rem]"
+          />
+          <StatusBadge
+            status={match.statusLong}
+            variant={variant}
+            className="sm:order-last"
+          />
+        </div>
       )}
 
       <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -79,10 +86,12 @@ export function MatchRow({
       <BroadcastLabel
         foxChannel={match.foxChannel}
         onTubi={match.onTubi}
-        className="shrink-0"
+        className="hidden shrink-0 sm:inline-flex"
       />
 
-      <StatusBadge status={match.statusLong} variant={variant} />
+      {!showTime && (
+        <StatusBadge status={match.statusLong} variant={variant} />
+      )}
     </div>
   );
 }
@@ -154,9 +163,11 @@ export function MatchPanel({
 function StatusBadge({
   status,
   variant,
+  className = "",
 }: {
   status: string;
   variant: "default" | "live" | "upcoming";
+  className?: string;
 }) {
   const colors = {
     live: "bg-red-500/15 text-red-400",
@@ -166,7 +177,7 @@ function StatusBadge({
 
   return (
     <span
-      className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${colors[variant]}`}
+      className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${colors[variant]} ${className}`}
     >
       {status}
     </span>

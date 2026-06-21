@@ -18,6 +18,10 @@ export default function Home() {
       </header>
 
       <ProgressDashboard />
+
+      <p className="mt-auto pt-4 text-center text-[10px] text-muted/40">
+        Built by Scott Mendenko
+      </p>
     </main>
   );
 }

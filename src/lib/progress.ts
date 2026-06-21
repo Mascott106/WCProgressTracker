@@ -1,5 +1,6 @@
 import { buildBracket } from "./bracket";
 import { applyScoreLocks } from "./locked-scores";
+import { applyManualScores } from "./manual-scores";
 import { applyScheduleStatuses } from "./match-status";
 import { buildKnockoutSchedule } from "./knockout-schedule";
 import { getScheduleDayWindow } from "./schedule-day";
@@ -75,7 +76,9 @@ export function buildProgressData(
   summaries: MatchSummary[],
   now = Date.now(),
 ): ProgressData {
-  const resolved = applyScoreLocks(applyScheduleStatuses(summaries, now), now);
+  const resolved = applyManualScores(
+    applyScoreLocks(applyScheduleStatuses(summaries, now), now),
+  );
   const completed = resolved.filter((m) => isFinished(m.status));
   const live = resolved.filter((m) => isLive(m.status));
 

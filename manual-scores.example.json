@@ -1,0 +1,11 @@
+{
+  "38": {
+    "matchId": 38,
+    "homeGoals": 4,
+    "awayGoals": 0,
+    "status": "FT",
+    "statusLong": "Full time",
+    "note": "Example: Spain 4-0 Saudi Arabia — override when football-data.org is wrong",
+    "pinnedAt": "2026-06-21T20:00:00.000Z"
+  }
+}

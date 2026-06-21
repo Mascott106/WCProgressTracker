@@ -97,6 +97,30 @@ Status mapping from football-data.org:
 
 When the API still reports `NS` during play (common on the free tier), kickoff time is used to show **Live** until the API catches up.
 
+### Manual score overrides
+
+If football-data.org has the wrong final score and never corrects it, pin the correct result in `data/manual-scores.json`. Pinned scores:
+
+- **Override the API** on every request
+- **Skip auto-locking** from bad API data
+- **Survive server restarts** (startup re-fetch will not replace them)
+
+**Quick pin (Spain 4–0 Saudi Arabia, match id 38):**
+
+```bash
+./scripts/pin-score.sh 38 4 0 "VAR disallowed fifth goal"
+pm2 restart wc-progress
+```
+
+**Remove a pin** when you want the API to drive the score again:
+
+```bash
+./scripts/unpin-score.sh 38
+pm2 restart wc-progress
+```
+
+See `manual-scores.example.json` for the file format. The file lives in `data/` (gitignored) alongside `cache.json` and `locked-scores.json`.
+
 ## Deploy
 
 Requires a **Node.js host** (VPS, Vercel, Railway, etc.) — not a static export.

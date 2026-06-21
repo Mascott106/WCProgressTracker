@@ -2,6 +2,7 @@ import fixturesData from "@/data/fixtures.json";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { FINAL_SCORE_LOCK_DELAY_MS, MATCH_DURATION_MS } from "./api-limits";
+import { hasManualScore } from "./manual-scores";
 import {
   FixturesFile,
   isFinished,
@@ -88,6 +89,10 @@ export function applyScoreLocks(
       return applyLockedRecord(match, existing);
     }
 
+    if (hasManualScore(match.id)) {
+      return match;
+    }
+
     if (!isFinished(match.status)) {
       return match;
     }
@@ -149,6 +154,7 @@ export function unlockMostRecentCompletedScore(now = Date.now()): number | null 
 
   for (const key of Object.keys(store)) {
     const id = Number(key);
+    if (hasManualScore(id)) continue;
     const kickoff = kickoffs.get(id);
     if (kickoff === undefined) continue;
     if (now < kickoff + MATCH_DURATION_MS) continue;

@@ -53,6 +53,8 @@ function toBracketSlot(
     status: summary.status,
     isLive: isLive(summary.status),
     isFinished: isFinished(summary.status),
+    venue: summary.venue,
+    city: summary.city,
     foxChannel: summary.foxChannel,
     onTubi: summary.onTubi,
   };

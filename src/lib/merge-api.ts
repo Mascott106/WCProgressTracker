@@ -109,6 +109,8 @@ export function mergeExternalMatches(
       awayTeam: resolveTeamName(staticMatch.awayTeam, api?.awayTeam),
       homeGoals: api?.homeGoals ?? staticMatch.homeGoals,
       awayGoals: api?.awayGoals ?? staticMatch.awayGoals,
+      venue: staticMatch.venue,
+      city: staticMatch.city,
       foxChannel,
       onTubi,
     };

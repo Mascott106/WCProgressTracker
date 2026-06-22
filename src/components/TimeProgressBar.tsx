@@ -6,19 +6,12 @@ import { ExpGauge } from "@/components/ExpGauge";
 import { percentToLevelProgress } from "@/lib/exp-levels";
 import { label } from "@/lib/nerd-mode-labels";
 import { playLevelUpSound } from "@/lib/play-levelup";
+import { computeTimePercent } from "@/lib/time-progress";
 
 interface TimeProgressBarProps {
   startAt: string;
   endAt: string;
   nerdMode?: boolean;
-}
-
-function computePercent(now: number, startAt: string, endAt: string): number {
-  const start = new Date(startAt).getTime();
-  const end = new Date(endAt).getTime();
-  if (now <= start) return 0;
-  if (now >= end) return 100;
-  return ((now - start) / (end - start)) * 100;
 }
 
 export function TimeProgressBar({
@@ -27,7 +20,7 @@ export function TimeProgressBar({
   nerdMode = false,
 }: TimeProgressBarProps) {
   const [percent, setPercent] = useState(() =>
-    computePercent(Date.now(), startAt, endAt),
+    computeTimePercent(Date.now(), startAt, endAt),
   );
 
   useEffect(() => {
@@ -38,7 +31,7 @@ export function TimeProgressBar({
 
     const tick = () => {
       if (!active) return;
-      const nextPercent = computePercent(Date.now(), startAt, endAt);
+      const nextPercent = computeTimePercent(Date.now(), startAt, endAt);
       setPercent(nextPercent);
 
       if (nerdMode) {

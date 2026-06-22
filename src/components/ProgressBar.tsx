@@ -72,6 +72,7 @@ export function ProgressBar({
             sectionLabel={label("matchSection", true)}
             accent="match"
             size="lg"
+            fillMode="overall"
             showHeader={false}
           />
           <div className="flex justify-between text-[10px] text-muted/50">

@@ -69,18 +69,38 @@ export function TimeProgressBar({
   if (nerdMode) {
     const progress = percentToLevelProgress(clampedPercent);
     return (
-      <div className="shrink-0 space-y-1.5 py-1">
+      <div className="shrink-0 space-y-2 py-1">
         <ExpGauge
           percent={clampedPercent}
           sectionLabel={label("timeSection", true)}
           accent="time"
           size="sm"
           progress={progress}
+          showBar={false}
+        />
+        <ExpGauge
+          percent={clampedPercent}
+          sectionLabel={label("timeSection", true)}
+          accent="time"
+          size="sm"
+          progress={progress}
+          fillMode="overall"
+          showHeader={false}
         />
         <div className="flex justify-between text-[10px] text-muted/50">
           <FormattedDate iso={startAt} dateOnly />
           <FormattedDate iso={endAt} dateOnly />
         </div>
+        <ExpGauge
+          percent={clampedPercent}
+          sectionLabel={label("currentLevelSection", true)}
+          accent="time"
+          size="sm"
+          progress={progress}
+          fillMode="intraLevel"
+          headerStyle="compact"
+          showHeader
+        />
       </div>
     );
   }

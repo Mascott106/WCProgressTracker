@@ -2,6 +2,7 @@ export type NerdLabelKey =
   | "pageTitle"
   | "pageSubtitle"
   | "matchSection"
+  | "currentLevelSection"
   | "statDone"
   | "statLive"
   | "statLeft"
@@ -27,6 +28,7 @@ const LABELS: Record<NerdLabelKey, { normal: string; nerd: string }> = {
     nerd: "EXP curve · Lv 1–99",
   },
   matchSection: { normal: "Match progress", nerd: "Quest EXP" },
+  currentLevelSection: { normal: "Current level", nerd: "Current Level" },
   statDone: { normal: "Done", nerd: "Cleared" },
   statLive: { normal: "Live", nerd: "In Battle" },
   statLeft: { normal: "Left", nerd: "Remaining" },

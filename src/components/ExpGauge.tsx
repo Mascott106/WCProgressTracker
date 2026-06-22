@@ -26,12 +26,17 @@ const ACCENT_STYLES: Record<
   },
 };
 
+type ExpGaugeFillMode = "overall" | "intraLevel";
+type ExpGaugeHeaderStyle = "full" | "compact";
+
 interface ExpGaugeProps {
   percent: number;
   sectionLabel: string;
   accent: ExpGaugeAccent;
   size?: "lg" | "sm";
   progress?: LevelProgress;
+  fillMode?: ExpGaugeFillMode;
+  headerStyle?: ExpGaugeHeaderStyle;
   /** When false, render only the level / EXP header (bar omitted). */
   showBar?: boolean;
   /** When false, render only the bar (header omitted). */
@@ -44,17 +49,25 @@ export function ExpGauge({
   accent,
   size = "lg",
   progress: progressProp,
+  fillMode = "intraLevel",
+  headerStyle = "full",
   showBar = true,
   showHeader = true,
 }: ExpGaugeProps) {
   const progress = progressProp ?? percentToLevelProgress(percent);
   const styles = ACCENT_STYLES[accent];
   const isLarge = size === "lg";
-  const fillWidth = Math.min(100, Math.max(0, progress.levelFillPercent));
+  const fillWidth =
+    fillMode === "overall"
+      ? Math.min(100, Math.max(0, percent))
+      : Math.min(100, Math.max(0, progress.levelFillPercent));
+  const levelFraction = progress.isMaxLevel
+    ? "MAX"
+    : `${formatExp(progress.expInLevel)} / ${formatExp(progress.expToNextLevel)}`;
 
   return (
     <div className="min-w-0 space-y-1.5">
-      {showHeader && (
+      {showHeader && headerStyle === "full" && (
         <div className="space-y-1">
           <span
             className={`block text-[10px] font-medium uppercase tracking-wider ${styles.label}`}
@@ -77,12 +90,18 @@ export function ExpGauge({
               {formatExp(progress.totalExp)} EXP
             </span>
             <span className="font-mono text-[10px] tabular-nums text-muted/60 sm:text-xs">
-              {progress.isMaxLevel
-                ? "MAX"
-                : `${formatExp(progress.expInLevel)} / ${formatExp(progress.expToNextLevel)}`}
+              {levelFraction}
             </span>
           </div>
         </div>
+      )}
+
+      {showHeader && headerStyle === "compact" && (
+        <span
+          className={`block text-[10px] font-medium uppercase tracking-wider ${styles.label}`}
+        >
+          {sectionLabel}
+        </span>
       )}
 
       {showBar && (

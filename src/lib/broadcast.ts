@@ -7,7 +7,7 @@ const FOX_NETWORK: FoxChannel[] = [
   "FOX", "FOX", "FOX", "FS1", "FS1", "FOX", "FOX", "FS1",
   "FOX", "FOX", "FS1", "FOX", "FOX", "FOX", "FS1", "FOX",
   "FOX", "FS1", "FOX", "FS1", "FS1", "FOX", "FS1", "FS1",
-  "FOX", "FOX", "FOX", "FS1", "FOX", "FOX", "FOX", "FS1",
+  "FS1", "FOX", "FOX", "FS1", "FOX", "FOX", "FOX", "FS1",
   "FOX", "FS1", "FOX", "FS1", "FOX", "FS1", "FS1", "FOX",
   "FS1", "FOX", "FS1", "FOX", "FOX", "FS1", "FS1", "FOX",
   "FS1", "FOX", "FOX", "FS1", "FS1", "FOX", "FOX", "FS1",

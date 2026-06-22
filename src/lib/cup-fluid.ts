@@ -1,4 +1,4 @@
-/** Canvas fluid sim clipped to a World Cup trophy silhouette. */
+/** Canvas fluid sim clipped to a trophy cup silhouette. */
 
 export interface CupFluidController {
   setTargetPercent(percent: number): void;
@@ -22,13 +22,13 @@ export interface CreateCupFluidOptions {
   onFillLevelChange?: (level: number) => void;
 }
 
-const GRAVITY = 0.35;
-const DAMPING = 0.92;
-const MAX_PARTICLES = 280;
-const FILL_EASE = 0.04;
-const DRAIN_RATE = 0.025;
+const GRAVITY = 0.42;
+const DAMPING = 0.9;
+const MAX_PARTICLES = 320;
+const FILL_EASE = 0.035;
+const DRAIN_RATE = 0.028;
+const POUR_SPAWN_RATE = 5;
 
-/** Draw trophy in unit box (0,0)-(1,1); bowl interior roughly y 0.38–0.88 */
 function traceTrophyPath(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const cx = w * 0.5;
   const s = Math.min(w, h);
@@ -75,9 +75,19 @@ function trophyBounds(w: number, h: number) {
     top: h - s * 0.9,
     bottom: h - s * 0.04,
     spoutX: cx,
-    spoutY: h - s * 0.94,
+    spoutY: Math.max(8, h - s * 0.98),
     bowlTop: h - s * 0.88,
-    bowlBottom: h - s * 0.12,
+    bowlBottom: h - s * 0.02,
+  };
+}
+
+/** Liquid rises from the bottom as fillLevel increases (0 = empty, 1 = full). */
+function liquidBounds(bounds: ReturnType<typeof trophyBounds>, fillLevel: number) {
+  const level = Math.min(1, Math.max(0, fillLevel));
+  const depth = bounds.bowlBottom - bounds.bowlTop;
+  return {
+    top: bounds.bowlBottom - level * depth,
+    bottom: bounds.bowlBottom,
   };
 }
 
@@ -122,10 +132,10 @@ export function createCupFluid({
   const spawnParticle = (bounds: ReturnType<typeof trophyBounds>) => {
     if (particles.length >= MAX_PARTICLES) return;
     particles.push({
-      x: bounds.spoutX + (Math.random() - 0.5) * 8,
-      y: bounds.spoutY,
-      vx: (Math.random() - 0.5) * 1.2,
-      vy: Math.random() * 0.5,
+      x: bounds.spoutX + (Math.random() - 0.5) * 10,
+      y: bounds.spoutY + Math.random() * 4,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: 1.2 + Math.random() * 1.5,
     });
   };
 
@@ -148,12 +158,16 @@ export function createCupFluid({
     } else {
       const target = Math.min(1, Math.max(0, targetLevel));
       fillLevel += (target - fillLevel) * FILL_EASE;
-      if (!reducedMotion && fillLevel < target - 0.008) {
-        for (let i = 0; i < 3; i++) spawnParticle(bounds);
+      if (!reducedMotion && fillLevel < target - 0.006) {
+        for (let i = 0; i < POUR_SPAWN_RATE; i++) spawnParticle(bounds);
       }
     }
 
     wobble += 0.08;
+
+    const liquid = liquidBounds(bounds, fillLevel);
+    const surfaceY = liquid.top;
+    const hasLiquid = fillLevel > 0.004;
 
     if (!reducedMotion) {
       for (const p of particles) {
@@ -163,29 +177,29 @@ export function createCupFluid({
         p.x += p.vx;
         p.y += p.vy;
 
-        const surfaceY =
-          bounds.bowlBottom - fillLevel * (bounds.bowlBottom - bounds.bowlTop);
-
         if (p.x < bounds.left + 4) {
           p.x = bounds.left + 4;
-          p.vx *= -0.4;
+          p.vx *= -0.35;
         }
         if (p.x > bounds.right - 4) {
           p.x = bounds.right - 4;
-          p.vx *= -0.4;
+          p.vx *= -0.35;
         }
         if (p.y > bounds.bowlBottom - 2) {
           p.y = bounds.bowlBottom - 2;
-          p.vy *= -0.3;
+          p.vy *= -0.25;
+          p.vx *= 0.9;
         }
         if (p.y < bounds.top) {
           p.y = bounds.top;
-          p.vy *= -0.2;
+          p.vy *= 0.2;
         }
-        if (p.y >= surfaceY - 2 && p.vy > 0) {
-          p.y = surfaceY - 2;
-          p.vy *= -0.15;
-          p.vx *= 0.85;
+
+        const catchSurface = hasLiquid ? surfaceY : bounds.bowlBottom;
+        if (p.y >= catchSurface - 3 && p.vy > 0) {
+          p.y = catchSurface - 3;
+          p.vy *= -0.1;
+          p.vx *= 0.88;
         }
       }
     }
@@ -202,42 +216,48 @@ export function createCupFluid({
     ctx.fill();
     ctx.restore();
 
-    // Liquid fill clipped to trophy
-    const surfaceY =
-      bounds.bowlBottom - fillLevel * (bounds.bowlBottom - bounds.bowlTop);
-
+    // Liquid fill clipped to trophy — rises from the bottom
     ctx.save();
     traceTrophyPath(ctx, w, h);
     ctx.clip();
 
-    const liquidGrad = ctx.createLinearGradient(0, surfaceY, 0, bounds.bowlBottom);
-    liquidGrad.addColorStop(0, "rgba(251, 191, 36, 0.95)");
-    liquidGrad.addColorStop(0.5, "rgba(234, 179, 8, 0.9)");
-    liquidGrad.addColorStop(1, "rgba(180, 83, 9, 0.85)");
+    if (hasLiquid) {
+      const liquidGrad = ctx.createLinearGradient(
+        0,
+        liquid.top,
+        0,
+        liquid.bottom,
+      );
+      liquidGrad.addColorStop(0, "rgba(255, 220, 120, 0.98)");
+      liquidGrad.addColorStop(0.35, "rgba(251, 191, 36, 0.95)");
+      liquidGrad.addColorStop(1, "rgba(180, 83, 9, 0.9)");
 
-    ctx.beginPath();
-    ctx.moveTo(bounds.left - 10, bounds.bowlBottom + 5);
-    ctx.lineTo(bounds.right + 10, bounds.bowlBottom + 5);
-    ctx.lineTo(bounds.right + 10, surfaceY);
+      const waveAmp = reducedMotion ? 0 : 2.5 + Math.sin(wobble) * 2;
+      const steps = 28;
 
-    const waveAmp = reducedMotion ? 0 : 3 + Math.sin(wobble) * 2;
-    const steps = 24;
-    for (let i = steps; i >= 0; i--) {
-      const t = i / steps;
-      const x = bounds.left + t * (bounds.right - bounds.left);
-      const y = surfaceY + Math.sin(t * Math.PI * 4 + wobble) * waveAmp;
-      ctx.lineTo(x, y);
+      ctx.beginPath();
+      ctx.moveTo(bounds.left - 12, liquid.bottom + 4);
+      ctx.lineTo(bounds.right + 12, liquid.bottom + 4);
+      ctx.lineTo(bounds.right + 12, liquid.top);
+
+      for (let i = steps; i >= 0; i--) {
+        const t = i / steps;
+        const x = bounds.left + t * (bounds.right - bounds.left);
+        const y = liquid.top + Math.sin(t * Math.PI * 4 + wobble) * waveAmp;
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = liquidGrad;
+      ctx.fill();
     }
-    ctx.closePath();
-    ctx.fillStyle = liquidGrad;
-    ctx.fill();
 
     if (!reducedMotion) {
       for (const p of particles) {
-        if (p.y >= surfaceY - 4) {
+        const showAbove = hasLiquid ? surfaceY : bounds.bowlBottom;
+        if (p.y <= showAbove + 10) {
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(255, 237, 180, 0.9)";
+          ctx.arc(p.x, p.y, p.vy > 2 ? 2.4 : 2, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 237, 180, 0.92)";
           ctx.fill();
         }
       }
@@ -245,15 +265,35 @@ export function createCupFluid({
 
     ctx.restore();
 
-    // Pour stream
-    if (!reducedMotion && !draining && fillLevel < targetLevel - 0.008) {
+    // Pour stream from above into the cup
+    if (!reducedMotion && !draining && fillLevel < targetLevel - 0.006) {
+      const pourTargetY = hasLiquid ? surfaceY : bounds.bowlBottom;
+      const streamX = bounds.spoutX + Math.sin(wobble * 2.5) * 2;
+
       ctx.save();
-      ctx.strokeStyle = "rgba(251, 191, 36, 0.55)";
-      ctx.lineWidth = 3;
+      const pourGrad = ctx.createLinearGradient(
+        0,
+        bounds.spoutY,
+        0,
+        pourTargetY,
+      );
+      pourGrad.addColorStop(0, "rgba(255, 237, 180, 0.15)");
+      pourGrad.addColorStop(0.15, "rgba(251, 191, 36, 0.75)");
+      pourGrad.addColorStop(1, "rgba(251, 191, 36, 0.95)");
+
+      ctx.strokeStyle = pourGrad;
+      ctx.lineWidth = 5;
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(bounds.spoutX, bounds.spoutY + 4);
-      ctx.lineTo(bounds.spoutX + Math.sin(wobble * 2) * 2, surfaceY - 8);
+      ctx.moveTo(streamX, bounds.spoutY);
+      ctx.lineTo(streamX + Math.sin(wobble * 3) * 1.5, pourTargetY);
+      ctx.stroke();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.beginPath();
+      ctx.moveTo(streamX - 1, bounds.spoutY);
+      ctx.lineTo(streamX - 1, pourTargetY - 6);
       ctx.stroke();
       ctx.restore();
     }

@@ -28,6 +28,14 @@ const MAX_PARTICLES = 320;
 const FILL_EASE = 0.035;
 const DRAIN_RATE = 0.028;
 const POUR_SPAWN_RATE = 5;
+const AREA_STEPS = 240;
+
+interface CupAreaProfile {
+  yBottom: number;
+  yTop: number;
+  samples: { y: number; cumArea: number }[];
+  totalArea: number;
+}
 
 function traceTrophyPath(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const cx = w * 0.5;
@@ -81,12 +89,73 @@ function trophyBounds(w: number, h: number) {
   };
 }
 
-/** Liquid rises from the bottom as fillLevel increases (0 = empty, 1 = full). */
-function liquidBounds(bounds: ReturnType<typeof trophyBounds>, fillLevel: number) {
+/** Precompute cross-section area from bottom to top so fill % matches visible area. */
+function buildCupAreaProfile(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+): CupAreaProfile {
+  const bounds = trophyBounds(w, h);
+  const yBottom = bounds.bowlBottom;
+  const yTop = bounds.bowlTop;
+
+  traceTrophyPath(ctx, w, h);
+
+  const yCoords: number[] = [];
+  const widths: number[] = [];
+
+  for (let i = 0; i <= AREA_STEPS; i++) {
+    const y = yBottom - (i / AREA_STEPS) * (yBottom - yTop);
+    yCoords.push(y);
+
+    let minX = bounds.right;
+    let maxX = bounds.left;
+    for (let x = bounds.left; x <= bounds.right; x += 2) {
+      if (ctx.isPointInPath(x, y)) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+      }
+    }
+    widths.push(maxX > minX ? maxX - minX : 0);
+  }
+
+  const samples: { y: number; cumArea: number }[] = [{ y: yBottom, cumArea: 0 }];
+  let cum = 0;
+  for (let i = 1; i <= AREA_STEPS; i++) {
+    const dy = Math.abs(yCoords[i - 1] - yCoords[i]);
+    cum += ((widths[i - 1] + widths[i]) / 2) * dy;
+    samples.push({ y: yCoords[i], cumArea: cum });
+  }
+
+  return { yBottom, yTop, samples, totalArea: cum };
+}
+
+function surfaceYForFillLevel(profile: CupAreaProfile, fillLevel: number): number {
   const level = Math.min(1, Math.max(0, fillLevel));
-  const depth = bounds.bowlBottom - bounds.bowlTop;
+  if (level <= 0) return profile.yBottom;
+  if (level >= 1) return profile.yTop;
+
+  const target = level * profile.totalArea;
+  for (let i = 1; i < profile.samples.length; i++) {
+    const prev = profile.samples[i - 1];
+    const curr = profile.samples[i];
+    if (curr.cumArea >= target) {
+      const span = curr.cumArea - prev.cumArea;
+      const t = span > 0 ? (target - prev.cumArea) / span : 0;
+      return prev.y + t * (curr.y - prev.y);
+    }
+  }
+  return profile.yTop;
+}
+
+/** Liquid rises from the bottom; fillLevel maps to cross-section area, not height. */
+function liquidBounds(
+  profile: CupAreaProfile,
+  bounds: ReturnType<typeof trophyBounds>,
+  fillLevel: number,
+) {
   return {
-    top: bounds.bowlBottom - level * depth,
+    top: surfaceYForFillLevel(profile, fillLevel),
     bottom: bounds.bowlBottom,
   };
 }
@@ -116,6 +185,16 @@ export function createCupFluid({
   let active = true;
   let wobble = 0;
   let lastReported = -1;
+  let areaProfile: CupAreaProfile | null = null;
+  let areaKey = "";
+
+  const getAreaProfile = (w: number, h: number) => {
+    const key = `${Math.round(w)}x${Math.round(h)}`;
+    if (areaProfile && areaKey === key) return areaProfile;
+    areaProfile = buildCupAreaProfile(ctx, w, h);
+    areaKey = key;
+    return areaProfile;
+  };
 
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
@@ -123,6 +202,7 @@ export function createCupFluid({
     canvas.width = Math.floor(rect.width * dpr);
     canvas.height = Math.floor(rect.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    areaKey = "";
   };
 
   resize();
@@ -146,6 +226,7 @@ export function createCupFluid({
     const w = rect.width;
     const h = rect.height;
     const bounds = trophyBounds(w, h);
+    const profile = getAreaProfile(w, h);
 
     if (draining) {
       fillLevel = Math.max(0, fillLevel - DRAIN_RATE);
@@ -165,7 +246,7 @@ export function createCupFluid({
 
     wobble += 0.08;
 
-    const liquid = liquidBounds(bounds, fillLevel);
+    const liquid = liquidBounds(profile, bounds, fillLevel);
     const surfaceY = liquid.top;
     const hasLiquid = fillLevel > 0.004;
 

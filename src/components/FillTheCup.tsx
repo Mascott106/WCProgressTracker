@@ -20,6 +20,10 @@ export function FillTheCup({ mode }: FillTheCupProps) {
   const prevModeRef = useRef<CupMode | null>(null);
   const { data, loading, error, refresh, setLoading } = useProgressData();
   const [displayPercent, setDisplayPercent] = useState(0);
+  const [activeMetric, setActiveMetric] = useState<"match" | "time">(
+    mode === "cup-time" ? "time" : "match",
+  );
+  const [transitioning, setTransitioning] = useState(false);
   const [timeFillReady, setTimeFillReady] = useState(mode === "cup-time");
   const [fluidReady, setFluidReady] = useState(false);
 
@@ -62,11 +66,13 @@ export function FillTheCup({ mode }: FillTheCupProps) {
     if (mode === "cup-match") {
       fluid.reset();
       fluid.setTargetPercent(data.progressPercent);
-      setDisplayPercent(data.progressPercent);
+      setActiveMetric("match");
+      setTransitioning(false);
       setTimeFillReady(false);
     } else if (mode === "cup-time") {
       setTimeFillReady(false);
       if (prev === "cup-match") {
+        setTransitioning(true);
         fluid.triggerDrain();
         let frame = 0;
         let raf = 0;
@@ -79,7 +85,8 @@ export function FillTheCup({ mode }: FillTheCupProps) {
               data.timeProgress.endAt,
             );
             fluid.setTargetPercent(pct);
-            setDisplayPercent(Math.round(pct * 10) / 10);
+            setActiveMetric("time");
+            setTransitioning(false);
             setTimeFillReady(true);
             return;
           }
@@ -95,7 +102,8 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         data.timeProgress.endAt,
       );
       fluid.setTargetPercent(pct);
-      setDisplayPercent(Math.round(pct * 10) / 10);
+      setActiveMetric("time");
+      setTransitioning(false);
       setTimeFillReady(true);
     }
 
@@ -118,7 +126,6 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         data.timeProgress.endAt,
       );
       fluid.setTargetPercent(pct);
-      setDisplayPercent(Math.round(pct * 10) / 10);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -151,17 +158,8 @@ export function FillTheCup({ mode }: FillTheCupProps) {
     );
   }
 
-  const label = mode === "cup-match" ? "Game Progress" : "Campaign Time";
-  const targetPercent =
-    mode === "cup-match"
-      ? (data?.progressPercent ?? 0)
-      : data
-        ? computeTimePercent(
-            Date.now(),
-            data.timeProgress.startAt,
-            data.timeProgress.endAt,
-          )
-        : 0;
+  const label =
+    activeMetric === "match" ? "Game Progress" : "Campaign Time";
 
   return (
     <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-4 py-6">
@@ -172,22 +170,25 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         <h2 className="mt-1 text-lg font-bold tracking-tight sm:text-xl">
           {label}
         </h2>
-        <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-accent sm:text-4xl">
-          {targetPercent.toFixed(1)}
-          <span className="text-lg text-accent/60 sm:text-2xl">%</span>
-        </p>
-        <p className="mt-0.5 font-mono text-xs tabular-nums text-muted/50">
-          fill {displayPercent.toFixed(1)}%
-        </p>
+        {transitioning ? (
+          <p className="mt-1 text-sm text-muted/60">Emptying cup…</p>
+        ) : (
+          <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-accent sm:text-4xl">
+            {displayPercent.toFixed(1)}
+            <span className="text-lg text-accent/60 sm:text-2xl">%</span>
+          </p>
+        )}
       </div>
 
       <canvas
         ref={canvasRef}
         className="h-[min(52vh,420px)] w-full max-w-md shrink-0"
-        aria-label={`Trophy filling to ${targetPercent.toFixed(1)} percent`}
+        aria-label={`Trophy filling to ${displayPercent.toFixed(1)} percent ${label}`}
       />
 
-      <p className="text-[10px] text-muted/40">Click 🏆 to switch</p>
+      <p className="text-[10px] text-muted/40">
+        Click 🏆 to switch — game progress, campaign time, then dashboard
+      </p>
     </div>
   );
 }

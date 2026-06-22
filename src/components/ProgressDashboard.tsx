@@ -8,14 +8,20 @@ import { TimeProgressBar } from "@/components/TimeProgressBar";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { KnockoutRoundTimeline } from "@/components/KnockoutRoundTimeline";
 import { UpcomingSchedule } from "@/components/UpcomingSchedule";
+import { useMatchProgressCelebrations } from "@/hooks/useMatchProgressCelebrations";
+import { useNerdMode } from "@/contexts/NerdModeContext";
 import type { ProgressApiMeta } from "@/lib/football-data";
+import { label } from "@/lib/nerd-mode-labels";
 import type { ProgressData } from "@/lib/types";
 
 export function ProgressDashboard() {
+  const { nerdMode } = useNerdMode();
   const [data, setData] = useState<ProgressData | null>(null);
   const [meta, setMeta] = useState<ProgressApiMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useMatchProgressCelebrations(data, nerdMode);
 
   const refresh = useCallback(async (force = false) => {
     try {
@@ -119,31 +125,33 @@ export function ProgressDashboard() {
         live={data.liveGames}
         remaining={data.remainingGames}
         total={data.totalGames}
+        nerdMode={nerdMode}
       />
 
       <TimeProgressBar
         startAt={data.timeProgress.startAt}
         endAt={data.timeProgress.endAt}
+        nerdMode={nerdMode}
       />
 
       <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
         <MatchPanel
-          title="Live Now"
+          title={label("panelLive", nerdMode)}
           matches={data.liveMatches.slice(0, 3)}
           variant="live"
-          emptyText="No live matches"
+          emptyText={label("emptyLive", nerdMode)}
         />
         <MatchPanel
-          title="Last Completed"
+          title={label("panelLast", nerdMode)}
           matches={data.lastCompleted ? [data.lastCompleted] : []}
           variant="default"
           highlightWinner
-          emptyText="No results yet"
+          emptyText={label("emptyLast", nerdMode)}
         />
       </div>
 
       {data.upcomingDays.some((day) => day.matches.length > 0) && (
-        <UpcomingSchedule days={data.upcomingDays} />
+        <UpcomingSchedule days={data.upcomingDays} nerdMode={nerdMode} />
       )}
 
       {data.bracket.active && <KnockoutBracket bracket={data.bracket} />}
@@ -201,7 +209,7 @@ export function ProgressDashboard() {
               }
               className="rounded px-2 py-1 text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Refresh
+              {label("refresh", nerdMode)}
             </button>
           </div>
         </footer>

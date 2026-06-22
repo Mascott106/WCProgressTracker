@@ -4,6 +4,10 @@ import type { ReactNode } from "react";
 import { FormattedDayLabel, FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import {
+  label,
+  scheduleMatchCount,
+} from "@/lib/nerd-mode-labels";
 import { SCHEDULE_DAY_TIMEZONE } from "@/lib/schedule-day";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
 
@@ -42,21 +46,31 @@ function scheduleDayLabel(iso: string) {
   );
 }
 
-function dayHeading(day: ScheduleDay): ReactNode {
+function dayHeading(day: ScheduleDay, nerdMode: boolean): ReactNode {
   if (day.isToday) {
-    return <>Rest of today — {scheduleDayLabel(day.dateIso)}</>;
+    return (
+      <>
+        {label("scheduleToday", nerdMode)} — {scheduleDayLabel(day.dateIso)}
+      </>
+    );
   }
   if (day.isTomorrow) {
-    return <>Tomorrow — {scheduleDayLabel(day.dateIso)}</>;
+    return (
+      <>
+        {label("scheduleTomorrow", nerdMode)} — {scheduleDayLabel(day.dateIso)}
+      </>
+    );
   }
   return scheduleDayLabel(day.dateIso);
 }
 
 function ScheduleDayBox({
   day,
+  nerdMode,
   fullWidth = false,
 }: {
   day: ScheduleDay;
+  nerdMode: boolean;
   fullWidth?: boolean;
 }) {
   return (
@@ -66,12 +80,16 @@ function ScheduleDayBox({
       }`}
     >
       <h2 className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-        {dayHeading(day)}
-        <span className="ml-2 text-muted/50">({day.matches.length} matches)</span>
+        {dayHeading(day, nerdMode)}
+        <span className="ml-2 text-muted/50">
+          {scheduleMatchCount(day.matches.length, nerdMode)}
+        </span>
       </h2>
 
       {day.matches.length === 0 ? (
-        <p className="py-1 text-xs text-muted/40">No matches scheduled</p>
+        <p className="py-1 text-xs text-muted/40">
+          {label("scheduleEmpty", nerdMode)}
+        </p>
       ) : (
         <div>
           {day.matches.map((match) => (
@@ -83,16 +101,22 @@ function ScheduleDayBox({
   );
 }
 
-export function UpcomingSchedule({ days }: { days: ScheduleDay[] }) {
+export function UpcomingSchedule({
+  days,
+  nerdMode = false,
+}: {
+  days: ScheduleDay[];
+  nerdMode?: boolean;
+}) {
   const [today, ...laterDays] = days;
 
   return (
     <div className="flex shrink-0 flex-col gap-2">
-      {today && <ScheduleDayBox day={today} fullWidth />}
+      {today && <ScheduleDayBox day={today} nerdMode={nerdMode} fullWidth />}
       {laterDays.length > 0 && (
         <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
           {laterDays.map((day) => (
-            <ScheduleDayBox key={day.dateIso} day={day} />
+            <ScheduleDayBox key={day.dateIso} day={day} nerdMode={nerdMode} />
           ))}
         </div>
       )}

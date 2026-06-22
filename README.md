@@ -14,6 +14,17 @@ Live World Cup 2026 progress for all **104 matches**. Scores and statuses come f
 - **Live-aware polling** — refreshes every minute during live matches and for ~30 minutes after; otherwise waits until the next kickoff
 - **Kickoff-based fallback** — live games still show if the API is down or delayed
 - **Mock mode** — schedule + time-based status without an API key
+- **Nerd Mode** — RPG-style EXP gauges (Lv 1–99) and labels; toggle in the header (saved in `localStorage`)
+
+## Nerd Mode
+
+Toggle **Nerd Mode** in the page header to swap tournament percentages for RPG-style leveling:
+
+- **0% progress → Lv 1** (0 EXP); **100% → Lv 99** (2,452,783 EXP)
+- Match completion and campaign time each have their own EXP track and intra-level gauge
+- Labels switch to RPG wording (Quest Progress, Active Encounter, Sync, etc.)
+
+Level thresholds come from [`exp-levels.txt`](exp-levels.txt). The toggle persists in your browser via `localStorage` (`wc-progress-nerd-mode`).
 
 ## Setup
 

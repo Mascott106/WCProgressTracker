@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { FormattedDate } from "@/components/FormattedDate";
+import { ExpGauge } from "@/components/ExpGauge";
+import { percentToLevelProgress } from "@/lib/exp-levels";
+import { label } from "@/lib/nerd-mode-labels";
+import { playLevelUpSound } from "@/lib/play-levelup";
 
 interface TimeProgressBarProps {
   startAt: string;
   endAt: string;
+  nerdMode?: boolean;
 }
 
 function computePercent(now: number, startAt: string, endAt: string): number {
@@ -16,28 +21,95 @@ function computePercent(now: number, startAt: string, endAt: string): number {
   return ((now - start) / (end - start)) * 100;
 }
 
-export function TimeProgressBar({ startAt, endAt }: TimeProgressBarProps) {
+export function TimeProgressBar({
+  startAt,
+  endAt,
+  nerdMode = false,
+}: TimeProgressBarProps) {
   const [percent, setPercent] = useState(() =>
     computePercent(Date.now(), startAt, endAt),
   );
 
   useEffect(() => {
     let frame = 0;
+    let active = true;
+    let seeded = false;
+    let prevLevel: number | null = null;
+
     const tick = () => {
-      setPercent(computePercent(Date.now(), startAt, endAt));
-      frame = requestAnimationFrame(tick);
+      if (!active) return;
+      const nextPercent = computePercent(Date.now(), startAt, endAt);
+      setPercent(nextPercent);
+
+      if (nerdMode) {
+        const clamped = Math.min(100, Math.max(0, nextPercent));
+        const level = percentToLevelProgress(clamped).level;
+        if (seeded && prevLevel !== null && level > prevLevel) {
+          playLevelUpSound();
+        }
+        seeded = true;
+        prevLevel = level;
+      }
+
+      if (active) {
+        frame = requestAnimationFrame(tick);
+      }
     };
+
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [startAt, endAt]);
+
+    return () => {
+      active = false;
+      cancelAnimationFrame(frame);
+    };
+  }, [startAt, endAt, nerdMode]);
 
   const clampedPercent = Math.min(100, Math.max(0, percent));
+
+  if (nerdMode) {
+    const progress = percentToLevelProgress(clampedPercent);
+    return (
+      <div className="shrink-0 space-y-2 py-1">
+        <ExpGauge
+          percent={clampedPercent}
+          sectionLabel={label("timeSection", true)}
+          accent="time"
+          size="sm"
+          progress={progress}
+          showBar={false}
+        />
+        <ExpGauge
+          percent={clampedPercent}
+          sectionLabel={label("timeSection", true)}
+          accent="time"
+          size="sm"
+          progress={progress}
+          fillMode="overall"
+          showHeader={false}
+        />
+        <div className="flex justify-between text-[10px] text-muted/50">
+          <FormattedDate iso={startAt} dateOnly />
+          <FormattedDate iso={endAt} dateOnly />
+        </div>
+        <ExpGauge
+          percent={clampedPercent}
+          sectionLabel={label("currentLevelSection", true)}
+          accent="time"
+          size="sm"
+          progress={progress}
+          fillMode="intraLevel"
+          headerStyle="compact"
+          showHeader
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="shrink-0 space-y-1.5 py-1">
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-          Real time
+          {label("timeSection", false)}
         </span>
         <div className="flex items-baseline gap-1">
           <span className="font-mono text-xl font-bold tabular-nums tracking-tight text-sky-400 sm:text-2xl">

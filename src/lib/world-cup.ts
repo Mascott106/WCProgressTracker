@@ -26,6 +26,8 @@ function toSummary(match: StaticMatch, now: number): MatchSummary {
     awayTeam: match.awayTeam,
     homeGoals: match.homeGoals,
     awayGoals: match.awayGoals,
+    venue: match.venue,
+    city: match.city,
     foxChannel,
     onTubi,
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import type { BracketData, BracketSlot } from "@/lib/types";
+import { formatMatchVenue } from "@/lib/types";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
 
@@ -92,6 +93,12 @@ function BracketMatch({
         onTubi={slot.onTubi}
         className="mb-0.5"
       />
+      <p
+        className="mb-0.5 truncate text-[8px] text-muted/45"
+        title={formatMatchVenue(slot)}
+      >
+        {formatMatchVenue(slot)}
+      </p>
       <TeamLine
         name={slot.homeTeam}
         goals={slot.homeGoals}

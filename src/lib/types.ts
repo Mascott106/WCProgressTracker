@@ -43,6 +43,8 @@ export interface MatchSummary {
   awayTeam: string;
   homeGoals: number | null;
   awayGoals: number | null;
+  venue: string;
+  city: string;
   foxChannel: FoxChannel;
   onTubi: boolean;
 }
@@ -56,6 +58,8 @@ export interface BracketSlot {
   status: string;
   isLive: boolean;
   isFinished: boolean;
+  venue: string;
+  city: string;
   foxChannel: FoxChannel;
   onTubi: boolean;
 }
@@ -172,6 +176,12 @@ export function hasMatchScore(
   match: Pick<MatchSummary, "homeGoals" | "awayGoals">,
 ): boolean {
   return match.homeGoals !== null && match.awayGoals !== null;
+}
+
+export function formatMatchVenue(
+  match: Pick<MatchSummary, "venue" | "city">,
+): string {
+  return `${match.venue}, ${match.city}`;
 }
 
 /** Winning team name, or null if undecided / draw / no score. */

@@ -10,6 +10,7 @@ import {
 } from "@/lib/nerd-mode-labels";
 import { SCHEDULE_DAY_TIMEZONE } from "@/lib/schedule-day";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
+import { formatMatchVenue } from "@/lib/types";
 
 function shortRound(round: string): string {
   const group = round.match(/\(Group ([A-L])\)/);
@@ -19,20 +20,28 @@ function shortRound(round: string): string {
 
 function ScheduleRow({ match }: { match: MatchSummary }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-border/25 py-2 last:border-b-0 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)_4.5rem] sm:items-center sm:gap-x-2 sm:py-1.5">
+    <div className="flex flex-col gap-1 border-b border-border/25 py-2 last:border-b-0 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3 sm:py-1.5">
       <FormattedDate
         iso={match.date}
         timeOnly
         className="text-[11px] tabular-nums text-muted/70"
       />
-      <p className="text-sm font-medium leading-snug">
-        <TeamName name={match.homeTeam} />
-        <span className="mx-1.5 font-normal text-muted/50">vs</span>
-        <TeamName name={match.awayTeam} />
-      </p>
+      <div className="min-w-0">
+        <p className="text-sm font-medium leading-snug">
+          <TeamName name={match.homeTeam} />
+          <span className="mx-1.5 font-normal text-muted/50">vs</span>
+          <TeamName name={match.awayTeam} />
+        </p>
+        <p
+          className="truncate text-[10px] text-muted/50"
+          title={formatMatchVenue(match)}
+        >
+          {formatMatchVenue(match)}
+        </p>
+      </div>
       <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-0.5">
         <BroadcastLabel foxChannel={match.foxChannel} onTubi={match.onTubi} />
-        <span className="truncate text-[10px] text-muted/60 sm:text-right">
+        <span className="truncate text-[10px] text-muted/60 sm:max-w-[5.5rem] sm:text-right">
           {shortRound(match.round)}
         </span>
       </div>

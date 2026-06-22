@@ -2,6 +2,7 @@
 
 import type { MatchSummary } from "@/lib/types";
 import {
+  formatMatchVenue,
   getMatchWinnerTeam,
   hasMatchScore,
 } from "@/lib/types";
@@ -45,38 +46,46 @@ export function MatchRow({
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span
-          className={`min-w-0 flex-1 truncate text-sm font-medium ${
-            homeWins
-              ? "font-semibold text-accent"
-              : awayWins
-                ? "text-muted/50"
-                : ""
-          }`}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span
+            className={`min-w-0 flex-1 truncate text-sm font-medium ${
+              homeWins
+                ? "font-semibold text-accent"
+                : awayWins
+                  ? "text-muted/50"
+                  : ""
+            }`}
+          >
+            <TeamName name={match.homeTeam} />
+          </span>
+          <span className="shrink-0 text-muted/40">
+            {hasScore ? (
+              <span className="font-mono text-sm font-bold tabular-nums">
+                {match.homeGoals}–{match.awayGoals}
+              </span>
+            ) : (
+              "vs"
+            )}
+          </span>
+          <span
+            className={`min-w-0 flex-1 truncate text-sm font-medium ${
+              awayWins
+                ? "font-semibold text-accent"
+                : homeWins
+                  ? "text-muted/50"
+                  : ""
+            }`}
+          >
+            <TeamName name={match.awayTeam} />
+          </span>
+        </div>
+        <p
+          className="truncate text-[10px] text-muted/50"
+          title={formatMatchVenue(match)}
         >
-          <TeamName name={match.homeTeam} />
-        </span>
-        <span className="shrink-0 text-muted/40">
-          {hasScore ? (
-            <span className="font-mono text-sm font-bold tabular-nums">
-              {match.homeGoals}–{match.awayGoals}
-            </span>
-          ) : (
-            "vs"
-          )}
-        </span>
-        <span
-          className={`min-w-0 flex-1 truncate text-sm font-medium ${
-            awayWins
-              ? "font-semibold text-accent"
-              : homeWins
-                ? "text-muted/50"
-                : ""
-          }`}
-        >
-          <TeamName name={match.awayTeam} />
-        </span>
+          {formatMatchVenue(match)}
+        </p>
       </div>
 
       <span className="hidden shrink-0 truncate text-[10px] text-muted/50 xl:inline xl:max-w-[9rem]">

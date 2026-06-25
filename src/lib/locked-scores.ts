@@ -6,7 +6,6 @@ import { hasManualScore } from "./manual-scores";
 import {
   FixturesFile,
   isFinished,
-  statusLabel,
   type MatchSummary,
 } from "./types";
 
@@ -70,9 +69,9 @@ function applyLockedRecord(match: MatchSummary, locked: LockedMatchScore): Match
 }
 
 /**
- * Delay accepting final scores until 30 minutes after expected full time so
- * API corrections (e.g. VAR reversals) can settle. Locked scores are written
- * once and never updated.
+ * Apply persisted score locks. Finished matches show API status immediately;
+ * scores are written to disk only after the grace period so VAR corrections
+ * can settle. Locked scores are never updated.
  */
 export function applyScoreLocks(
   summaries: MatchSummary[],
@@ -98,11 +97,7 @@ export function applyScoreLocks(
     }
 
     if (!isPastScoreLockTime(match.date, now)) {
-      return {
-        ...match,
-        status: "LIVE",
-        statusLong: statusLabel("LIVE"),
-      };
+      return match;
     }
 
     store[key] = toLockedRecord(match, now);

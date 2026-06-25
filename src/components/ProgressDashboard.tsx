@@ -78,7 +78,7 @@ export function ProgressDashboard() {
         />
         <MatchPanel
           title={label("panelLast", nerdMode)}
-          matches={data.lastCompleted ? [data.lastCompleted] : []}
+          matches={data.lastCompleted}
           variant="default"
           highlightWinner
           emptyText={label("emptyLast", nerdMode)}

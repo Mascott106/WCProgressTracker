@@ -115,7 +115,7 @@ export interface ProgressData {
   remainingGames: number;
   progressPercent: number;
   timeProgress: TimeProgress;
-  lastCompleted: MatchSummary | null;
+  lastCompleted: MatchSummary[];
   liveMatches: MatchSummary[];
   upcomingDays: ScheduleDay[];
   bracket: BracketData;

@@ -115,7 +115,7 @@ export function buildProgressData(
       endAt: new Date(end).toISOString(),
       percent: getTimeProgressPercent(now, start, end),
     },
-    lastCompleted: completedSorted[0] ?? null,
+    lastCompleted: completedSorted.slice(0, 2),
     liveMatches: live,
     upcomingDays,
     bracket: buildBracket(resolved, now),

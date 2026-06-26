@@ -1,7 +1,7 @@
 /** Labels used in fixtures.json before teams are known. */
 const UNDETERMINED_PATTERNS = [
   /^Group [A-L] Winners?$/i,
-  /^Group [A-L] Runners Up$/i,
+  /^Group [A-L] Runners? Up$/i,
   /^Match \d+ Winner$/i,
   /^Match \d+ Loser$/i,
   /^Best 3rd\b/i,

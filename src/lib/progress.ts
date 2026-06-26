@@ -1,3 +1,4 @@
+import { applyGroupPlaceholders } from "./group-standings";
 import { buildBracket } from "./bracket";
 import { applyScoreLocks } from "./locked-scores";
 import { applyManualScores } from "./manual-scores";
@@ -77,7 +78,9 @@ export function buildProgressData(
   now = Date.now(),
 ): ProgressData {
   const resolved = applyManualScores(
-    applyScoreLocks(applyScheduleStatuses(summaries, now), now),
+    applyGroupPlaceholders(
+      applyScoreLocks(applyScheduleStatuses(summaries, now), now),
+    ),
   );
   const completed = resolved.filter((m) => isFinished(m.status));
   const live = resolved.filter((m) => isLive(m.status));

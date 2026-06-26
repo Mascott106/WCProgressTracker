@@ -119,7 +119,8 @@ export function MatchPanel({
   highlightWinner?: boolean;
 }) {
   const isLive = variant === "live";
-  const featured = highlightWinner && matches.length === 1 ? matches[0] : null;
+  const featured =
+    highlightWinner && matches.length > 0 ? matches[0] : null;
   const winner = featured ? getMatchWinnerTeam(featured) : null;
   const hasScore = featured ? hasMatchScore(featured) : false;
 

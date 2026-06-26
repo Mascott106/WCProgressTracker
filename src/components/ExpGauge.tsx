@@ -41,6 +41,8 @@ interface ExpGaugeProps {
   showBar?: boolean;
   /** When false, render only the bar (header omitted). */
   showHeader?: boolean;
+  /** Vertical tick positions on the bar (percent). Defaults to 25/50/75. */
+  barMarks?: number[];
 }
 
 export function ExpGauge({
@@ -53,6 +55,7 @@ export function ExpGauge({
   headerStyle = "full",
   showBar = true,
   showHeader = true,
+  barMarks = [25, 50, 75],
 }: ExpGaugeProps) {
   const progress = progressProp ?? percentToLevelProgress(percent);
   const styles = ACCENT_STYLES[accent];
@@ -110,7 +113,7 @@ export function ExpGauge({
             isLarge ? "h-8 rounded-xl" : "h-5"
           }`}
         >
-          {[25, 50, 75].map((mark) => (
+          {barMarks.map((mark) => (
             <div
               key={mark}
               className={`absolute z-0 w-px bg-border/40 ${

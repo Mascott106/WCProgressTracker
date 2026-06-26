@@ -1,6 +1,7 @@
 "use client";
 
 import { label } from "@/lib/nerd-mode-labels";
+import { matchProgressKnockoutPercent } from "@/lib/types";
 import { ExpGauge } from "@/components/ExpGauge";
 
 interface ProgressBarProps {
@@ -11,6 +12,9 @@ interface ProgressBarProps {
   total: number;
   nerdMode?: boolean;
 }
+
+const KNOCKOUT_START_PERCENT = matchProgressKnockoutPercent();
+const MATCH_BAR_MARKS = [25, KNOCKOUT_START_PERCENT, 75];
 
 export function ProgressBar({
   percent,
@@ -74,12 +78,9 @@ export function ProgressBar({
             size="lg"
             fillMode="overall"
             showHeader={false}
+            barMarks={MATCH_BAR_MARKS}
           />
-          <div className="flex justify-between text-[10px] text-muted/50">
-            <span>{label("matchAxisStart", true)}</span>
-            <span>{label("matchAxisMid", true)}</span>
-            <span>{label("matchAxisEnd", true)}</span>
-          </div>
+          <MatchProgressAxis nerdMode />
         </>
       ) : (
         <>
@@ -88,7 +89,7 @@ export function ProgressBar({
               className="progress-glow absolute inset-y-0 left-0 rounded-xl bg-gradient-to-r from-accent-dim via-accent to-yellow-300 transition-all duration-1000 ease-out"
               style={{ width: `${clampedPercent}%` }}
             />
-            {[25, 50, 75].map((mark) => (
+            {MATCH_BAR_MARKS.map((mark) => (
               <div
                 key={mark}
                 className="absolute top-1 bottom-1 w-px bg-border/50"
@@ -97,13 +98,28 @@ export function ProgressBar({
             ))}
           </div>
 
-          <div className="flex justify-between text-[10px] text-muted/50">
-            <span>{label("matchAxisStart", false)}</span>
-            <span>{label("matchAxisMid", false)}</span>
-            <span>{label("matchAxisEnd", false)}</span>
-          </div>
+          <MatchProgressAxis nerdMode={false} />
         </>
       )}
+    </div>
+  );
+}
+
+function MatchProgressAxis({ nerdMode }: { nerdMode: boolean }) {
+  return (
+    <div className="relative h-3 text-[10px] text-muted/50">
+      <span className="absolute left-0 top-0">
+        {label("matchAxisStart", nerdMode)}
+      </span>
+      <span
+        className="absolute top-0 -translate-x-1/2 whitespace-nowrap"
+        style={{ left: `${KNOCKOUT_START_PERCENT}%` }}
+      >
+        {label("matchAxisMid", nerdMode)}
+      </span>
+      <span className="absolute right-0 top-0">
+        {label("matchAxisEnd", nerdMode)}
+      </span>
     </div>
   );
 }

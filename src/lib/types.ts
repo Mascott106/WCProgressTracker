@@ -8,6 +8,16 @@ export const LIVE_STATUSES = new Set(["1H", "HT", "2H", "ET", "BT", "P", "LIVE"]
 
 export const KNOCKOUT_FIRST_MATCH_ID = 73;
 
+/** Group-stage matches (ids 1–72) before Round of 32. */
+export const GROUP_STAGE_GAMES = KNOCKOUT_FIRST_MATCH_ID - 1;
+
+/** Match-count progress (0–100) when knockout begins. */
+export function matchProgressKnockoutPercent(
+  totalGames = TOTAL_GAMES,
+): number {
+  return (GROUP_STAGE_GAMES / totalGames) * 100;
+}
+
 export const KNOCKOUT_ROUND_ORDER = [
   "Round of 32",
   "Round of 16",

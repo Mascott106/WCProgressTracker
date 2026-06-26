@@ -51,13 +51,18 @@ export function rankThirdPlaceCandidates(
   return candidates;
 }
 
+export interface ThirdPlaceSlotAssignment {
+  team: string;
+  thirdGroup: string;
+}
+
 /**
- * Map group-winner letter (A,B,D,E,G,I,K,L) → third-placed team name.
+ * Map group-winner letter (A,B,D,E,G,I,K,L) → qualifying third-placed team.
  * Uses FIFA Annex C once all group-stage thirds are final.
  */
 export function buildThirdPlaceAssignments(
   tables: Map<string, GroupStandingRow[]>,
-): Map<string, string> | null {
+): Map<string, ThirdPlaceSlotAssignment> | null {
   const ranked = rankThirdPlaceCandidates(tables);
   if (!ranked) return null;
 
@@ -70,14 +75,41 @@ export function buildThirdPlaceAssignments(
   if (!byWinner) return null;
 
   const teamByGroup = new Map(qualifying.map((q) => [q.group, q.row.team]));
-  const assignment = new Map<string, string>();
+  const assignment = new Map<string, ThirdPlaceSlotAssignment>();
 
   for (const [winner, thirdGroup] of Object.entries(byWinner)) {
     const team = teamByGroup.get(thirdGroup);
-    if (team) assignment.set(winner, team);
+    if (team) assignment.set(winner, { team, thirdGroup });
   }
 
   return assignment.size === ANNEX_C_WINNERS.length ? assignment : null;
+}
+
+/** Parse "Best 3rd (A/B/C/D/F)" → Set of eligible group letters. */
+export function parseBestThirdEligibleGroups(
+  placeholder: string,
+): Set<string> | null {
+  const match = placeholder.trim().match(BEST_THIRD_RE);
+  if (!match) return null;
+  return new Set(match[1]!.split("/").map((g) => g.toUpperCase()));
+}
+
+/** Resolve a Best 3rd placeholder when Annex C assigns a third from an allowed group. */
+export function resolveBestThirdPlaceholder(
+  placeholder: string,
+  assignments: Map<string, ThirdPlaceSlotAssignment> | null,
+  opponentWinnerGroup: string | null,
+): string {
+  if (!parseBestThirdEligibleGroups(placeholder)) return placeholder;
+  if (!assignments || !opponentWinnerGroup) return placeholder;
+
+  const slot = assignments.get(opponentWinnerGroup);
+  if (!slot) return placeholder;
+
+  const allowed = parseBestThirdEligibleGroups(placeholder)!;
+  if (!allowed.has(slot.thirdGroup)) return placeholder;
+
+  return slot.team;
 }
 
 export const BEST_THIRD_RE = /^Best 3rd \(([A-L](?:\/[A-L])*)\)$/i;

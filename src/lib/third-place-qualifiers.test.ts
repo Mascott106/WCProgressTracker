@@ -2,6 +2,8 @@ import { applyGroupPlaceholders, type GroupStandingRow } from "./group-standings
 import {
   buildThirdPlaceAssignments,
   rankThirdPlaceCandidates,
+  resolveBestThirdPlaceholder,
+  type ThirdPlaceSlotAssignment,
 } from "./third-place-qualifiers";
 import type { MatchSummary } from "./types";
 
@@ -44,7 +46,8 @@ const qualifyingGroups = ranked!.slice(0, 8).map((q) => q.group).sort().join("")
 assert(qualifyingGroups === "EFGHIJKL", `expected EFGHIJKL combo, got ${qualifyingGroups}`);
 
 const assignments = buildThirdPlaceAssignments(tables);
-assert(assignments?.get("E") === "Third F", "1E should face Third F per Annex C");
+assert(assignments?.get("E")?.team === "Third F", "1E should face Third F per Annex C");
+assert(assignments?.get("E")?.thirdGroup === "F", "1E opponent is group F third");
 
 const match74: MatchSummary = {
   id: 74,
@@ -66,5 +69,17 @@ const match74: MatchSummary = {
 const apiStandings = Object.fromEntries(tables);
 const [resolved] = applyGroupPlaceholders([match74], { apiStandings });
 assert(resolved!.awayTeam === "Third F", "match 74 Best 3rd resolves to Third F");
+
+const badAssignments = new Map<string, ThirdPlaceSlotAssignment>([
+  ["E", { team: "Third H", thirdGroup: "H" }],
+]);
+assert(
+  resolveBestThirdPlaceholder(
+    "Best 3rd (A/B/C/D/F)",
+    badAssignments,
+    "E",
+  ) === "Best 3rd (A/B/C/D/F)",
+  "reject third from group H when slot only allows A/B/C/D/F",
+);
 
 console.log("third-place-qualifiers tests passed");

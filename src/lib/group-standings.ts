@@ -3,6 +3,8 @@ import { isUndeterminedTeamName } from "./placeholders";
 import {
   buildThirdPlaceAssignments,
   isBestThirdPlaceholder,
+  resolveBestThirdPlaceholder,
+  type ThirdPlaceSlotAssignment,
 } from "./third-place-qualifiers";
 import { FixturesFile, isFinished, type MatchSummary } from "./types";
 
@@ -191,12 +193,15 @@ function buildGroupTables(
 function resolveGroupLabel(
   name: string,
   tables: Map<string, GroupStandingRow[]>,
-  thirdByWinner: Map<string, string> | null,
+  thirdByWinner: Map<string, ThirdPlaceSlotAssignment> | null,
   opponentWinnerGroup: string | null,
 ): string {
   if (isBestThirdPlaceholder(name)) {
-    if (!thirdByWinner || !opponentWinnerGroup) return name;
-    return thirdByWinner.get(opponentWinnerGroup) ?? name;
+    return resolveBestThirdPlaceholder(
+      name,
+      thirdByWinner,
+      opponentWinnerGroup,
+    );
   }
 
   const winner = name.match(GROUP_WINNER_RE);

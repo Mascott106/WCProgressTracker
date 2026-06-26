@@ -1,5 +1,6 @@
 import fixturesData from "@/data/fixtures.json";
 import { getBroadcast } from "./broadcast";
+import type { ApiGroupStandings } from "./group-standings";
 import { buildProgressData } from "./progress";
 import {
   isUndeterminedTeamName,
@@ -196,6 +197,9 @@ export function mergeExternalMatches(
 export function buildProgressFromExternal(
   external: ExternalMatch[],
   now = Date.now(),
+  apiStandings?: ApiGroupStandings,
 ) {
-  return buildProgressData(mergeExternalMatches(external), now);
+  return buildProgressData(mergeExternalMatches(external), now, {
+    apiStandings,
+  });
 }

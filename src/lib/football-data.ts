@@ -16,6 +16,11 @@ import {
   mergeExternalMatches,
   type ExternalMatch,
 } from "./merge-api";
+import {
+  parseApiStandings,
+  type ApiGroupStandingBlock,
+  type ApiGroupStandings,
+} from "./group-standings";
 import type { MatchSummary, ProgressData } from "./types";
 import { statusLabel, TOTAL_GAMES } from "./types";
 
@@ -51,6 +56,8 @@ export interface ProgressApiResponse {
 
 interface CacheEntry {
   matches: ExternalMatch[];
+  /** Official group tables from football-data.org (optional for older cache files). */
+  standings?: ApiGroupStandings;
   fetchedAt: number;
   expiresAt: number;
   requestsRemaining: number | null;
@@ -80,6 +87,12 @@ interface FootballDataMatch {
 
 interface FootballDataMatchesResponse {
   matches: FootballDataMatch[];
+  message?: string;
+  errorCode?: number;
+}
+
+interface FootballDataStandingsResponse {
+  standings?: ApiGroupStandingBlock[];
   message?: string;
   errorCode?: number;
 }
@@ -261,6 +274,20 @@ function canFetchUpstream(now: number, requestsRemaining: number | null): boolea
   return true;
 }
 
+function parseRateLimitHeaders(res: Response): {
+  requestsRemaining: number | null;
+  requestResetAt: string | null;
+} {
+  const remaining = res.headers.get("X-Requests-Available-Minute");
+  const requestsRemaining = remaining ? Number(remaining) : null;
+  const resetSeconds = res.headers.get("X-RequestCounter-Reset");
+  const requestResetAt =
+    resetSeconds && Number(resetSeconds) > 0
+      ? new Date(Date.now() + Number(resetSeconds) * 1000).toISOString()
+      : null;
+  return { requestsRemaining, requestResetAt };
+}
+
 async function fetchMatches(apiKey: string): Promise<{
   matches: ExternalMatch[];
   requestsRemaining: number | null;
@@ -272,13 +299,7 @@ async function fetchMatches(apiKey: string): Promise<{
     cache: "no-store",
   });
 
-  const remaining = res.headers.get("X-Requests-Available-Minute");
-  const requestsRemaining = remaining ? Number(remaining) : null;
-  const resetSeconds = res.headers.get("X-RequestCounter-Reset");
-  const requestResetAt =
-    resetSeconds && Number(resetSeconds) > 0
-      ? new Date(Date.now() + Number(resetSeconds) * 1000).toISOString()
-      : null;
+  const { requestsRemaining, requestResetAt } = parseRateLimitHeaders(res);
   const body = (await res.json()) as FootballDataMatchesResponse;
 
   if (res.status === 429) {
@@ -304,13 +325,65 @@ async function fetchMatches(apiKey: string): Promise<{
   };
 }
 
+async function fetchStandings(apiKey: string): Promise<ApiGroupStandings> {
+  const url = `${API_BASE}/competitions/${WORLD_CUP_CODE}/standings?season=${WORLD_CUP_SEASON}`;
+  const res = await fetch(url, {
+    headers: { "X-Auth-Token": apiKey },
+    cache: "no-store",
+  });
+
+  const body = (await res.json()) as FootballDataStandingsResponse;
+
+  if (res.status === 429) {
+    rateLimitUntil = Date.now() + RATE_LIMIT_BACKOFF_MS;
+    throw new Error("Rate limit exceeded — try again in a few minutes");
+  }
+
+  if (!res.ok) {
+    const msg =
+      body.message ??
+      (typeof body === "object" && "error" in body
+        ? String((body as { error: string }).error)
+        : `Standings API error ${res.status}`);
+    throw new Error(msg);
+  }
+
+  lastUpstreamFetchAt = Date.now();
+  return parseApiStandings(body.standings ?? []);
+}
+
+async function fetchFromApi(apiKey: string): Promise<{
+  matches: ExternalMatch[];
+  standings: ApiGroupStandings;
+  requestsRemaining: number | null;
+  requestResetAt: string | null;
+}> {
+  const { matches, requestsRemaining, requestResetAt } =
+    await fetchMatches(apiKey);
+
+  let standings: ApiGroupStandings = {};
+  try {
+    standings = await fetchStandings(apiKey);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "standings fetch failed";
+    console.warn(`[wc-progress] Standings fetch skipped: ${message}`);
+  }
+
+  return { matches, standings, requestsRemaining, requestResetAt };
+}
+
 function toResponse(
   entry: CacheEntry,
   source: ProgressApiMeta["source"],
   now: number,
   extra?: Partial<ProgressApiMeta>,
 ): ProgressApiResponse {
-  const data = buildProgressFromExternal(entry.matches, now);
+  const data = buildProgressFromExternal(
+    entry.matches,
+    now,
+    entry.standings,
+  );
   return {
     data: {
       ...data,
@@ -397,10 +470,13 @@ export async function getProgressFromApi(
     }
 
     try {
-      const { matches, requestsRemaining, requestResetAt } = await fetchMatches(apiKey);
+      const { matches, standings, requestsRemaining, requestResetAt } =
+        await fetchFromApi(apiKey);
       const summaries = mergeExternalMatches(matches);
       entry = {
         matches,
+        standings:
+          Object.keys(standings).length > 0 ? standings : entry?.standings,
         fetchedAt: now,
         expiresAt: now + computeCacheTtl(summaries, now),
         requestsRemaining,

@@ -1,4 +1,7 @@
-import { applyGroupPlaceholders } from "./group-standings";
+import {
+  applyGroupPlaceholders,
+  type ApiGroupStandings,
+} from "./group-standings";
 import { buildBracket } from "./bracket";
 import { applyScoreLocks } from "./locked-scores";
 import { applyManualScores } from "./manual-scores";
@@ -73,13 +76,20 @@ function getScheduledMatchesForWindow(
     );
 }
 
+export interface BuildProgressOptions {
+  /** Official group tables from football-data.org (overrides computed standings). */
+  apiStandings?: ApiGroupStandings;
+}
+
 export function buildProgressData(
   summaries: MatchSummary[],
   now = Date.now(),
+  options?: BuildProgressOptions,
 ): ProgressData {
   const resolved = applyManualScores(
     applyGroupPlaceholders(
       applyScoreLocks(applyScheduleStatuses(summaries, now), now),
+      { apiStandings: options?.apiStandings },
     ),
   );
   const completed = resolved.filter((m) => isFinished(m.status));

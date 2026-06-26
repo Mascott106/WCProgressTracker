@@ -5,7 +5,15 @@ import { FixturesFile, isFinished, type MatchSummary } from "./types";
 const GROUP_WINNER_RE = /^Group ([A-L]) Winners?$/i;
 const GROUP_RUNNER_UP_RE = /^Group ([A-L]) Runners? Up$/i;
 
-interface Standing {
+function apiGroupLetter(
+  apiGroup: string | null | undefined,
+): string | null {
+  if (!apiGroup) return null;
+  const match = apiGroup.match(/^GROUP_([A-L])$/i);
+  return match ? match[1]!.toUpperCase() : null;
+}
+
+export interface GroupStandingRow {
   team: string;
   played: number;
   points: number;
@@ -13,6 +21,23 @@ interface Standing {
   ga: number;
   gd: number;
 }
+
+/** One group's table block from football-data.org /standings. */
+export interface ApiGroupStandingBlock {
+  type: string;
+  group: string | null;
+  table: {
+    position: number;
+    team: { name: string };
+    playedGames: number;
+    points: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    goalDifference: number;
+  }[];
+}
+
+export type ApiGroupStandings = Record<string, GroupStandingRow[]>;
 
 const groupStageMeta = (() => {
   const matches = (fixturesData as FixturesFile).matches.filter(
@@ -33,12 +58,12 @@ const groupStageMeta = (() => {
   return { matches, teamsByGroup, groupByMatchId };
 })();
 
-function emptyStanding(team: string): Standing {
+function emptyStanding(team: string): GroupStandingRow {
   return { team, played: 0, points: 0, gf: 0, ga: 0, gd: 0 };
 }
 
 function addResult(
-  table: Map<string, Standing>,
+  table: Map<string, GroupStandingRow>,
   home: string,
   away: string,
   homeGoals: number,
@@ -67,14 +92,40 @@ function addResult(
   awayRow.gd = awayRow.gf - awayRow.ga;
 }
 
+/** Normalize football-data.org standings into group letter → sorted table rows. */
+export function parseApiStandings(
+  blocks: ApiGroupStandingBlock[],
+): ApiGroupStandings {
+  const result: ApiGroupStandings = {};
+
+  for (const block of blocks) {
+    if (block.type !== "TOTAL") continue;
+    const letter = apiGroupLetter(block.group);
+    if (!letter || block.table.length === 0) continue;
+
+    result[letter] = [...block.table]
+      .sort((a, b) => a.position - b.position)
+      .map((row) => ({
+        team: row.team.name,
+        played: row.playedGames,
+        points: row.points,
+        gf: row.goalsFor,
+        ga: row.goalsAgainst,
+        gd: row.goalDifference,
+      }));
+  }
+
+  return result;
+}
+
 function computeGroupTables(
   summaries: MatchSummary[],
-): Map<string, Standing[]> {
+): Map<string, GroupStandingRow[]> {
   const byId = new Map(summaries.map((m) => [m.id, m]));
-  const tables = new Map<string, Map<string, Standing>>();
+  const tables = new Map<string, Map<string, GroupStandingRow>>();
 
   for (const [group, teams] of groupStageMeta.teamsByGroup) {
-    const table = new Map<string, Standing>();
+    const table = new Map<string, GroupStandingRow>();
     for (const team of teams) {
       table.set(team, emptyStanding(team));
     }
@@ -98,7 +149,7 @@ function computeGroupTables(
     );
   }
 
-  const sorted = new Map<string, Standing[]>();
+  const sorted = new Map<string, GroupStandingRow[]>();
   for (const [group, table] of tables) {
     sorted.set(
       group,
@@ -115,9 +166,27 @@ function computeGroupTables(
   return sorted;
 }
 
+function buildGroupTables(
+  summaries: MatchSummary[],
+  apiStandings?: ApiGroupStandings,
+): Map<string, GroupStandingRow[]> {
+  const computed = computeGroupTables(summaries);
+  if (!apiStandings || Object.keys(apiStandings).length === 0) {
+    return computed;
+  }
+
+  const merged = new Map(computed);
+  for (const [group, rows] of Object.entries(apiStandings)) {
+    if (rows.length > 0) {
+      merged.set(group.toUpperCase(), rows);
+    }
+  }
+  return merged;
+}
+
 function resolveGroupLabel(
   name: string,
-  tables: Map<string, Standing[]>,
+  tables: Map<string, GroupStandingRow[]>,
 ): string {
   const winner = name.match(GROUP_WINNER_RE);
   if (winner) {
@@ -139,8 +208,9 @@ function resolveGroupLabel(
 /** Replace Group X Winners / Runners Up labels using group-stage results. */
 export function applyGroupPlaceholders(
   summaries: MatchSummary[],
+  options?: { apiStandings?: ApiGroupStandings },
 ): MatchSummary[] {
-  const tables = computeGroupTables(summaries);
+  const tables = buildGroupTables(summaries, options?.apiStandings);
 
   return summaries.map((match) => {
     const homeTeam = isUndeterminedTeamName(match.homeTeam)

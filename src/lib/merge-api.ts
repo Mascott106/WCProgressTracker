@@ -15,6 +15,12 @@ import {
 
 /** Normalized match from an external API, ready to merge onto our schedule. */
 export interface ExternalMatch {
+  /** football-data.org match id (stable across fetches). */
+  apiId?: number;
+  /** e.g. GROUP_STAGE, LAST_32, QUARTER_FINALS */
+  stage?: string | null;
+  /** e.g. GROUP_A — null for knockout matches */
+  group?: string | null;
   date: string;
   status: string;
   statusLong: string;
@@ -26,10 +32,80 @@ export interface ExternalMatch {
 
 const KICKOFF_TOLERANCE_MS = 90 * 60 * 1000;
 
+/** Map our fixture id to the stage string football-data.org uses. */
+export function expectedApiStage(staticMatch: StaticMatch): string | null {
+  if (staticMatch.id <= 72) return "GROUP_STAGE";
+  if (staticMatch.id <= 88) return "LAST_32";
+  if (staticMatch.id <= 96) return "LAST_16";
+  if (staticMatch.id <= 100) return "QUARTER_FINALS";
+  if (staticMatch.id <= 102) return "SEMI_FINALS";
+  if (staticMatch.id === 103) return "THIRD_PLACE";
+  if (staticMatch.id === 104) return "FINAL";
+  return null;
+}
+
+/** Parse GROUP_A → A for comparison with fixtures.json group letters. */
+export function apiGroupLetter(
+  apiGroup: string | null | undefined,
+): string | null {
+  if (!apiGroup) return null;
+  const match = apiGroup.match(/^GROUP_([A-L])$/i);
+  return match ? match[1]!.toUpperCase() : null;
+}
+
 function kickoffMatches(a: string, b: string): boolean {
   const aMs = new Date(a).getTime();
   const bMs = new Date(b).getTime();
   return Math.abs(aMs - bMs) <= KICKOFF_TOLERANCE_MS;
+}
+
+function stageMatches(staticMatch: StaticMatch, api: ExternalMatch): boolean {
+  const expected = expectedApiStage(staticMatch);
+  if (!expected || !api.stage) return true;
+  return api.stage === expected;
+}
+
+function groupMatches(staticMatch: StaticMatch, api: ExternalMatch): boolean {
+  const staticGroup = staticMatch.group?.toUpperCase() ?? null;
+  const apiGroup = apiGroupLetter(api.group);
+  if (!staticGroup || !apiGroup) return true;
+  return staticGroup === apiGroup;
+}
+
+function matchCandidateScore(
+  staticMatch: StaticMatch,
+  api: ExternalMatch,
+): number {
+  let score = 0;
+
+  const expected = expectedApiStage(staticMatch);
+  if (expected && api.stage === expected) score += 8;
+
+  const staticGroup = staticMatch.group?.toUpperCase() ?? null;
+  const apiGroup = apiGroupLetter(api.group);
+  if (staticGroup && apiGroup && staticGroup === apiGroup) score += 8;
+
+  if (
+    api.homeTeam &&
+    !isUndeterminedTeamName(staticMatch.homeTeam) &&
+    teamsMatch(api.homeTeam, staticMatch.homeTeam)
+  ) {
+    score += 4;
+  }
+  if (
+    api.awayTeam &&
+    !isUndeterminedTeamName(staticMatch.awayTeam) &&
+    teamsMatch(api.awayTeam, staticMatch.awayTeam)
+  ) {
+    score += 4;
+  }
+
+  const kickoffDelta = Math.abs(
+    new Date(api.date).getTime() - new Date(staticMatch.date).getTime(),
+  );
+  score -= kickoffDelta / (60 * 60 * 1000);
+
+  return score;
 }
 
 /** Whether an API row corresponds to a static fixture row. */
@@ -38,6 +114,8 @@ function apiMatchesStatic(
   api: ExternalMatch,
 ): boolean {
   if (!kickoffMatches(api.date, staticMatch.date)) return false;
+  if (!stageMatches(staticMatch, api)) return false;
+  if (!groupMatches(staticMatch, api)) return false;
 
   const homePlaceholder = isUndeterminedTeamName(staticMatch.homeTeam);
   const awayPlaceholder = isUndeterminedTeamName(staticMatch.awayTeam);
@@ -70,14 +148,12 @@ function findExternalMatch(
 
   if (candidates.length === 0) return undefined;
 
-  const exact = candidates.find(
-    ({ api }) =>
-      api.homeTeam &&
-      api.awayTeam &&
-      teamsMatch(api.homeTeam, staticMatch.homeTeam) &&
-      teamsMatch(api.awayTeam, staticMatch.awayTeam),
+  const pick = candidates.reduce((best, current) =>
+    matchCandidateScore(staticMatch, current.api) >
+    matchCandidateScore(staticMatch, best.api)
+      ? current
+      : best,
   );
-  const pick = exact ?? candidates[0];
   used.add(pick.index);
   return pick.api;
 }

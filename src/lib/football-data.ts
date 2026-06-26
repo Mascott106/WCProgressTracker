@@ -65,6 +65,9 @@ interface FootballDataScoreSide {
 }
 
 interface FootballDataMatch {
+  id?: number;
+  stage?: string | null;
+  group?: string | null;
   utcDate: string;
   status: string;
   homeTeam: { name: string | null } | null;
@@ -174,6 +177,9 @@ export function toExternalMatches(
     const goals = extractGoals(match.score?.fullTime);
 
     return {
+      apiId: match.id,
+      stage: match.stage ?? null,
+      group: match.group ?? null,
       date: match.utcDate,
       status: mapped.status,
       statusLong: mapped.statusLong,

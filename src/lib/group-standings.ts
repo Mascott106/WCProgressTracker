@@ -1,5 +1,9 @@
 import fixturesData from "@/data/fixtures.json";
 import { isUndeterminedTeamName } from "./placeholders";
+import {
+  buildThirdPlaceAssignments,
+  isBestThirdPlaceholder,
+} from "./third-place-qualifiers";
 import { FixturesFile, isFinished, type MatchSummary } from "./types";
 
 const GROUP_WINNER_RE = /^Group ([A-L]) Winners?$/i;
@@ -187,7 +191,14 @@ function buildGroupTables(
 function resolveGroupLabel(
   name: string,
   tables: Map<string, GroupStandingRow[]>,
+  thirdByWinner: Map<string, string> | null,
+  opponentWinnerGroup: string | null,
 ): string {
+  if (isBestThirdPlaceholder(name)) {
+    if (!thirdByWinner || !opponentWinnerGroup) return name;
+    return thirdByWinner.get(opponentWinnerGroup) ?? name;
+  }
+
   const winner = name.match(GROUP_WINNER_RE);
   if (winner) {
     const table = tables.get(winner[1]!.toUpperCase());
@@ -211,13 +222,29 @@ export function applyGroupPlaceholders(
   options?: { apiStandings?: ApiGroupStandings },
 ): MatchSummary[] {
   const tables = buildGroupTables(summaries, options?.apiStandings);
+  const thirdByWinner = buildThirdPlaceAssignments(tables);
 
   return summaries.map((match) => {
+    const opponentWinnerGroup =
+      match.homeTeam.match(GROUP_WINNER_RE)?.[1]?.toUpperCase() ??
+      match.awayTeam.match(GROUP_WINNER_RE)?.[1]?.toUpperCase() ??
+      null;
+
     const homeTeam = isUndeterminedTeamName(match.homeTeam)
-      ? resolveGroupLabel(match.homeTeam, tables)
+      ? resolveGroupLabel(
+          match.homeTeam,
+          tables,
+          thirdByWinner,
+          opponentWinnerGroup,
+        )
       : match.homeTeam;
     const awayTeam = isUndeterminedTeamName(match.awayTeam)
-      ? resolveGroupLabel(match.awayTeam, tables)
+      ? resolveGroupLabel(
+          match.awayTeam,
+          tables,
+          thirdByWinner,
+          opponentWinnerGroup,
+        )
       : match.awayTeam;
 
     if (homeTeam === match.homeTeam && awayTeam === match.awayTeam) {

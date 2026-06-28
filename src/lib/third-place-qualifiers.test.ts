@@ -70,6 +70,19 @@ const apiStandings = Object.fromEntries(tables);
 const [resolved] = applyGroupPlaceholders([match74], { apiStandings });
 assert(resolved!.awayTeam === "Third F", "match 74 Best 3rd resolves to Third F");
 
+// API merge often resolves "Group E Winners" → Germany before placeholders run
+const apiMergedMatch74: MatchSummary = {
+  ...match74,
+  homeTeam: "Germany",
+};
+const [resolvedFromApi] = applyGroupPlaceholders([apiMergedMatch74], {
+  apiStandings,
+});
+assert(
+  resolvedFromApi!.awayTeam === "Third F",
+  "Best 3rd resolves when winner already named by API",
+);
+
 const badAssignments = new Map<string, ThirdPlaceSlotAssignment>([
   ["E", { team: "Third H", thirdGroup: "H" }],
 ]);

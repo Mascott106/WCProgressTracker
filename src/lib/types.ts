@@ -57,6 +57,10 @@ export interface MatchSummary {
   city: string;
   foxChannel: FoxChannel;
   onTubi: boolean;
+  /** Raw home team from football-data.org (for precedence checks). */
+  apiHomeTeam?: string | null;
+  /** Raw away team from football-data.org (for precedence checks). */
+  apiAwayTeam?: string | null;
 }
 
 export interface BracketSlot {

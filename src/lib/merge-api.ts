@@ -190,6 +190,8 @@ export function mergeExternalMatches(
       city: staticMatch.city,
       foxChannel,
       onTubi,
+      apiHomeTeam: api?.homeTeam ?? null,
+      apiAwayTeam: api?.awayTeam ?? null,
     };
   });
 }

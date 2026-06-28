@@ -2,6 +2,7 @@ import {
   applyGroupPlaceholders,
   type ApiGroupStandings,
 } from "./group-standings";
+import { applyApiTeamPrecedence } from "./api-team-precedence";
 import { buildBracket } from "./bracket";
 import { applyScoreLocks } from "./locked-scores";
 import { applyManualScores } from "./manual-scores";
@@ -87,9 +88,11 @@ export function buildProgressData(
   options?: BuildProgressOptions,
 ): ProgressData {
   const resolved = applyManualScores(
-    applyGroupPlaceholders(
-      applyScoreLocks(applyScheduleStatuses(summaries, now), now),
-      { apiStandings: options?.apiStandings },
+    applyApiTeamPrecedence(
+      applyGroupPlaceholders(
+        applyScoreLocks(applyScheduleStatuses(summaries, now), now),
+        { apiStandings: options?.apiStandings },
+      ),
     ),
   );
   const completed = resolved.filter((m) => isFinished(m.status));

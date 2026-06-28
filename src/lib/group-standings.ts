@@ -6,6 +6,7 @@ import {
   resolveBestThirdPlaceholder,
   type ThirdPlaceSlotAssignment,
 } from "./third-place-qualifiers";
+import { teamsMatch } from "./team-names";
 import { FixturesFile, isFinished, type MatchSummary } from "./types";
 
 const GROUP_WINNER_RE = /^Group ([A-L]) Winners?$/i;
@@ -63,6 +64,87 @@ const groupStageMeta = (() => {
 
   return { matches, teamsByGroup, groupByMatchId };
 })();
+
+/** Best 3rd slot metadata from static fixtures (side + opponent winner group). */
+const bestThirdSlotByMatchId = (() => {
+  const map = new Map<
+    number,
+    { winnerGroup: string; side: "home" | "away" }
+  >();
+  for (const match of (fixturesData as FixturesFile).matches) {
+    const homeWinner = match.homeTeam.match(GROUP_WINNER_RE);
+    const awayWinner = match.awayTeam.match(GROUP_WINNER_RE);
+    if (isBestThirdPlaceholder(match.homeTeam) && awayWinner) {
+      map.set(match.id, {
+        winnerGroup: awayWinner[1]!.toUpperCase(),
+        side: "home",
+      });
+    } else if (isBestThirdPlaceholder(match.awayTeam) && homeWinner) {
+      map.set(match.id, {
+        winnerGroup: homeWinner[1]!.toUpperCase(),
+        side: "away",
+      });
+    }
+  }
+  return map;
+})();
+
+export function winnerGroupForBestThirdMatch(matchId: number): string | null {
+  return bestThirdSlotByMatchId.get(matchId)?.winnerGroup ?? null;
+}
+
+export function bestThirdSideForMatch(
+  matchId: number,
+): "home" | "away" | null {
+  return bestThirdSlotByMatchId.get(matchId)?.side ?? null;
+}
+
+export function apiTeamForBestThirdSlot(match: MatchSummary): string | null {
+  const side = bestThirdSideForMatch(match.id);
+  if (!side) return null;
+  return apiTeamForBestThirdSide(side, match.apiHomeTeam, match.apiAwayTeam);
+}
+
+/** Pick the API team name for a Best 3rd slot on the given side. */
+export function apiTeamForBestThirdSide(
+  side: "home" | "away",
+  apiHomeTeam: string | null | undefined,
+  apiAwayTeam: string | null | undefined,
+): string | null {
+  return side === "home"
+    ? concreteApiTeamName(apiHomeTeam)
+    : concreteApiTeamName(apiAwayTeam);
+}
+
+function concreteApiTeamName(name: string | null | undefined): string | null {
+  if (!name?.trim() || isUndeterminedTeamName(name)) return null;
+  return name.trim();
+}
+
+/** Warn when computed Best 3rd assignments disagree with API knockout fixtures. */
+function validateBestThirdAgainstApi(
+  summaries: MatchSummary[],
+  thirdByWinner: Map<string, ThirdPlaceSlotAssignment> | null,
+): void {
+  if (!thirdByWinner) return;
+
+  for (const match of summaries) {
+    const winnerGroup = winnerGroupForBestThirdMatch(match.id);
+    if (!winnerGroup) continue;
+
+    const computed = thirdByWinner.get(winnerGroup);
+    const apiTeam = apiTeamForBestThirdSlot(match);
+    if (
+      computed &&
+      apiTeam &&
+      !teamsMatch(computed.team, apiTeam)
+    ) {
+      console.warn(
+        `[wc-progress] Match ${match.id} Best 3rd (1${winnerGroup}): computed "${computed.team}" (3${computed.thirdGroup}) ≠ API "${apiTeam}" — using API`,
+      );
+    }
+  }
+}
 
 function emptyStanding(team: string): GroupStandingRow {
   return { team, played: 0, points: 0, gf: 0, ga: 0, gd: 0 };
@@ -183,9 +265,23 @@ function buildGroupTables(
 
   const merged = new Map(computed);
   for (const [group, rows] of Object.entries(apiStandings)) {
-    if (rows.length > 0) {
-      merged.set(group.toUpperCase(), rows);
+    if (rows.length === 0) continue;
+
+    const letter = group.toUpperCase();
+    const compRows = computed.get(letter);
+    if (compRows) {
+      for (let i = 0; i < Math.min(3, compRows.length, rows.length); i++) {
+        const comp = compRows[i];
+        const api = rows[i];
+        if (comp && api && !teamsMatch(comp.team, api.team)) {
+          console.warn(
+            `[wc-progress] Group ${letter} #${i + 1}: computed "${comp.team}" ≠ API standings "${api.team}" — using API`,
+          );
+        }
+      }
     }
+
+    merged.set(letter, rows);
   }
   return merged;
 }
@@ -228,9 +324,11 @@ export function applyGroupPlaceholders(
 ): MatchSummary[] {
   const tables = buildGroupTables(summaries, options?.apiStandings);
   const thirdByWinner = buildThirdPlaceAssignments(tables);
+  validateBestThirdAgainstApi(summaries, thirdByWinner);
 
   return summaries.map((match) => {
     const opponentWinnerGroup =
+      winnerGroupForBestThirdMatch(match.id) ??
       match.homeTeam.match(GROUP_WINNER_RE)?.[1]?.toUpperCase() ??
       match.awayTeam.match(GROUP_WINNER_RE)?.[1]?.toUpperCase() ??
       null;

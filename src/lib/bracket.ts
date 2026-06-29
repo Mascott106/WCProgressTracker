@@ -1,6 +1,10 @@
 import type { BracketData, BracketSlot, MatchSummary } from "./types";
 import { isFinished, isLive, KNOCKOUT_ROUND_ORDER, roundShortName } from "./types";
 import { KNOCKOUT_START_MS } from "./knockout-schedule";
+import {
+  buildBracketGridLayout,
+  buildKnockoutFeeders,
+} from "./bracket-layout";
 
 const WINNER_RE = /^Match (\d+) Winner$/;
 const LOSER_RE = /^Match (\d+) Loser$/;
@@ -86,11 +90,16 @@ export function buildBracket(
       .map((m) => toBracketSlot(m, byId)),
   }));
 
+  const feeders = buildKnockoutFeeders(knockout);
+  const gridLayout =
+    feeders.size > 0 ? buildBracketGridLayout(feeders) : null;
+
   return {
     active: knockoutStarted || previewBracket,
     rounds,
     thirdPlace: thirdPlaceMatch
       ? toBracketSlot(thirdPlaceMatch, byId)
       : null,
+    gridLayout,
   };
 }

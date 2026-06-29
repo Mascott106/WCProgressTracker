@@ -1,3 +1,5 @@
+import type { BracketGridLayout } from "./bracket-layout";
+
 export const TOTAL_GAMES = 104;
 
 /** Minutes after kickoff before a match counts as complete */
@@ -105,6 +107,8 @@ export interface BracketData {
   active: boolean;
   rounds: BracketRound[];
   thirdPlace: BracketSlot | null;
+  /** Tournament-tree grid positions for knockout matches */
+  gridLayout: BracketGridLayout | null;
 }
 
 export interface ScheduleDay {

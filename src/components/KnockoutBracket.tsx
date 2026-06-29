@@ -14,7 +14,9 @@ import { TeamName } from "@/components/TeamName";
 
 const FINAL_MATCH_ID = 104;
 
-const DESKTOP_GRID_COLUMNS = `repeat(${BRACKET_COLUMNS}, minmax(0, 1fr))`;
+const DESKTOP_GRID_COLUMNS = `repeat(${BRACKET_COLUMNS}, minmax(5.5rem, 1fr))`;
+/** Fixed row height so R32 cards (2-row span) never overlap vertically. */
+const ROW_HEIGHT_REM = 5;
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   if (!bracket.active) return null;
@@ -25,7 +27,11 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
 
   const slotsById = buildSlotsById(bracket);
   const { rows, cells } = bracket.gridLayout;
-  const gridRows = `repeat(${rows}, minmax(3.25rem, auto))`;
+  const gridRows = `repeat(${rows}, ${ROW_HEIGHT_REM}rem)`;
+  /** Paint outer columns last so inner-round cards cannot cover R32 slots. */
+  const paintOrder = [...cells].sort(
+    (a, b) => b.column - a.column || a.rowStart - b.rowStart,
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
@@ -55,13 +61,13 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
         </div>
 
         <div
-          className="grid w-full gap-x-2"
+          className="grid w-full items-start gap-x-2"
           style={{
             gridTemplateColumns: DESKTOP_GRID_COLUMNS,
             gridTemplateRows: gridRows,
           }}
         >
-          {cells.map((cell) => (
+          {paintOrder.map((cell) => (
             <BracketGridCell
               key={cell.matchId}
               cell={cell}
@@ -112,10 +118,11 @@ function BracketGridCell({
 
   return (
     <div
-      className="relative flex items-center self-stretch py-0.5"
+      className="relative isolate min-h-0 w-full py-0.5"
       style={{
         gridColumn: cell.column + 1,
         gridRow: `${cell.rowStart} / ${cell.rowEnd}`,
+        zIndex: 10 - cell.column,
       }}
     >
       {cell.side !== "center" && (
@@ -129,7 +136,7 @@ function BracketGridCell({
         <BracketMatch
           slot={slot}
           large={cell.matchId === FINAL_MATCH_ID}
-          compact={rowSpan > 2}
+          compact={rowSpan > 4}
         />
       ) : (
         <BracketMatchPlaceholder matchId={cell.matchId} />
@@ -160,7 +167,7 @@ function BracketConnector({
           onLeft ? "left-0" : "right-0"
         }`}
       />
-      {rowSpan > 2 && (
+      {rowSpan > 4 && (
         <div
           className={`absolute top-0 h-full w-px ${lineClass} ${
             onLeft ? "left-0" : "right-0"

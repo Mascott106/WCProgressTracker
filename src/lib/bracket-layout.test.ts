@@ -19,7 +19,7 @@ const rightLeaves = collectBracketLeaves(102, feeders);
 assert(feeders.size === 15, `expected 15 feeder links, got ${feeders.size}`);
 assert(leftLeaves.length === 8, `expected 8 left R32 leaves, got ${leftLeaves.length}`);
 assert(rightLeaves.length === 8, `expected 8 right R32 leaves, got ${rightLeaves.length}`);
-assert(layout.rows === 16, `expected 16 bracket rows, got ${layout.rows}`);
+assert(layout.rows === 32, `expected 32 bracket rows, got ${layout.rows}`);
 assert(layout.columns === BRACKET_COLUMNS, "expected 9 columns");
 
 for (const [parent, [home, away]] of feeders) {
@@ -56,7 +56,7 @@ assert(m102.column === 5, "Right semi should sit right of the final");
 const m104 = layout.cells.find((cell) => cell.matchId === 104)!;
 assert(m104.column === FINAL_COLUMN, "Final should be centered");
 assert(m104.side === "center", "Final should be in the center");
-assert(m104.rowEnd - m104.rowStart === 16, "Final should span the full bracket height");
+assert(m104.rowEnd - m104.rowStart === 32, "Final should span the full bracket height");
 
 const r32Ids = layout.cells
   .filter((cell) => cell.column === 0 || cell.column === 8)

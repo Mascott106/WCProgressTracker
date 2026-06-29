@@ -58,7 +58,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
             className="grid gap-x-1.5"
             style={{
               gridTemplateColumns: columnTemplate,
-              gridTemplateRows: `repeat(${rows}, minmax(1.5rem, auto))`,
+              gridTemplateRows: `repeat(${rows}, minmax(2.75rem, auto))`,
             }}
           >
             {cells.map((cell) => {
@@ -70,10 +70,11 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
               return (
                 <div
                   key={cell.matchId}
-                  className="relative flex items-center py-px"
+                  className="relative flex min-h-0 items-center self-stretch py-0.5"
                   style={{
                     gridColumn: cell.column + 1,
                     gridRow: `${cell.rowStart} / ${cell.rowEnd}`,
+                    zIndex: cell.side === "center" ? 5 : 10 - cell.column,
                   }}
                 >
                   {cell.side !== "center" && (

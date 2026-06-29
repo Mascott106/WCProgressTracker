@@ -105,8 +105,9 @@ function buildHalfGridPositions(
   const subtree = collectSubtreeMatchIds(semiFinalId, feeders);
   const depthCache = new Map<number, number>();
 
+  // Two grid tracks per R32 slot so match cards do not overlap vertically.
   leaves.forEach((id, index) => {
-    positions.set(id, { rowStart: index + 1, rowEnd: index + 2 });
+    positions.set(id, { rowStart: 2 * index + 1, rowEnd: 2 * index + 3 });
   });
 
   const maxDepth = matchDepth(semiFinalId, feeders, depthCache);
@@ -148,7 +149,7 @@ export function buildBracketGridLayout(
   const [leftSemi, rightSemi] = finalPair;
   const leftPositions = buildHalfGridPositions(leftSemi, feeders);
   const rightPositions = buildHalfGridPositions(rightSemi, feeders);
-  const rows = collectBracketLeaves(leftSemi, feeders).length;
+  const rows = collectBracketLeaves(leftSemi, feeders).length * 2;
   const depthCache = new Map<number, number>();
   const cells: BracketGridCell[] = [];
 

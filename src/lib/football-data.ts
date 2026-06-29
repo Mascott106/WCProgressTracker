@@ -71,6 +71,10 @@ interface FootballDataScoreSide {
   awayTeam?: number | null;
 }
 
+interface FootballDataGoal {
+  score?: FootballDataScoreSide | null;
+}
+
 interface FootballDataMatch {
   id?: number;
   stage?: string | null;
@@ -79,11 +83,14 @@ interface FootballDataMatch {
   status: string;
   homeTeam: { name: string | null } | null;
   awayTeam: { name: string | null } | null;
+  goals?: FootballDataGoal[];
   score?: {
     duration?: string | null;
     fullTime?: FootballDataScoreSide | null;
   };
 }
+
+const LIVE_API_STATUSES = new Set(["LIVE", "IN_PLAY", "PAUSED"]);
 
 interface FootballDataMatchesResponse {
   matches: FootballDataMatch[];
@@ -182,12 +189,72 @@ function extractGoals(fullTime?: FootballDataScoreSide | null): {
   };
 }
 
+/** Last running score from goal events — updates before fullTime on VAR reversals. */
+export function scoreFromGoalEvents(
+  goals?: FootballDataGoal[],
+): { home: number; away: number } | null {
+  if (!goals?.length) return null;
+
+  for (let i = goals.length - 1; i >= 0; i--) {
+    const side = goals[i]?.score;
+    if (!side) continue;
+    const home = side.home ?? side.homeTeam;
+    const away = side.away ?? side.awayTeam;
+    if (home != null && away != null) {
+      return { home, away };
+    }
+  }
+
+  return null;
+}
+
+/** Prefer goal-event score over stale fullTime while a match is live. */
+export function extractMatchGoals(match: FootballDataMatch): {
+  home: number | null;
+  away: number | null;
+} {
+  const fullTime = extractGoals(match.score?.fullTime);
+
+  if (!LIVE_API_STATUSES.has(match.status)) {
+    return fullTime;
+  }
+
+  if (!Array.isArray(match.goals)) {
+    return fullTime;
+  }
+
+  if (match.goals.length === 0) {
+    if (fullTime.home == null && fullTime.away == null) {
+      return { home: 0, away: 0 };
+    }
+    return fullTime;
+  }
+
+  const fromEvents = scoreFromGoalEvents(match.goals);
+  if (!fromEvents) {
+    return fullTime;
+  }
+
+  if (fullTime.home == null || fullTime.away == null) {
+    return fromEvents;
+  }
+
+  if (
+    fromEvents.home !== fullTime.home ||
+    fromEvents.away !== fullTime.away
+  ) {
+    return fromEvents;
+  }
+
+  return fullTime;
+}
+
 export function toExternalMatches(
   apiMatches: FootballDataMatch[],
 ): ExternalMatch[] {
   return apiMatches.map((match) => {
     const mapped = mapStatus(match.status, match.score?.duration);
-    const goals = extractGoals(match.score?.fullTime);
+    const goals = extractMatchGoals(match);
 
     return {
       apiId: match.id,
@@ -404,6 +471,11 @@ function toResponse(
 }
 
 function shouldSkipForceRefresh(entry: CacheEntry, now: number): boolean {
+  const summaries = mergeExternalMatches(entry.matches);
+  if (isInActivePollingWindow(summaries, now)) {
+    // During live play, allow manual refresh even if cache TTL has not expired.
+    return false;
+  }
   if (isCacheFresh(entry, now)) return true;
   if (now - entry.fetchedAt < FORCE_REFRESH_MIN_AGE_MS) return true;
   return false;

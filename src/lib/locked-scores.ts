@@ -71,7 +71,9 @@ function applyLockedRecord(match: MatchSummary, locked: LockedMatchScore): Match
 /**
  * Apply persisted score locks. Finished matches show API status immediately;
  * scores are written to disk only after the grace period so VAR corrections
- * can settle. Locked scores are never updated.
+ * can settle. Locked scores follow API corrections (including when a goal is
+ * disallowed) while the API still reports full scores; if the API drops scores
+ * to null, the lock is kept.
  */
 export function applyScoreLocks(
   summaries: MatchSummary[],
@@ -85,6 +87,32 @@ export function applyScoreLocks(
     const existing = store[key];
 
     if (existing) {
+      if (hasManualScore(match.id)) {
+        return match;
+      }
+
+      // Never freeze a live (or not-yet-finished) match — stale locks caused
+      // disallowed goals to stick at 2-1 while the API had corrected to 1-1.
+      if (!isFinished(match.status)) {
+        delete store[key];
+        dirty = true;
+        return match;
+      }
+
+      const apiHasScores =
+        match.homeGoals !== null && match.awayGoals !== null;
+      const apiCorrected =
+        apiHasScores &&
+        (match.homeGoals !== existing.homeGoals ||
+          match.awayGoals !== existing.awayGoals ||
+          match.status !== existing.status);
+
+      if (apiCorrected) {
+        store[key] = toLockedRecord(match, now);
+        dirty = true;
+        return match;
+      }
+
       return applyLockedRecord(match, existing);
     }
 

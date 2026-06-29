@@ -67,4 +67,45 @@ assert(
   `expected all 16 R32 matches in outer columns, got ${r32Ids.join(",")}`,
 );
 
+const leftR32Ids = layout.cells
+  .filter((cell) => cell.column === 0)
+  .sort((a, b) => a.rowStart - b.rowStart)
+  .map((cell) => cell.matchId);
+assert(
+  leftR32Ids.join(",") === leftLeaves.join(","),
+  `left R32 order should match bracket leaves, got ${leftR32Ids.join(",")}`,
+);
+
+const innerIds = new Set(
+  layout.cells
+    .filter((cell) => cell.column > 0 && cell.column < 8)
+    .map((cell) => cell.matchId),
+);
+for (let id = 89; id <= 102; id++) {
+  assert(innerIds.has(id), `M${id} should appear in an inner bracket column`);
+}
+
+function rowsOverlap(
+  a: { rowStart: number; rowEnd: number },
+  b: { rowStart: number; rowEnd: number },
+): boolean {
+  return a.rowStart < b.rowEnd && b.rowStart < a.rowEnd;
+}
+
+for (let col = 0; col < BRACKET_COLUMNS; col++) {
+  const colCells = layout.cells.filter((cell) => cell.column === col);
+  for (let i = 0; i < colCells.length; i++) {
+    for (let j = i + 1; j < colCells.length; j++) {
+      assert(
+        !rowsOverlap(colCells[i], colCells[j]),
+        `column ${col}: M${colCells[i].matchId} (${colCells[i].rowStart}-${colCells[i].rowEnd}) overlaps M${colCells[j].matchId} (${colCells[j].rowStart}-${colCells[j].rowEnd})`,
+      );
+    }
+  }
+}
+
+const cellIds = layout.cells.map((cell) => cell.matchId);
+const duplicateIds = cellIds.filter((id, index) => cellIds.indexOf(id) !== index);
+assert(duplicateIds.length === 0, `duplicate layout cells: ${duplicateIds.join(",")}`);
+
 console.log("bracket-layout tests passed");

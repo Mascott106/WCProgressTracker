@@ -1,17 +1,20 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { BracketData, BracketSlot } from "@/lib/types";
 import { formatMatchVenue } from "@/lib/types";
 import {
   BRACKET_COLUMNS,
   BRACKET_SPLIT_LABELS,
   FINAL_COLUMN,
+  type BracketGridCell,
   type BracketSide,
 } from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
 
 const FINAL_MATCH_ID = 104;
+const COLUMN_WIDTH = "7.25rem";
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   if (!bracket.active) return null;
@@ -28,7 +31,6 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   }
 
   const { rows, cells } = bracket.gridLayout;
-  const columnTemplate = `repeat(${BRACKET_COLUMNS}, minmax(6.5rem, 1fr))`;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
@@ -37,17 +39,15 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
       </h2>
 
       <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <div className="inline-block min-w-full">
-          <div
-            className="mb-1 grid gap-x-1.5"
-            style={{ gridTemplateColumns: columnTemplate }}
-          >
+        <div className="inline-flex min-w-max flex-col gap-2">
+          <div className="flex gap-x-2">
             {BRACKET_SPLIT_LABELS.map((label, index) => (
               <p
                 key={`${label}-${index}`}
-                className={`text-center text-[9px] font-semibold uppercase tracking-widest ${
+                className={`shrink-0 text-center text-[9px] font-semibold uppercase tracking-widest ${
                   index === FINAL_COLUMN ? "text-accent/70" : "text-muted/50"
                 }`}
+                style={{ width: COLUMN_WIDTH }}
               >
                 {label}
               </p>
@@ -55,60 +55,123 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
           </div>
 
           <div
-            className="grid gap-x-1.5"
-            style={{
-              gridTemplateColumns: columnTemplate,
-              gridTemplateRows: `repeat(${rows}, minmax(2.75rem, auto))`,
-            }}
+            className="flex items-stretch gap-x-2"
+            style={{ minHeight: `${rows * 2.5}rem` }}
           >
-            {cells.map((cell) => {
-              const slot = slotsById.get(cell.matchId);
-              if (!slot) return null;
-
-              const rowSpan = cell.rowEnd - cell.rowStart;
-
-              return (
-                <div
-                  key={cell.matchId}
-                  className="relative flex min-h-0 items-center self-stretch py-0.5"
-                  style={{
-                    gridColumn: cell.column + 1,
-                    gridRow: `${cell.rowStart} / ${cell.rowEnd}`,
-                    zIndex: cell.side === "center" ? 5 : 10 - cell.column,
-                  }}
-                >
-                  {cell.side !== "center" && (
-                    <BracketConnector
-                      side={cell.side}
-                      rowSpan={rowSpan}
-                      emphasize={cell.matchId === FINAL_MATCH_ID}
-                    />
-                  )}
-                  <BracketMatch
-                    slot={slot}
-                    large={cell.matchId === FINAL_MATCH_ID}
-                    compact={rowSpan > 1}
-                  />
-                </div>
-              );
-            })}
+            {Array.from({ length: BRACKET_COLUMNS }, (_, columnIndex) => (
+              <BracketColumn
+                key={columnIndex}
+                columnIndex={columnIndex}
+                cells={cells}
+                rows={rows}
+                slotsById={slotsById}
+              />
+            ))}
           </div>
 
           {bracket.thirdPlace && (
-            <div
-              className="mt-2 grid gap-x-1.5"
-              style={{ gridTemplateColumns: columnTemplate }}
-            >
-              <div style={{ gridColumn: FINAL_COLUMN + 1 }}>
-                <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
-                  3rd
-                </p>
-                <BracketMatch slot={bracket.thirdPlace} />
-              </div>
+            <div className="flex gap-x-2">
+              {Array.from({ length: BRACKET_COLUMNS }, (_, index) => (
+                <div
+                  key={index}
+                  className="shrink-0"
+                  style={{ width: COLUMN_WIDTH }}
+                >
+                  {index === FINAL_COLUMN && (
+                    <>
+                      <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
+                        3rd
+                      </p>
+                      <BracketMatch slot={bracket.thirdPlace!} />
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function BracketColumn({
+  columnIndex,
+  cells,
+  rows,
+  slotsById,
+}: {
+  columnIndex: number;
+  cells: BracketGridCell[];
+  rows: number;
+  slotsById: Map<number, BracketSlot>;
+}) {
+  const colCells = cells
+    .filter((cell) => cell.column === columnIndex)
+    .sort((a, b) => a.rowStart - b.rowStart);
+
+  const parts: ReactNode[] = [];
+  let cursor = 1;
+
+  for (const cell of colCells) {
+    const gap = cell.rowStart - cursor;
+    if (gap > 0) {
+      parts.push(
+        <div
+          key={`gap-${columnIndex}-${cursor}`}
+          aria-hidden
+          className="min-h-0"
+          style={{ flex: `${gap} 1 0` }}
+        />,
+      );
+    }
+
+    const slot = slotsById.get(cell.matchId);
+    if (slot) {
+      const span = cell.rowEnd - cell.rowStart;
+      parts.push(
+        <div
+          key={cell.matchId}
+          className="relative flex min-h-0 items-center overflow-hidden"
+          style={{ flex: `${span} 1 0` }}
+        >
+          {cell.side !== "center" && (
+            <BracketConnector
+              side={cell.side}
+              rowSpan={span}
+              emphasize={cell.matchId === FINAL_MATCH_ID}
+            />
+          )}
+          <BracketMatch
+            slot={slot}
+            large={cell.matchId === FINAL_MATCH_ID}
+            compact={span > 2}
+          />
+        </div>,
+      );
+    }
+
+    cursor = cell.rowEnd;
+  }
+
+  const tail = rows + 1 - cursor;
+  if (tail > 0) {
+    parts.push(
+      <div
+        key={`tail-${columnIndex}`}
+        aria-hidden
+        className="min-h-0"
+        style={{ flex: `${tail} 1 0` }}
+      />,
+    );
+  }
+
+  return (
+    <div
+      className="flex shrink-0 flex-col overflow-hidden"
+      style={{ width: COLUMN_WIDTH }}
+    >
+      {parts}
     </div>
   );
 }
@@ -127,7 +190,7 @@ function BracketConnector({
 
   return (
     <div
-      className={`pointer-events-none absolute inset-y-0 w-3 ${onLeft ? "left-0" : "right-0"}`}
+      className={`pointer-events-none absolute inset-y-0 z-10 w-3 ${onLeft ? "left-0" : "right-0"}`}
       aria-hidden
     >
       <div
@@ -135,7 +198,7 @@ function BracketConnector({
           onLeft ? "left-0" : "right-0"
         }`}
       />
-      {rowSpan > 1 && (
+      {rowSpan > 2 && (
         <div
           className={`absolute top-0 h-full w-px ${lineClass} ${
             onLeft ? "left-0" : "right-0"

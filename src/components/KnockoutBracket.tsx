@@ -2,7 +2,12 @@
 
 import type { BracketData, BracketSlot } from "@/lib/types";
 import { formatMatchVenue } from "@/lib/types";
-import { BRACKET_ROUND_LABELS } from "@/lib/bracket-layout";
+import {
+  BRACKET_COLUMNS,
+  BRACKET_SPLIT_LABELS,
+  FINAL_COLUMN,
+  type BracketSide,
+} from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
 
@@ -23,6 +28,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   }
 
   const { rows, cells } = bracket.gridLayout;
+  const columnTemplate = `repeat(${BRACKET_COLUMNS}, minmax(6.5rem, 1fr))`;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
@@ -31,15 +37,17 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
       </h2>
 
       <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <div className="inline-block min-w-[40rem]">
+        <div className="inline-block min-w-full">
           <div
-            className="mb-1 grid gap-x-2"
-            style={{ gridTemplateColumns: "repeat(5, minmax(7rem, 1fr))" }}
+            className="mb-1 grid gap-x-1.5"
+            style={{ gridTemplateColumns: columnTemplate }}
           >
-            {BRACKET_ROUND_LABELS.map((label) => (
+            {BRACKET_SPLIT_LABELS.map((label, index) => (
               <p
-                key={label}
-                className="text-center text-[9px] font-semibold uppercase tracking-widest text-muted/50"
+                key={`${label}-${index}`}
+                className={`text-center text-[9px] font-semibold uppercase tracking-widest ${
+                  index === FINAL_COLUMN ? "text-accent/70" : "text-muted/50"
+                }`}
               >
                 {label}
               </p>
@@ -47,9 +55,9 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
           </div>
 
           <div
-            className="grid gap-x-2"
+            className="grid gap-x-1.5"
             style={{
-              gridTemplateColumns: "repeat(5, minmax(7rem, 1fr))",
+              gridTemplateColumns: columnTemplate,
               gridTemplateRows: `repeat(${rows}, minmax(1.5rem, auto))`,
             }}
           >
@@ -68,8 +76,9 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
                     gridRow: `${cell.rowStart} / ${cell.rowEnd}`,
                   }}
                 >
-                  {cell.column < 4 && (
+                  {cell.side !== "center" && (
                     <BracketConnector
+                      side={cell.side}
                       rowSpan={rowSpan}
                       emphasize={cell.matchId === FINAL_MATCH_ID}
                     />
@@ -86,10 +95,10 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
 
           {bracket.thirdPlace && (
             <div
-              className="mt-2 grid gap-x-2"
-              style={{ gridTemplateColumns: "repeat(5, minmax(7rem, 1fr))" }}
+              className="mt-2 grid gap-x-1.5"
+              style={{ gridTemplateColumns: columnTemplate }}
             >
-              <div className="col-start-5">
+              <div style={{ gridColumn: FINAL_COLUMN + 1 }}>
                 <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
                   3rd
                 </p>
@@ -104,24 +113,32 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
 }
 
 function BracketConnector({
+  side,
   rowSpan,
   emphasize,
 }: {
+  side: Exclude<BracketSide, "center">;
   rowSpan: number;
   emphasize?: boolean;
 }) {
+  const lineClass = emphasize ? "bg-accent/40" : "bg-border/70";
+  const onLeft = side === "right";
+
   return (
     <div
-      className="pointer-events-none absolute inset-y-0 right-0 w-3"
+      className={`pointer-events-none absolute inset-y-0 w-3 ${onLeft ? "left-0" : "right-0"}`}
       aria-hidden
     >
       <div
-        className={`absolute right-0 top-1/2 h-px w-2 -translate-y-1/2 ${emphasize ? "bg-accent/40" : "bg-border/70"}`}
+        className={`absolute top-1/2 h-px w-2 -translate-y-1/2 ${lineClass} ${
+          onLeft ? "left-0" : "right-0"
+        }`}
       />
       {rowSpan > 1 && (
         <div
-          className={`absolute right-0 top-0 w-px ${emphasize ? "bg-accent/40" : "bg-border/70"}`}
-          style={{ height: "100%" }}
+          className={`absolute top-0 h-full w-px ${lineClass} ${
+            onLeft ? "left-0" : "right-0"
+          }`}
         />
       )}
     </div>
@@ -137,10 +154,7 @@ function KnockoutBracketFallback({ bracket }: { bracket: BracketData }) {
       </h2>
       <div className="flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:gap-2">
         {bracket.rounds.map((round) => (
-          <div
-            key={round.name}
-            className="flex min-w-0 flex-col sm:flex-1"
-          >
+          <div key={round.name} className="flex min-w-0 flex-col sm:flex-1">
             <p className="mb-1 shrink-0 text-center text-[9px] font-semibold uppercase tracking-widest text-muted/50">
               {round.shortName}
             </p>

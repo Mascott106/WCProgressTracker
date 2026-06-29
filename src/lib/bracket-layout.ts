@@ -1,6 +1,8 @@
 import { KNOCKOUT_ROUND_ORDER } from "./types";
 
 export const FINAL_MATCH_ID = 104;
+export const BRACKET_COLUMNS = 9;
+export const FINAL_COLUMN = 4;
 
 const WINNER_RE = /^Match (\d+) Winner$/;
 
@@ -37,16 +39,20 @@ export function collectBracketLeaves(
   ];
 }
 
+export type BracketSide = "left" | "right" | "center";
+
 export interface BracketGridCell {
   matchId: number;
   rowStart: number;
   rowEnd: number;
-  /** 0 = Round of 32 … 4 = Final */
+  /** 0–8: R32 … SF | Final | SF … R32 */
   column: number;
+  side: BracketSide;
 }
 
 export interface BracketGridLayout {
   rows: number;
+  columns: number;
   cells: BracketGridCell[];
 }
 
@@ -73,24 +79,41 @@ function matchDepth(
   return depth;
 }
 
-export function buildBracketGridLayout(
+function collectSubtreeMatchIds(
+  matchId: number,
   feeders: Map<number, [number, number]>,
-  finalMatchId = FINAL_MATCH_ID,
-): BracketGridLayout {
-  const leaves = collectBracketLeaves(finalMatchId, feeders);
-  const rows = leaves.length;
+): Set<number> {
+  const ids = new Set<number>();
+  const walk = (id: number) => {
+    ids.add(id);
+    const pair = feeders.get(id);
+    if (pair) {
+      walk(pair[0]);
+      walk(pair[1]);
+    }
+  };
+  walk(matchId);
+  return ids;
+}
+
+function buildHalfGridPositions(
+  semiFinalId: number,
+  feeders: Map<number, [number, number]>,
+): Map<number, { rowStart: number; rowEnd: number }> {
+  const leaves = collectBracketLeaves(semiFinalId, feeders);
   const positions = new Map<number, { rowStart: number; rowEnd: number }>();
+  const subtree = collectSubtreeMatchIds(semiFinalId, feeders);
+  const depthCache = new Map<number, number>();
 
   leaves.forEach((id, index) => {
     positions.set(id, { rowStart: index + 1, rowEnd: index + 2 });
   });
 
-  const depthCache = new Map<number, number>();
-  const maxDepth = matchDepth(finalMatchId, feeders, depthCache);
+  const maxDepth = matchDepth(semiFinalId, feeders, depthCache);
 
   for (let depth = 1; depth <= maxDepth; depth++) {
-    const parents = [...feeders.keys()].filter(
-      (id) => matchDepth(id, feeders, depthCache) === depth,
+    const parents = [...subtree].filter(
+      (id) => feeders.has(id) && matchDepth(id, feeders, depthCache) === depth,
     );
     parents.sort((a, b) => {
       const aHome = feeders.get(a)![0];
@@ -109,16 +132,59 @@ export function buildBracketGridLayout(
     }
   }
 
-  const cells: BracketGridCell[] = [...positions.entries()].map(
-    ([matchId, pos]) => ({
+  return positions;
+}
+
+/** Split bracket: left half | Final | right half (mirrored). */
+export function buildBracketGridLayout(
+  feeders: Map<number, [number, number]>,
+  finalMatchId = FINAL_MATCH_ID,
+): BracketGridLayout {
+  const finalPair = feeders.get(finalMatchId);
+  if (!finalPair) {
+    return { rows: 0, columns: BRACKET_COLUMNS, cells: [] };
+  }
+
+  const [leftSemi, rightSemi] = finalPair;
+  const leftPositions = buildHalfGridPositions(leftSemi, feeders);
+  const rightPositions = buildHalfGridPositions(rightSemi, feeders);
+  const rows = collectBracketLeaves(leftSemi, feeders).length;
+  const depthCache = new Map<number, number>();
+  const cells: BracketGridCell[] = [];
+
+  for (const [matchId, pos] of leftPositions) {
+    const depth = matchDepth(matchId, feeders, depthCache);
+    cells.push({
       matchId,
       rowStart: pos.rowStart,
       rowEnd: pos.rowEnd,
-      column: matchDepth(matchId, feeders, depthCache),
-    }),
-  );
+      column: depth,
+      side: "left",
+    });
+  }
 
-  return { rows, cells };
+  for (const [matchId, pos] of rightPositions) {
+    const depth = matchDepth(matchId, feeders, depthCache);
+    cells.push({
+      matchId,
+      rowStart: pos.rowStart,
+      rowEnd: pos.rowEnd,
+      column: BRACKET_COLUMNS - 1 - depth,
+      side: "right",
+    });
+  }
+
+  const leftSemiPos = leftPositions.get(leftSemi)!;
+  const rightSemiPos = rightPositions.get(rightSemi)!;
+  cells.push({
+    matchId: finalMatchId,
+    rowStart: Math.min(leftSemiPos.rowStart, rightSemiPos.rowStart),
+    rowEnd: Math.max(leftSemiPos.rowEnd, rightSemiPos.rowEnd),
+    column: FINAL_COLUMN,
+    side: "center",
+  });
+
+  return { rows, columns: BRACKET_COLUMNS, cells };
 }
 
 export const BRACKET_ROUND_LABELS = KNOCKOUT_ROUND_ORDER.map((name) => {
@@ -137,3 +203,16 @@ export const BRACKET_ROUND_LABELS = KNOCKOUT_ROUND_ORDER.map((name) => {
       return name;
   }
 });
+
+/** Column headers for the split bracket grid. */
+export const BRACKET_SPLIT_LABELS = [
+  "R32",
+  "R16",
+  "QF",
+  "SF",
+  "Final",
+  "SF",
+  "QF",
+  "R16",
+  "R32",
+] as const;

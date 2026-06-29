@@ -88,11 +88,15 @@ function BracketMatch({
       className={`rounded border px-1.5 py-2 sm:py-1 ${border} ${large ? "sm:py-1.5" : ""}`}
       title={`Match ${slot.id}`}
     >
-      <BroadcastLabel
-        foxChannel={slot.foxChannel}
-        onTubi={slot.onTubi}
-        className="mb-0.5"
-      />
+      <div className="mb-0.5 flex items-center justify-between gap-1">
+        <span className="font-mono text-[8px] font-semibold tabular-nums text-muted/55">
+          M{slot.id}
+        </span>
+        <BroadcastLabel
+          foxChannel={slot.foxChannel}
+          onTubi={slot.onTubi}
+        />
+      </div>
       <p
         className="mb-0.5 truncate text-[8px] text-muted/45"
         title={formatMatchVenue(slot)}

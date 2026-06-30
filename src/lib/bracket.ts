@@ -1,6 +1,7 @@
-import type { BracketData, BracketSlot, MatchSummary } from "./types";
+import type { BracketData, BracketSlot, FixturesFile, MatchSummary } from "./types";
 import { isFinished, isLive, KNOCKOUT_ROUND_ORDER, roundShortName } from "./types";
 import { KNOCKOUT_START_MS } from "./knockout-schedule";
+import fixturesData from "@/data/fixtures.json";
 import {
   buildKnockoutFeeders,
   buildKnockoutTreeMeta,
@@ -90,7 +91,13 @@ export function buildBracket(
       .map((m) => toBracketSlot(m, byId)),
   }));
 
-  const feeders = buildKnockoutFeeders(knockout);
+  // Feeder links must come from static fixture labels ("Match N Winner"), not
+  // resolved team names — otherwise finished R16+ matches collapse to leaves
+  // and R32 slots (e.g. M73, M75, M77, M78) never render in the tree.
+  const feederSource = (fixturesData as FixturesFile).matches.filter(
+    (m) => m.id >= 73 && m.round !== "Third Place",
+  );
+  const feeders = buildKnockoutFeeders(feederSource);
   const knockoutTree = buildKnockoutTreeMeta(feeders);
 
   return {

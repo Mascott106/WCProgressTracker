@@ -6,8 +6,8 @@ import type { KnockoutTreeMeta } from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
 
-const MATCH_CARD_CLASS =
-  "w-full min-w-[5.25rem] max-w-[7.5rem] sm:min-w-[5.5rem] sm:max-w-[8rem]";
+/** SF → QF → R16 → R32 on each half (0 = semi). */
+const KNOCKOUT_HALF_DEPTH = 3;
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   if (!bracket.active) return null;
@@ -31,48 +31,45 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
         <KnockoutBracketRoundList bracket={bracket} />
       </div>
 
-      <div className="hidden w-full overflow-x-auto sm:block">
-        <div className="flex min-w-max items-center justify-between gap-1 py-1">
+      <div className="hidden w-full sm:block">
+        <div className="grid w-full grid-cols-[minmax(0,4fr)_minmax(0,1fr)_minmax(0,4fr)] items-center gap-x-1 py-1">
           <BracketSubtree
             matchId={leftSemi}
             side="left"
+            depth={0}
             feeders={feeders}
             slots={slotsById}
           />
 
-          <div className="flex shrink-0 flex-col items-center gap-0.5 px-1">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-accent/70">
-              Final
-            </p>
-            {slotsById.get(finalMatchId) ? (
-              <div className={MATCH_CARD_CLASS}>
+          <div className="flex min-w-0 flex-col items-stretch gap-2 px-0.5">
+            <div>
+              <p className="mb-0.5 text-center text-[9px] font-semibold uppercase tracking-widest text-accent/70">
+                Final
+              </p>
+              {slotsById.get(finalMatchId) ? (
                 <BracketMatch slot={slotsById.get(finalMatchId)!} large />
+              ) : (
+                <BracketMatchPlaceholder matchId={finalMatchId} />
+              )}
+            </div>
+            {bracket.thirdPlace && (
+              <div>
+                <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
+                  3rd
+                </p>
+                <BracketMatch slot={bracket.thirdPlace} />
               </div>
-            ) : (
-              <BracketMatchPlaceholder matchId={finalMatchId} />
             )}
           </div>
 
           <BracketSubtree
             matchId={rightSemi}
             side="right"
+            depth={0}
             feeders={feeders}
             slots={slotsById}
           />
         </div>
-
-        {bracket.thirdPlace && (
-          <div className="mt-2 flex justify-center">
-            <div className="flex flex-col items-center gap-0.5">
-              <p className="text-[8px] uppercase tracking-widest text-muted/40">
-                3rd
-              </p>
-              <div className={MATCH_CARD_CLASS}>
-                <BracketMatch slot={bracket.thirdPlace} />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -102,11 +99,13 @@ function buildSlotsById(bracket: BracketData): Map<number, BracketSlot> {
 function BracketSubtree({
   matchId,
   side,
+  depth,
   feeders,
   slots,
 }: {
   matchId: number;
   side: "left" | "right";
+  depth: number;
   feeders: Map<number, [number, number]>;
   slots: Map<number, BracketSlot>;
 }) {
@@ -115,7 +114,7 @@ function BracketSubtree({
 
   if (!pair) {
     return (
-      <div className={`flex items-center ${MATCH_CARD_CLASS}`}>
+      <div className="flex w-full min-w-0 items-center">
         {slot ? (
           <BracketMatch slot={slot} compact />
         ) : (
@@ -126,27 +125,33 @@ function BracketSubtree({
   }
 
   const [homeFeeder, awayFeeder] = pair;
+  const feedersFlex = KNOCKOUT_HALF_DEPTH - depth;
 
   return (
     <div
-      className={`flex items-stretch ${side === "right" ? "flex-row-reverse" : ""}`}
+      className={`flex w-full min-w-0 items-stretch ${side === "right" ? "flex-row-reverse" : ""}`}
     >
-      <div className="flex flex-col justify-center gap-0.5 py-0.5">
+      <div
+        className="flex min-w-0 flex-col justify-center gap-0.5 py-0.5"
+        style={{ flex: feedersFlex }}
+      >
         <BracketSubtree
           matchId={homeFeeder}
           side={side}
+          depth={depth + 1}
           feeders={feeders}
           slots={slots}
         />
         <BracketSubtree
           matchId={awayFeeder}
           side={side}
+          depth={depth + 1}
           feeders={feeders}
           slots={slots}
         />
       </div>
       <BracketTreeConnector side={side} />
-      <div className={`flex items-center self-center ${MATCH_CARD_CLASS}`}>
+      <div className="flex min-w-0 items-center self-center" style={{ flex: 1 }}>
         {slot ? (
           <BracketMatch slot={slot} compact />
         ) : (
@@ -162,7 +167,7 @@ function BracketTreeConnector({ side }: { side: "left" | "right" }) {
 
   return (
     <div
-      className="relative w-3 shrink-0 self-stretch"
+      className="relative w-2 shrink-0 self-stretch sm:w-3"
       aria-hidden
     >
       <div

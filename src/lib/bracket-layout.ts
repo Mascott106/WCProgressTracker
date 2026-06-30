@@ -56,6 +56,29 @@ export interface BracketGridLayout {
   cells: BracketGridCell[];
 }
 
+/** Serializable feeder tree for the knockout bracket UI. */
+export interface KnockoutTreeMeta {
+  finalMatchId: number;
+  semiFinalMatchIds: [number, number];
+  /** [matchId, homeFeederId, awayFeederId] */
+  feeders: [number, number, number][];
+}
+
+export function buildKnockoutTreeMeta(
+  feeders: Map<number, [number, number]>,
+  finalMatchId = FINAL_MATCH_ID,
+): KnockoutTreeMeta | null {
+  const finalPair = feeders.get(finalMatchId);
+  if (!finalPair) return null;
+  return {
+    finalMatchId,
+    semiFinalMatchIds: finalPair,
+    feeders: [...feeders.entries()].map(
+      ([id, [home, away]]) => [id, home, away] as [number, number, number],
+    ),
+  };
+}
+
 function matchDepth(
   matchId: number,
   feeders: Map<number, [number, number]>,

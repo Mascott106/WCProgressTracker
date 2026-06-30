@@ -2,8 +2,8 @@ import type { BracketData, BracketSlot, MatchSummary } from "./types";
 import { isFinished, isLive, KNOCKOUT_ROUND_ORDER, roundShortName } from "./types";
 import { KNOCKOUT_START_MS } from "./knockout-schedule";
 import {
-  buildBracketGridLayout,
   buildKnockoutFeeders,
+  buildKnockoutTreeMeta,
 } from "./bracket-layout";
 
 const WINNER_RE = /^Match (\d+) Winner$/;
@@ -91,8 +91,7 @@ export function buildBracket(
   }));
 
   const feeders = buildKnockoutFeeders(knockout);
-  const gridLayout =
-    feeders.size > 0 ? buildBracketGridLayout(feeders) : null;
+  const knockoutTree = buildKnockoutTreeMeta(feeders);
 
   return {
     active: knockoutStarted || previewBracket,
@@ -100,6 +99,6 @@ export function buildBracket(
     thirdPlace: thirdPlaceMatch
       ? toBracketSlot(thirdPlaceMatch, byId)
       : null,
-    gridLayout,
+    knockoutTree,
   };
 }

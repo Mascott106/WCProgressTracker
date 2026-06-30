@@ -1,4 +1,4 @@
-import type { BracketGridLayout } from "./bracket-layout";
+import type { KnockoutTreeMeta } from "./bracket-layout";
 
 export const TOTAL_GAMES = 104;
 
@@ -107,8 +107,8 @@ export interface BracketData {
   active: boolean;
   rounds: BracketRound[];
   thirdPlace: BracketSlot | null;
-  /** Tournament-tree grid positions for knockout matches */
-  gridLayout: BracketGridLayout | null;
+  /** Feeder tree for desktop bracket layout */
+  knockoutTree: KnockoutTreeMeta | null;
 }
 
 export interface ScheduleDay {

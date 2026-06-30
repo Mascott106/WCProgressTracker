@@ -34,7 +34,7 @@ const baseData = {
   progressPercent: 1,
   timeProgress: { startAt: "", endAt: "", percent: 0 },
   upcomingDays: [],
-  bracket: { active: false, rounds: [], thirdPlace: null, gridLayout: null },
+  bracket: { active: false, rounds: [], thirdPlace: null, knockoutTree: null },
   knockoutSchedule: { active: false, milestones: [], currentRound: null },
   nextStatusChangeAt: "",
 } satisfies Omit<ProgressData, "liveMatches" | "lastCompleted">;

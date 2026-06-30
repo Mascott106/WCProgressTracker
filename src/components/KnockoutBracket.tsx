@@ -2,36 +2,24 @@
 
 import type { BracketData, BracketSlot } from "@/lib/types";
 import { formatMatchVenue } from "@/lib/types";
-import {
-  BRACKET_COLUMNS,
-  BRACKET_SPLIT_LABELS,
-  FINAL_COLUMN,
-  type BracketGridCell,
-  type BracketSide,
-} from "@/lib/bracket-layout";
+import type { KnockoutTreeMeta } from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
 
-const FINAL_MATCH_ID = 104;
-
-const DESKTOP_GRID_COLUMNS = `repeat(${BRACKET_COLUMNS}, minmax(5.5rem, 1fr))`;
-/** Fixed row height so R32 cards (2-row span) never overlap vertically. */
-const ROW_HEIGHT_REM = 5;
+const MATCH_CARD_CLASS =
+  "w-full min-w-[5.25rem] max-w-[7.5rem] sm:min-w-[5.5rem] sm:max-w-[8rem]";
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   if (!bracket.active) return null;
 
-  if (!bracket.gridLayout) {
+  if (!bracket.knockoutTree) {
     return <KnockoutBracketFallback bracket={bracket} />;
   }
 
   const slotsById = buildSlotsById(bracket);
-  const { rows, cells } = bracket.gridLayout;
-  const gridRows = `repeat(${rows}, ${ROW_HEIGHT_REM}rem)`;
-  /** Paint outer columns last so inner-round cards cannot cover R32 slots. */
-  const paintOrder = [...cells].sort(
-    (a, b) => b.column - a.column || a.rowStart - b.rowStart,
-  );
+  const feeders = buildFeedersMap(bracket.knockoutTree);
+  const { finalMatchId, semiFinalMatchIds } = bracket.knockoutTree;
+  const [leftSemi, rightSemi] = semiFinalMatchIds;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
@@ -43,54 +31,58 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
         <KnockoutBracketRoundList bracket={bracket} />
       </div>
 
-      <div className="hidden w-full sm:block">
-        <div
-          className="mb-1 grid gap-x-2"
-          style={{ gridTemplateColumns: DESKTOP_GRID_COLUMNS }}
-        >
-          {BRACKET_SPLIT_LABELS.map((label, index) => (
-            <p
-              key={`${label}-${index}`}
-              className={`text-center text-[9px] font-semibold uppercase tracking-widest ${
-                index === FINAL_COLUMN ? "text-accent/70" : "text-muted/50"
-              }`}
-            >
-              {label}
-            </p>
-          ))}
-        </div>
+      <div className="hidden w-full overflow-x-auto sm:block">
+        <div className="flex min-w-max items-center justify-between gap-1 py-1">
+          <BracketSubtree
+            matchId={leftSemi}
+            side="left"
+            feeders={feeders}
+            slots={slotsById}
+          />
 
-        <div
-          className="grid w-full items-start gap-x-2"
-          style={{
-            gridTemplateColumns: DESKTOP_GRID_COLUMNS,
-            gridTemplateRows: gridRows,
-          }}
-        >
-          {paintOrder.map((cell) => (
-            <BracketGridCell
-              key={cell.matchId}
-              cell={cell}
-              slot={slotsById.get(cell.matchId)}
-            />
-          ))}
+          <div className="flex shrink-0 flex-col items-center gap-0.5 px-1">
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-accent/70">
+              Final
+            </p>
+            {slotsById.get(finalMatchId) ? (
+              <div className={MATCH_CARD_CLASS}>
+                <BracketMatch slot={slotsById.get(finalMatchId)!} large />
+              </div>
+            ) : (
+              <BracketMatchPlaceholder matchId={finalMatchId} />
+            )}
+          </div>
+
+          <BracketSubtree
+            matchId={rightSemi}
+            side="right"
+            feeders={feeders}
+            slots={slotsById}
+          />
         </div>
 
         {bracket.thirdPlace && (
-          <div
-            className="mt-2 grid gap-x-2"
-            style={{ gridTemplateColumns: DESKTOP_GRID_COLUMNS }}
-          >
-            <div style={{ gridColumn: FINAL_COLUMN + 1 }}>
-              <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
+          <div className="mt-2 flex justify-center">
+            <div className="flex flex-col items-center gap-0.5">
+              <p className="text-[8px] uppercase tracking-widest text-muted/40">
                 3rd
               </p>
-              <BracketMatch slot={bracket.thirdPlace} />
+              <div className={MATCH_CARD_CLASS}>
+                <BracketMatch slot={bracket.thirdPlace} />
+              </div>
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function buildFeedersMap(
+  tree: KnockoutTreeMeta,
+): Map<number, [number, number]> {
+  return new Map(
+    tree.feeders.map(([id, home, away]) => [id, [home, away] as [number, number]]),
   );
 }
 
@@ -107,73 +99,82 @@ function buildSlotsById(bracket: BracketData): Map<number, BracketSlot> {
   return slotsById;
 }
 
-function BracketGridCell({
-  cell,
-  slot,
+function BracketSubtree({
+  matchId,
+  side,
+  feeders,
+  slots,
 }: {
-  cell: BracketGridCell;
-  slot: BracketSlot | undefined;
+  matchId: number;
+  side: "left" | "right";
+  feeders: Map<number, [number, number]>;
+  slots: Map<number, BracketSlot>;
 }) {
-  const rowSpan = cell.rowEnd - cell.rowStart;
+  const pair = feeders.get(matchId);
+  const slot = slots.get(matchId);
+
+  if (!pair) {
+    return (
+      <div className={`flex items-center ${MATCH_CARD_CLASS}`}>
+        {slot ? (
+          <BracketMatch slot={slot} compact />
+        ) : (
+          <BracketMatchPlaceholder matchId={matchId} />
+        )}
+      </div>
+    );
+  }
+
+  const [homeFeeder, awayFeeder] = pair;
 
   return (
     <div
-      className="relative isolate min-h-0 w-full py-0.5"
-      style={{
-        gridColumn: cell.column + 1,
-        gridRow: `${cell.rowStart} / ${cell.rowEnd}`,
-        zIndex: 10 - cell.column,
-      }}
+      className={`flex items-stretch ${side === "right" ? "flex-row-reverse" : ""}`}
     >
-      {cell.side !== "center" && (
-        <BracketConnector
-          side={cell.side}
-          rowSpan={rowSpan}
-          emphasize={cell.matchId === FINAL_MATCH_ID}
+      <div className="flex flex-col justify-center gap-0.5 py-0.5">
+        <BracketSubtree
+          matchId={homeFeeder}
+          side={side}
+          feeders={feeders}
+          slots={slots}
         />
-      )}
-      {slot ? (
-        <BracketMatch
-          slot={slot}
-          large={cell.matchId === FINAL_MATCH_ID}
-          compact={rowSpan > 4}
+        <BracketSubtree
+          matchId={awayFeeder}
+          side={side}
+          feeders={feeders}
+          slots={slots}
         />
-      ) : (
-        <BracketMatchPlaceholder matchId={cell.matchId} />
-      )}
+      </div>
+      <BracketTreeConnector side={side} />
+      <div className={`flex items-center self-center ${MATCH_CARD_CLASS}`}>
+        {slot ? (
+          <BracketMatch slot={slot} compact />
+        ) : (
+          <BracketMatchPlaceholder matchId={matchId} />
+        )}
+      </div>
     </div>
   );
 }
 
-function BracketConnector({
-  side,
-  rowSpan,
-  emphasize,
-}: {
-  side: Exclude<BracketSide, "center">;
-  rowSpan: number;
-  emphasize?: boolean;
-}) {
-  const lineClass = emphasize ? "bg-accent/40" : "bg-border/70";
+function BracketTreeConnector({ side }: { side: "left" | "right" }) {
   const onLeft = side === "right";
 
   return (
     <div
-      className={`pointer-events-none absolute inset-y-0 z-10 w-3 ${onLeft ? "left-0" : "right-0"}`}
+      className="relative w-3 shrink-0 self-stretch"
       aria-hidden
     >
       <div
-        className={`absolute top-1/2 h-px w-2 -translate-y-1/2 ${lineClass} ${
+        className={`absolute top-[10%] bottom-[10%] w-px bg-border/60 ${
           onLeft ? "left-0" : "right-0"
         }`}
       />
-      {rowSpan > 4 && (
-        <div
-          className={`absolute top-0 h-full w-px ${lineClass} ${
-            onLeft ? "left-0" : "right-0"
-          }`}
-        />
-      )}
+      <div
+        className={`absolute top-1/2 h-px w-1/2 -translate-y-1/2 bg-border/60 ${
+          onLeft ? "left-0" : "right-0"
+        }`}
+      />
     </div>
   );
 }
@@ -206,7 +207,7 @@ function KnockoutBracketRoundList({ bracket }: { bracket: BracketData }) {
   );
 }
 
-/** Round columns when grid metadata is unavailable. */
+/** Round columns when tree metadata is unavailable. */
 function KnockoutBracketFallback({ bracket }: { bracket: BracketData }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">

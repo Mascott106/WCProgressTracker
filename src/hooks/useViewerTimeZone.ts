@@ -1,27 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getViewerTimeZone } from "@/lib/format-datetime";
+import { useTimeZone } from "@/contexts/TimeZoneContext";
 
-/** Viewer IANA timezone; re-syncs on tab focus and periodically for DST/travel. */
+/** Viewer IANA timezone from the footer picker (or auto-detected). */
 export function useViewerTimeZone(): string {
-  const [timeZone, setTimeZone] = useState(getViewerTimeZone);
-
-  useEffect(() => {
-    const sync = () => {
-      const next = getViewerTimeZone();
-      setTimeZone((prev) => (prev === next ? prev : next));
-    };
-
-    sync();
-    document.addEventListener("visibilitychange", sync);
-    const interval = window.setInterval(sync, 60_000);
-
-    return () => {
-      document.removeEventListener("visibilitychange", sync);
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  return timeZone;
+  return useTimeZone().timeZone;
 }

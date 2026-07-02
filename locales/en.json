@@ -84,6 +84,8 @@
   "footer": {
     "builtBy": "Built by",
     "language": "Language",
+    "timezone": "Time zone",
+    "timezoneAuto": "Auto",
     "refresh": { "normal": "Refresh", "nerd": "Sync" },
     "source": "Source: {source}",
     "fixturesMatched": " · {matched}/{total} fixtures matched",

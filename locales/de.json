@@ -84,6 +84,8 @@
   "footer": {
     "builtBy": "Erstellt von",
     "language": "Sprache",
+    "timezone": "Zeitzone",
+    "timezoneAuto": "Auto",
     "refresh": { "normal": "Aktualisieren", "nerd": "Sync" },
     "source": "Quelle: {source}",
     "fixturesMatched": " · {matched}/{total} Spiele zugeordnet",

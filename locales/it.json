@@ -84,6 +84,8 @@
   "footer": {
     "builtBy": "Creato da",
     "language": "Lingua",
+    "timezone": "Fuso orario",
+    "timezoneAuto": "Auto",
     "refresh": { "normal": "Aggiorna", "nerd": "Sync" },
     "source": "Fonte: {source}",
     "fixturesMatched": " · {matched}/{total} partite abbinate",

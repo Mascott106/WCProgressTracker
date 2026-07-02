@@ -49,13 +49,28 @@ export function getViewerLocale(): string {
   return DEFAULT_LOCALE;
 }
 
+let viewerTimeZoneOverride: string | null = null;
+
+/** Set by TimeZoneProvider so schedule bucketing matches the timezone picker. */
+export function setViewerTimeZoneOverride(timeZone: string | null): void {
+  viewerTimeZoneOverride = timeZone;
+}
+
 /** IANA timezone from OS settings; safe on server (falls back to UTC). */
-export function getViewerTimeZone(): string {
+export function getSystemTimeZone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC";
   } catch {
     return "UTC";
   }
+}
+
+/** Effective viewer timezone (picker override or system). */
+export function getViewerTimeZone(): string {
+  if (viewerTimeZoneOverride) {
+    return viewerTimeZoneOverride;
+  }
+  return getSystemTimeZone();
 }
 
 export function isOffsetStyleTimeZoneName(name: string | undefined): boolean {

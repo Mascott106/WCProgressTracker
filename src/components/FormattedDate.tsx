@@ -22,7 +22,9 @@ export function FormattedDate({
   const viewerTimeZone = useViewerTimeZone();
 
   useEffect(() => {
-    setFormatted(formatDateTime(iso, { timeOnly, dateOnly }));
+    setFormatted(
+      formatDateTime(iso, { timeOnly, dateOnly, timeZone: viewerTimeZone }),
+    );
   }, [iso, timeOnly, dateOnly, viewerTimeZone]);
 
   return (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatDateTime, formatDayLabel } from "@/lib/format-datetime";
+import { useViewerTimeZone } from "@/hooks/useViewerTimeZone";
 
 interface FormattedDateProps {
   iso: string;
@@ -18,10 +19,11 @@ export function FormattedDate({
   dateOnly = false,
 }: FormattedDateProps) {
   const [formatted, setFormatted] = useState<string | null>(null);
+  const viewerTimeZone = useViewerTimeZone();
 
   useEffect(() => {
     setFormatted(formatDateTime(iso, { timeOnly, dateOnly }));
-  }, [iso, timeOnly, dateOnly]);
+  }, [iso, timeOnly, dateOnly, viewerTimeZone]);
 
   return (
     <time dateTime={iso} className={className} suppressHydrationWarning>
@@ -39,10 +41,13 @@ export function FormattedDayLabel({
   timeZone?: string;
 }) {
   const [formatted, setFormatted] = useState<string | null>(null);
+  const viewerTimeZone = useViewerTimeZone();
 
   useEffect(() => {
-    setFormatted(formatDayLabel(iso, timeZone ? { timeZone } : {}));
-  }, [iso, timeZone]);
+    setFormatted(
+      formatDayLabel(iso, timeZone ? { timeZone } : { timeZone: viewerTimeZone }),
+    );
+  }, [iso, timeZone, viewerTimeZone]);
 
   return <span suppressHydrationWarning>{formatted ?? "Tomorrow"}</span>;
 }

@@ -1,20 +1,25 @@
 "use client";
 
 import { useMemo } from "react";
-import { getViewerTimeZone } from "@/lib/format-datetime";
 import { buildLocalizedScheduleDays } from "@/lib/localized-schedule";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
+import { useViewerTimeZone } from "@/hooks/useViewerTimeZone";
 
 export function useLocalizedScheduleDays(
   upcomingMatches: MatchSummary[] | undefined,
   fallbackDays: ScheduleDay[],
+  generatedAt: string | undefined,
 ): ScheduleDay[] {
-  const timeZone = useMemo(() => getViewerTimeZone(), []);
+  const timeZone = useViewerTimeZone();
 
   return useMemo(() => {
-    if (upcomingMatches === undefined) {
+    if (upcomingMatches === undefined || generatedAt === undefined) {
       return fallbackDays;
     }
-    return buildLocalizedScheduleDays(upcomingMatches, Date.now(), timeZone);
-  }, [upcomingMatches, fallbackDays, timeZone]);
+    const now = new Date(generatedAt).getTime();
+    if (Number.isNaN(now)) {
+      return fallbackDays;
+    }
+    return buildLocalizedScheduleDays(upcomingMatches, now, timeZone);
+  }, [upcomingMatches, fallbackDays, generatedAt, timeZone]);
 }

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "node scripts/build-fixtures.mjs && next build",
+    "build": "node scripts/build-fixtures.mjs && node scripts/check-locales.mjs && next build",
+    "i18n:check": "node scripts/check-locales.mjs",
     "start": "next start",
     "lint": "next lint",
     "fixtures": "node scripts/build-fixtures.mjs",

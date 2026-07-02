@@ -5,11 +5,13 @@ import { formatMatchVenue } from "@/lib/types";
 import type { KnockoutTreeMeta } from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import { useTranslation } from "@/contexts/LocaleContext";
 
 /** SF → QF → R16 → R32 on each half (0 = semi). */
 const KNOCKOUT_HALF_DEPTH = 3;
 
 export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
+  const { t } = useTranslation();
   if (!bracket.active) return null;
 
   if (!bracket.knockoutTree) {
@@ -24,7 +26,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
       <h2 className="mb-2 shrink-0 text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-        Knockout Bracket
+        {t("knockout.bracketTitle")}
       </h2>
 
       <div className="sm:hidden">
@@ -44,7 +46,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
           <div className="flex min-w-0 flex-col items-stretch gap-2 px-0.5">
             <div>
               <p className="mb-0.5 text-center text-[9px] font-semibold uppercase tracking-widest text-accent/70">
-                Final
+                {t("knockout.final")}
               </p>
               {slotsById.get(finalMatchId) ? (
                 <BracketMatch slot={slotsById.get(finalMatchId)!} large />
@@ -55,7 +57,7 @@ export function KnockoutBracket({ bracket }: { bracket: BracketData }) {
             {bracket.thirdPlace && (
               <div>
                 <p className="mb-0.5 text-center text-[8px] uppercase tracking-widest text-muted/40">
-                  3rd
+                  {t("knockout.third")}
                 </p>
                 <BracketMatch slot={bracket.thirdPlace} />
               </div>
@@ -214,10 +216,12 @@ function KnockoutBracketRoundList({ bracket }: { bracket: BracketData }) {
 
 /** Round columns when tree metadata is unavailable. */
 function KnockoutBracketFallback({ bracket }: { bracket: BracketData }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
       <h2 className="mb-2 shrink-0 text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-        Knockout Bracket
+        {t("knockout.bracketTitle")}
       </h2>
       <div className="sm:hidden">
         <KnockoutBracketRoundList bracket={bracket} />
@@ -241,6 +245,8 @@ function KnockoutBracketFallback({ bracket }: { bracket: BracketData }) {
 }
 
 function BracketMatchPlaceholder({ matchId }: { matchId: number }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="w-full rounded border border-dashed border-amber-500/40 bg-amber-500/5 px-1.5 py-2"
@@ -249,7 +255,7 @@ function BracketMatchPlaceholder({ matchId }: { matchId: number }) {
       <p className="font-mono text-[8px] font-semibold tabular-nums text-amber-200/70">
         M{matchId}
       </p>
-      <p className="text-[9px] text-amber-200/50">Match data unavailable</p>
+      <p className="text-[9px] text-amber-200/50">{t("knockout.matchUnavailable")}</p>
     </div>
   );
 }

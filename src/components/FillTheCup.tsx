@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CupMode } from "@/contexts/CupModeContext";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { useProgressData } from "@/hooks/useProgressData";
 import {
   createCupFluid,
@@ -15,6 +16,7 @@ interface FillTheCupProps {
 }
 
 export function FillTheCup({ mode }: FillTheCupProps) {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fluidRef = useRef<CupFluidController | null>(null);
   const prevModeRef = useRef<CupMode | null>(null);
@@ -152,26 +154,28 @@ export function FillTheCup({ mode }: FillTheCupProps) {
           }}
           className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-foreground hover:bg-surface-elevated"
         >
-          Retry
+          {t("common.retry")}
         </button>
       </div>
     );
   }
 
-  const label =
-    activeMetric === "match" ? "Game Progress" : "Campaign Time";
+  const metricLabel =
+    activeMetric === "match"
+      ? t("cup.gameProgress")
+      : t("cup.campaignTime");
 
   return (
     <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-4 py-6">
       <div className="text-center">
         <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-accent">
-          Fill The Cup
+          {t("cup.title")}
         </p>
         <h2 className="mt-1 text-lg font-bold tracking-tight sm:text-xl">
-          {label}
+          {metricLabel}
         </h2>
         {transitioning ? (
-          <p className="mt-1 text-sm text-muted/60">Emptying cup…</p>
+          <p className="mt-1 text-sm text-muted/60">{t("cup.emptying")}</p>
         ) : (
           <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-accent sm:text-4xl">
             {displayPercent.toFixed(1)}
@@ -183,12 +187,12 @@ export function FillTheCup({ mode }: FillTheCupProps) {
       <canvas
         ref={canvasRef}
         className="h-[min(52vh,420px)] w-full max-w-md shrink-0"
-        aria-label={`Trophy filling to ${displayPercent.toFixed(1)} percent ${label}`}
+        aria-label={t("cup.ariaTrophyFill", {
+          vars: { percent: displayPercent.toFixed(1), label: metricLabel },
+        })}
       />
 
-      <p className="text-[10px] text-muted/40">
-        Click 🏆 to switch — game progress, campaign time, then dashboard
-      </p>
+      <p className="text-[10px] text-muted/40">{t("cup.hint")}</p>
     </div>
   );
 }

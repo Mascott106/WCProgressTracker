@@ -4,21 +4,14 @@ import type { ReactNode } from "react";
 import { FormattedDayLabel, FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { useLocalizedScheduleDays } from "@/hooks/useLocalizedScheduleDays";
-import {
-  label,
-  scheduleMatchCount,
-} from "@/lib/nerd-mode-labels";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
 import { formatMatchVenue } from "@/lib/types";
 
-function shortRound(round: string): string {
-  const group = round.match(/\(Group ([A-L])\)/);
-  if (group) return `Group ${group[1]}`;
-  return round.replace("Group Stage - ", "");
-}
-
 function ScheduleRow({ match }: { match: MatchSummary }) {
+  const { t, translateRound } = useTranslation();
+
   return (
     <div className="flex flex-col gap-1 border-b border-border/25 py-2 last:border-b-0 sm:grid sm:grid-cols-[5.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3 sm:py-1.5">
       <FormattedDate
@@ -29,7 +22,7 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
       <div className="min-w-0">
         <p className="text-sm font-medium leading-snug">
           <TeamName name={match.homeTeam} />
-          <span className="mx-1.5 font-normal text-muted/50">vs</span>
+          <span className="mx-1.5 font-normal text-muted/50">{t("panels.versus")}</span>
           <TeamName name={match.awayTeam} />
         </p>
         <p
@@ -42,7 +35,7 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
       <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-0.5">
         <BroadcastLabel foxChannel={match.foxChannel} onTubi={match.onTubi} />
         <span className="truncate text-[10px] text-muted/60 sm:max-w-[5.5rem] sm:text-right">
-          {shortRound(match.round)}
+          {translateRound(match.round)}
         </span>
       </div>
     </div>
@@ -53,18 +46,18 @@ function scheduleDayLabel(iso: string) {
   return <FormattedDayLabel iso={iso} />;
 }
 
-function dayHeading(day: ScheduleDay, nerdMode: boolean): ReactNode {
+function dayHeading(day: ScheduleDay, nerdMode: boolean, t: ReturnType<typeof useTranslation>["t"]): ReactNode {
   if (day.isToday) {
     return (
       <>
-        {label("scheduleToday", nerdMode)} — {scheduleDayLabel(day.dateIso)}
+        {t("schedule.today", { nerd: nerdMode })} — {scheduleDayLabel(day.dateIso)}
       </>
     );
   }
   if (day.isTomorrow) {
     return (
       <>
-        {label("scheduleTomorrow", nerdMode)} — {scheduleDayLabel(day.dateIso)}
+        {t("schedule.tomorrow", { nerd: nerdMode })} — {scheduleDayLabel(day.dateIso)}
       </>
     );
   }
@@ -80,6 +73,8 @@ function ScheduleDayBox({
   nerdMode: boolean;
   fullWidth?: boolean;
 }) {
+  const { t, scheduleMatchCount } = useTranslation();
+
   return (
     <div
       className={`min-h-0 rounded-lg border border-border bg-surface-elevated/60 px-3 py-2 ${
@@ -87,7 +82,7 @@ function ScheduleDayBox({
       }`}
     >
       <h2 className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-        {dayHeading(day, nerdMode)}
+        {dayHeading(day, nerdMode, t)}
         <span className="ml-2 text-muted/50">
           {scheduleMatchCount(day.matches.length, nerdMode)}
         </span>
@@ -95,7 +90,7 @@ function ScheduleDayBox({
 
       {day.matches.length === 0 ? (
         <p className="py-1 text-xs text-muted/40">
-          {label("scheduleEmpty", nerdMode)}
+          {t("schedule.empty", { nerd: nerdMode })}
         </p>
       ) : (
         <div>

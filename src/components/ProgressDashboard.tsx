@@ -10,11 +10,12 @@ import { KnockoutRoundTimeline } from "@/components/KnockoutRoundTimeline";
 import { UpcomingSchedule } from "@/components/UpcomingSchedule";
 import { useMatchProgressCelebrations } from "@/hooks/useMatchProgressCelebrations";
 import { useProgressData } from "@/hooks/useProgressData";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { useNerdMode } from "@/contexts/NerdModeContext";
-import { label } from "@/lib/nerd-mode-labels";
 
 export function ProgressDashboard() {
   const { nerdMode } = useNerdMode();
+  const { t } = useTranslation();
   const { data, meta, loading, error, refresh, setLoading } = useProgressData();
 
   useMatchProgressCelebrations(data, nerdMode);
@@ -39,7 +40,7 @@ export function ProgressDashboard() {
           }}
           className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-foreground hover:bg-surface-elevated"
         >
-          Retry
+          {t("common.retry")}
         </button>
       </div>
     );
@@ -72,17 +73,17 @@ export function ProgressDashboard() {
 
       <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
         <MatchPanel
-          title={label("panelLive", nerdMode)}
+          title={t("panels.live", { nerd: nerdMode })}
           matches={data.liveMatches.slice(0, 3)}
           variant="live"
-          emptyText={label("emptyLive", nerdMode)}
+          emptyText={t("panels.emptyLive", { nerd: nerdMode })}
         />
         <MatchPanel
-          title={label("panelLast", nerdMode)}
+          title={t("panels.last", { nerd: nerdMode })}
           matches={data.lastCompleted}
           variant="default"
           highlightWinner
-          emptyText={label("emptyLast", nerdMode)}
+          emptyText={t("panels.emptyLast", { nerd: nerdMode })}
         />
       </div>
 
@@ -103,27 +104,40 @@ export function ProgressDashboard() {
       {meta && (
         <footer className="flex shrink-0 flex-col items-start gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center sm:justify-between">
           <span className="capitalize">
-            Source: {meta.source.replace("-", " ")}
+            {t("footer.source", {
+              vars: { source: meta.source.replace("-", " ") },
+            })}
             {meta.matchedFixtures > 0 &&
-              ` · ${meta.matchedFixtures}/${meta.totalFixtures} fixtures matched`}
+              t("footer.fixturesMatched", {
+                vars: {
+                  matched: meta.matchedFixtures,
+                  total: meta.totalFixtures,
+                },
+              })}
           </span>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {meta.apiRequestsRemaining !== null &&
               meta.apiRequestsLimit !== null && (
                 <span
-                  title={`football-data.org free tier: ${meta.apiRequestsLimit} requests per minute (rolling window, not a daily cap).${
-                    meta.apiRequestResetAt
-                      ? ` Counter resets at ${formatDateTime(meta.apiRequestResetAt, { timeOnly: true })}.`
-                      : ""
-                  }`}
+                  title={t("footer.apiQuotaTooltip", {
+                    vars: {
+                      limit: meta.apiRequestsLimit,
+                      reset: meta.apiRequestResetAt
+                        ? ` Counter resets at ${formatDateTime(meta.apiRequestResetAt, { timeOnly: true })}.`
+                        : "",
+                    },
+                  })}
                 >
-                  API quota: {meta.apiRequestsRemaining}/{meta.apiRequestsLimit}{" "}
-                  left · per minute
+                  {t("footer.apiQuota", {
+                    vars: {
+                      remaining: meta.apiRequestsRemaining,
+                      limit: meta.apiRequestsLimit,
+                    },
+                  })}
                   {meta.apiRequestResetAt &&
                     new Date(meta.apiRequestResetAt).getTime() > Date.now() && (
                       <>
-                        {" "}
-                        · resets{" "}
+                        {t("footer.apiQuotaResets")}{" "}
                         <FormattedDate
                           iso={meta.apiRequestResetAt}
                           timeOnly
@@ -132,8 +146,8 @@ export function ProgressDashboard() {
                     )}
                 </span>
               )}
-            <span title="Refreshes every minute during live matches and for ~10 minutes after; otherwise at the next kickoff">
-              Next refresh{" "}
+            <span title={t("footer.nextRefreshTitle")}>
+              {t("footer.nextRefresh")}{" "}
               <FormattedDate iso={meta.cacheExpiresAt} timeOnly />
             </span>
             <button
@@ -146,12 +160,12 @@ export function ProgressDashboard() {
               title={
                 meta.cacheExpiresAt &&
                 new Date(meta.cacheExpiresAt).getTime() > Date.now()
-                  ? "Cache still fresh — automatic refresh runs every minute during live play"
+                  ? t("footer.cacheFreshTitle")
                   : undefined
               }
               className="rounded px-2 py-1 text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {label("refresh", nerdMode)}
+              {t("footer.refresh", { nerd: nerdMode })}
             </button>
           </div>
         </footer>

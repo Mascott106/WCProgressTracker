@@ -31,8 +31,18 @@ export interface FormatDateTimeOptions {
   timeZone?: string;
 }
 
+let viewerLocaleOverride: string | null = null;
+
+/** Set by LocaleProvider so datetime formatting matches the language picker. */
+export function setViewerLocaleOverride(locale: string | null): void {
+  viewerLocaleOverride = locale;
+}
+
 /** Browser locale from language settings; safe on server (falls back). */
 export function getViewerLocale(): string {
+  if (viewerLocaleOverride) {
+    return viewerLocaleOverride;
+  }
   if (typeof navigator !== "undefined" && navigator.language) {
     return navigator.language;
   }

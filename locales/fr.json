@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "Coupe du Monde de la FIFA 2026",
+    "dateRange": "104 matchs · 11 juin – 19 juillet",
+    "dateRangeNerd": "Courbe d'EXP · Niv. 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Progression du tournoi", "nerd": "Progression de la quête" },
+    "matchSection": { "normal": "Progression des matchs", "nerd": "EXP de quête" },
+    "currentLevelSection": { "normal": "Niveau actuel", "nerd": "Niveau actuel" },
+    "statDone": { "normal": "Terminés", "nerd": "Accomplis" },
+    "statLive": { "normal": "En direct", "nerd": "En combat" },
+    "statLeft": { "normal": "Restants", "nerd": "Restants" },
+    "matchAxisStart": { "normal": "Phase de groupes", "nerd": "Acte I" },
+    "matchAxisMid": { "normal": "Éliminatoires", "nerd": "Acte II" },
+    "matchAxisEnd": { "normal": "Finale", "nerd": "Finale" },
+    "timeSection": { "normal": "Temps réel", "nerd": "Temps de campagne" }
+  },
+  "panels": {
+    "live": { "normal": "En direct", "nerd": "Rencontre active" },
+    "last": { "normal": "Dernier terminé", "nerd": "Dernière victoire" },
+    "emptyLive": { "normal": "Aucun match en direct", "nerd": "Aucune rencontre active" },
+    "emptyLast": { "normal": "Aucun résultat", "nerd": "Aucune victoire" },
+    "wins": "{team} gagne {score}",
+    "draw": "Match nul {score}",
+    "versus": "contre"
+  },
+  "schedule": {
+    "today": { "normal": "Reste de la journée", "nerd": "Quêtes du jour" },
+    "tomorrow": { "normal": "Demain", "nerd": "Prochaines quêtes" },
+    "empty": { "normal": "Aucun match prévu", "nerd": "Aucune quête prévue" },
+    "matchCount": {
+      "one": "({count} match)",
+      "other": "({count} matchs)"
+    },
+    "matchCountNerd": {
+      "one": "({count} rencontre)",
+      "other": "({count} rencontres)"
+    },
+    "groupPrefix": "Groupe "
+  },
+  "knockout": {
+    "bracketTitle": "Tableau à élimination directe",
+    "scheduleTitle": "Calendrier des éliminatoires",
+    "now": "En cours :",
+    "begins": "Début",
+    "final": "Finale",
+    "third": "3e",
+    "matchUnavailable": "Données du match indisponibles"
+  },
+  "rounds": {
+    "roundOf32": "Seizièmes de finale",
+    "roundOf16": "Huitièmes de finale",
+    "quarterFinals": "Quarts de finale",
+    "semiFinals": "Demi-finales",
+    "thirdPlace": "Match pour la 3e place",
+    "final": "Finale",
+    "groupStage": "Phase de groupes"
+  },
+  "status": {
+    "NS": "Pas commencé",
+    "LIVE": "En cours",
+    "FT": "Terminé",
+    "AET": "Après prolongations",
+    "PEN": "Tirs au but",
+    "HT": "Mi-temps",
+    "1H": "1re mi-temps",
+    "2H": "2e mi-temps",
+    "ET": "Prolongations",
+    "BT": "Pause",
+    "P": "Tirs au but",
+    "AWD": "Forfait",
+    "WO": "Walkover"
+  },
+  "cup": {
+    "title": "Remplir la coupe",
+    "gameProgress": "Progression des matchs",
+    "campaignTime": "Temps de campagne",
+    "emptying": "Vidage de la coupe…",
+    "hint": "Cliquez sur 🏆 pour alterner — progression, temps de campagne, puis tableau de bord",
+    "ariaFillTheCup": "Remplir la coupe",
+    "ariaTrophyFill": "Coupe remplie à {percent} pour cent {label}"
+  },
+  "footer": {
+    "builtBy": "Créé par",
+    "language": "Langue",
+    "refresh": { "normal": "Actualiser", "nerd": "Synchroniser" },
+    "source": "Source : {source}",
+    "fixturesMatched": " · {matched}/{total} matchs associés",
+    "nextRefresh": "Prochaine actualisation",
+    "nextRefreshTitle": "Actualisation chaque minute pendant les matchs en direct et ~10 minutes après ; sinon au prochain coup d'envoi",
+    "cacheFreshTitle": "Cache encore valide — actualisation automatique chaque minute pendant le jeu en direct",
+    "apiQuota": "Quota API : {remaining}/{limit} restants · par minute",
+    "apiQuotaResets": " · réinitialisation",
+    "apiQuotaTooltip": "Niveau gratuit football-data.org : {limit} requêtes par minute (fenêtre glissante, pas de plafond journalier).{reset}"
+  },
+  "common": {
+    "retry": "Réessayer"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

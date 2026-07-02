@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { FormattedDate } from "@/components/FormattedDate";
 import { ExpGauge } from "@/components/ExpGauge";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { percentToLevelProgress } from "@/lib/exp-levels";
-import { label } from "@/lib/nerd-mode-labels";
 import { playLevelUpSound } from "@/lib/play-levelup";
 import { computeTimePercent } from "@/lib/time-progress";
 
@@ -19,6 +19,7 @@ export function TimeProgressBar({
   endAt,
   nerdMode = false,
 }: TimeProgressBarProps) {
+  const { t } = useTranslation();
   const [percent, setPercent] = useState(() =>
     computeTimePercent(Date.now(), startAt, endAt),
   );
@@ -65,7 +66,7 @@ export function TimeProgressBar({
       <div className="shrink-0 space-y-2 py-1">
         <ExpGauge
           percent={clampedPercent}
-          sectionLabel={label("timeSection", true)}
+          sectionLabel={t("progress.timeSection", { nerd: true })}
           accent="time"
           size="sm"
           progress={progress}
@@ -73,7 +74,7 @@ export function TimeProgressBar({
         />
         <ExpGauge
           percent={clampedPercent}
-          sectionLabel={label("timeSection", true)}
+          sectionLabel={t("progress.timeSection", { nerd: true })}
           accent="time"
           size="sm"
           progress={progress}
@@ -86,7 +87,7 @@ export function TimeProgressBar({
         </div>
         <ExpGauge
           percent={clampedPercent}
-          sectionLabel={label("currentLevelSection", true)}
+          sectionLabel={t("progress.currentLevelSection", { nerd: true })}
           accent="time"
           size="sm"
           progress={progress}
@@ -102,7 +103,7 @@ export function TimeProgressBar({
     <div className="shrink-0 space-y-1.5 py-1">
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-          {label("timeSection", false)}
+          {t("progress.timeSection", { nerd: false })}
         </span>
         <div className="flex items-baseline gap-1">
           <span className="font-mono text-xl font-bold tabular-nums tracking-tight text-sky-400 sm:text-2xl">

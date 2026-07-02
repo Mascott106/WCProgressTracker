@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "Copa do Mundo FIFA 2026",
+    "dateRange": "104 jogos · 11 de junho – 19 de julho",
+    "dateRangeNerd": "Curva EXP · Nv. 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Progresso do torneio", "nerd": "Progresso da missão" },
+    "matchSection": { "normal": "Progresso dos jogos", "nerd": "EXP da missão" },
+    "currentLevelSection": { "normal": "Nível atual", "nerd": "Nível atual" },
+    "statDone": { "normal": "Concluídos", "nerd": "Completos" },
+    "statLive": { "normal": "Ao vivo", "nerd": "Em combate" },
+    "statLeft": { "normal": "Restantes", "nerd": "Restantes" },
+    "matchAxisStart": { "normal": "Fase de grupos", "nerd": "Ato I" },
+    "matchAxisMid": { "normal": "Mata-mata", "nerd": "Ato II" },
+    "matchAxisEnd": { "normal": "Final", "nerd": "Grande final" },
+    "timeSection": { "normal": "Tempo real", "nerd": "Tempo de campanha" }
+  },
+  "panels": {
+    "live": { "normal": "Ao vivo agora", "nerd": "Encontro ativo" },
+    "last": { "normal": "Último concluído", "nerd": "Última vitória" },
+    "emptyLive": { "normal": "Nenhum jogo ao vivo", "nerd": "Nenhum encontro ativo" },
+    "emptyLast": { "normal": "Nenhum resultado ainda", "nerd": "Nenhuma vitória ainda" },
+    "wins": "{team} vence {score}",
+    "draw": "Empate {score}",
+    "versus": "x"
+  },
+  "schedule": {
+    "today": { "normal": "Restante de hoje", "nerd": "Missões de hoje" },
+    "tomorrow": { "normal": "Amanhã", "nerd": "Próximas missões" },
+    "empty": { "normal": "Nenhum jogo agendado", "nerd": "Nenhuma missão agendada" },
+    "matchCount": {
+      "one": "({count} jogo)",
+      "other": "({count} jogos)"
+    },
+    "matchCountNerd": {
+      "one": "({count} encontro)",
+      "other": "({count} encontros)"
+    },
+    "groupPrefix": "Grupo "
+  },
+  "knockout": {
+    "bracketTitle": "Chave eliminatória",
+    "scheduleTitle": "Calendário do mata-mata",
+    "now": "Agora:",
+    "begins": "Começa",
+    "final": "Final",
+    "third": "3º",
+    "matchUnavailable": "Dados do jogo indisponíveis"
+  },
+  "rounds": {
+    "roundOf32": "Trinta e dois avos de final",
+    "roundOf16": "Oitavas de final",
+    "quarterFinals": "Quartas de final",
+    "semiFinals": "Semifinais",
+    "thirdPlace": "Disputa do 3º lugar",
+    "final": "Final",
+    "groupStage": "Fase de grupos"
+  },
+  "status": {
+    "NS": "Não iniciado",
+    "LIVE": "Em andamento",
+    "FT": "Encerrado",
+    "AET": "Após prorrogação",
+    "PEN": "Pênaltis",
+    "HT": "Intervalo",
+    "1H": "1º tempo",
+    "2H": "2º tempo",
+    "ET": "Prorrogação",
+    "BT": "Pausa",
+    "P": "Pênaltis",
+    "AWD": "Concedido",
+    "WO": "W.O."
+  },
+  "cup": {
+    "title": "Encher a taça",
+    "gameProgress": "Progresso dos jogos",
+    "campaignTime": "Tempo de campanha",
+    "emptying": "Esvaziando a taça…",
+    "hint": "Clique em 🏆 para alternar — progresso, tempo de campanha e painel",
+    "ariaFillTheCup": "Encher a taça",
+    "ariaTrophyFill": "Taça enchendo a {percent} por cento {label}"
+  },
+  "footer": {
+    "builtBy": "Feito por",
+    "language": "Idioma",
+    "refresh": { "normal": "Atualizar", "nerd": "Sync" },
+    "source": "Fonte: {source}",
+    "fixturesMatched": " · {matched}/{total} jogos correspondidos",
+    "nextRefresh": "Próxima atualização",
+    "nextRefreshTitle": "Atualiza a cada minuto durante jogos ao vivo e por ~10 minutos depois; caso contrário, no próximo pontapé inicial",
+    "cacheFreshTitle": "Cache ainda válido — atualização automática a cada minuto durante jogo ao vivo",
+    "apiQuota": "Cota da API: {remaining}/{limit} restantes · por minuto",
+    "apiQuotaResets": " · reinicia",
+    "apiQuotaTooltip": "Plano gratuito football-data.org: {limit} requisições por minuto (janela móvel, não é limite diário).{reset}"
+  },
+  "common": {
+    "retry": "Tentar novamente"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

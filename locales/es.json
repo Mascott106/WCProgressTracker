@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "Copa Mundial de la FIFA 2026",
+    "dateRange": "104 partidos · 11 de junio – 19 de julio",
+    "dateRangeNerd": "Curva EXP · Nv. 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Progreso del torneo", "nerd": "Progreso de misión" },
+    "matchSection": { "normal": "Progreso de partidos", "nerd": "EXP de misión" },
+    "currentLevelSection": { "normal": "Nivel actual", "nerd": "Nivel actual" },
+    "statDone": { "normal": "Hechos", "nerd": "Completados" },
+    "statLive": { "normal": "En vivo", "nerd": "En combate" },
+    "statLeft": { "normal": "Restantes", "nerd": "Restantes" },
+    "matchAxisStart": { "normal": "Fase de grupos", "nerd": "Acto I" },
+    "matchAxisMid": { "normal": "Eliminatorias", "nerd": "Acto II" },
+    "matchAxisEnd": { "normal": "Final", "nerd": "Gran final" },
+    "timeSection": { "normal": "Tiempo real", "nerd": "Tiempo de campaña" }
+  },
+  "panels": {
+    "live": { "normal": "En vivo ahora", "nerd": "Encuentro activo" },
+    "last": { "normal": "Último completado", "nerd": "Última victoria" },
+    "emptyLive": { "normal": "Sin partidos en vivo", "nerd": "Sin encuentros activos" },
+    "emptyLast": { "normal": "Sin resultados aún", "nerd": "Sin victorias aún" },
+    "wins": "{team} gana {score}",
+    "draw": "Empate {score}",
+    "versus": "vs"
+  },
+  "schedule": {
+    "today": { "normal": "Resto de hoy", "nerd": "Misiones de hoy" },
+    "tomorrow": { "normal": "Mañana", "nerd": "Próximas misiones" },
+    "empty": { "normal": "Sin partidos programados", "nerd": "Sin misiones programadas" },
+    "matchCount": {
+      "one": "({count} partido)",
+      "other": "({count} partidos)"
+    },
+    "matchCountNerd": {
+      "one": "({count} encuentro)",
+      "other": "({count} encuentros)"
+    },
+    "groupPrefix": "Grupo "
+  },
+  "knockout": {
+    "bracketTitle": "Cuadro eliminatorio",
+    "scheduleTitle": "Calendario eliminatorio",
+    "now": "Ahora:",
+    "begins": "Comienza",
+    "final": "Final",
+    "third": "3.º",
+    "matchUnavailable": "Datos del partido no disponibles"
+  },
+  "rounds": {
+    "roundOf32": "Dieciseisavos de final",
+    "roundOf16": "Octavos de final",
+    "quarterFinals": "Cuartos de final",
+    "semiFinals": "Semifinales",
+    "thirdPlace": "Tercer puesto",
+    "final": "Final",
+    "groupStage": "Fase de grupos"
+  },
+  "status": {
+    "NS": "No iniciado",
+    "LIVE": "En juego",
+    "FT": "Finalizado",
+    "AET": "Tras prórroga",
+    "PEN": "Penaltis",
+    "HT": "Descanso",
+    "1H": "1.er tiempo",
+    "2H": "2.º tiempo",
+    "ET": "Prórroga",
+    "BT": "Pausa",
+    "P": "Penaltis",
+    "AWD": "Adjudicado",
+    "WO": "Walkover"
+  },
+  "cup": {
+    "title": "Llenar la copa",
+    "gameProgress": "Progreso de partidos",
+    "campaignTime": "Tiempo de campaña",
+    "emptying": "Vaciando la copa…",
+    "hint": "Haz clic en 🏆 para alternar — progreso, tiempo de campaña y panel",
+    "ariaFillTheCup": "Llenar la copa",
+    "ariaTrophyFill": "Copa llenándose al {percent} por ciento {label}"
+  },
+  "footer": {
+    "builtBy": "Creado por",
+    "language": "Idioma",
+    "refresh": { "normal": "Actualizar", "nerd": "Sync" },
+    "source": "Fuente: {source}",
+    "fixturesMatched": " · {matched}/{total} partidos emparejados",
+    "nextRefresh": "Próxima actualización",
+    "nextRefreshTitle": "Se actualiza cada minuto durante partidos en vivo y ~10 minutos después; si no, en el próximo saque inicial",
+    "cacheFreshTitle": "Caché aún válida — actualización automática cada minuto durante juego en vivo",
+    "apiQuota": "Cuota API: {remaining}/{limit} restantes · por minuto",
+    "apiQuotaResets": " · se reinicia",
+    "apiQuotaTooltip": "Plan gratuito football-data.org: {limit} solicitudes por minuto (ventana móvil, no límite diario).{reset}"
+  },
+  "common": {
+    "retry": "Reintentar"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

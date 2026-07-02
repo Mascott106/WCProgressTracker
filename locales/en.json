@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "FIFA World Cup 2026",
+    "dateRange": "104 matches · June 11 – July 19",
+    "dateRangeNerd": "EXP curve · Lv 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Tournament Progress", "nerd": "Quest Progress" },
+    "matchSection": { "normal": "Match progress", "nerd": "Quest EXP" },
+    "currentLevelSection": { "normal": "Current level", "nerd": "Current Level" },
+    "statDone": { "normal": "Done", "nerd": "Cleared" },
+    "statLive": { "normal": "Live", "nerd": "In Battle" },
+    "statLeft": { "normal": "Left", "nerd": "Remaining" },
+    "matchAxisStart": { "normal": "Group Stage", "nerd": "Act I" },
+    "matchAxisMid": { "normal": "Knockout", "nerd": "Act II" },
+    "matchAxisEnd": { "normal": "Final", "nerd": "Finale" },
+    "timeSection": { "normal": "Real time", "nerd": "Campaign Time" }
+  },
+  "panels": {
+    "live": { "normal": "Live Now", "nerd": "Active Encounter" },
+    "last": { "normal": "Last Completed", "nerd": "Last Victory" },
+    "emptyLive": { "normal": "No live matches", "nerd": "No active encounters" },
+    "emptyLast": { "normal": "No results yet", "nerd": "No victories yet" },
+    "wins": "{team} wins {score}",
+    "draw": "Draw {score}",
+    "versus": "vs"
+  },
+  "schedule": {
+    "today": { "normal": "Rest of today", "nerd": "Today's Quests" },
+    "tomorrow": { "normal": "Tomorrow", "nerd": "Next Quests" },
+    "empty": { "normal": "No matches scheduled", "nerd": "No quests scheduled" },
+    "matchCount": {
+      "one": "({count} match)",
+      "other": "({count} matches)"
+    },
+    "matchCountNerd": {
+      "one": "({count} encounter)",
+      "other": "({count} encounters)"
+    },
+    "groupPrefix": "Group "
+  },
+  "knockout": {
+    "bracketTitle": "Knockout Bracket",
+    "scheduleTitle": "Knockout Schedule",
+    "now": "Now:",
+    "begins": "Begins",
+    "final": "Final",
+    "third": "3rd",
+    "matchUnavailable": "Match data unavailable"
+  },
+  "rounds": {
+    "roundOf32": "Round of 32",
+    "roundOf16": "Round of 16",
+    "quarterFinals": "Quarter-finals",
+    "semiFinals": "Semi-finals",
+    "thirdPlace": "Third Place",
+    "final": "Final",
+    "groupStage": "Group Stage"
+  },
+  "status": {
+    "NS": "Not Started",
+    "LIVE": "In Progress",
+    "FT": "Full Time",
+    "AET": "After Extra Time",
+    "PEN": "Penalties",
+    "HT": "Half Time",
+    "1H": "First Half",
+    "2H": "Second Half",
+    "ET": "Extra Time",
+    "BT": "Break",
+    "P": "Penalties",
+    "AWD": "Awarded",
+    "WO": "Walkover"
+  },
+  "cup": {
+    "title": "Fill The Cup",
+    "gameProgress": "Game Progress",
+    "campaignTime": "Campaign Time",
+    "emptying": "Emptying cup…",
+    "hint": "Click 🏆 to switch — game progress, campaign time, then dashboard",
+    "ariaFillTheCup": "Fill the cup",
+    "ariaTrophyFill": "Trophy filling to {percent} percent {label}"
+  },
+  "footer": {
+    "builtBy": "Built by",
+    "language": "Language",
+    "refresh": { "normal": "Refresh", "nerd": "Sync" },
+    "source": "Source: {source}",
+    "fixturesMatched": " · {matched}/{total} fixtures matched",
+    "nextRefresh": "Next refresh",
+    "nextRefreshTitle": "Refreshes every minute during live matches and for ~10 minutes after; otherwise at the next kickoff",
+    "cacheFreshTitle": "Cache still fresh — automatic refresh runs every minute during live play",
+    "apiQuota": "API quota: {remaining}/{limit} left · per minute",
+    "apiQuotaResets": " · resets",
+    "apiQuotaTooltip": "football-data.org free tier: {limit} requests per minute (rolling window, not a daily cap).{reset}"
+  },
+  "common": {
+    "retry": "Retry"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

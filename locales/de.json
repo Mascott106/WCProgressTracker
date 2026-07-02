@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "FIFA-Weltmeisterschaft 2026",
+    "dateRange": "104 Spiele · 11. Juni – 19. Juli",
+    "dateRangeNerd": "EXP-Kurve · Lv. 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Turnierfortschritt", "nerd": "Quest-Fortschritt" },
+    "matchSection": { "normal": "Spielfortschritt", "nerd": "Quest-EXP" },
+    "currentLevelSection": { "normal": "Aktuelles Level", "nerd": "Aktuelles Level" },
+    "statDone": { "normal": "Erledigt", "nerd": "Abgeschlossen" },
+    "statLive": { "normal": "Live", "nerd": "Im Kampf" },
+    "statLeft": { "normal": "Übrig", "nerd": "Verbleibend" },
+    "matchAxisStart": { "normal": "Gruppenphase", "nerd": "Akt I" },
+    "matchAxisMid": { "normal": "K.-o.-Runde", "nerd": "Akt II" },
+    "matchAxisEnd": { "normal": "Finale", "nerd": "Finale" },
+    "timeSection": { "normal": "Echtzeit", "nerd": "Kampagnenzeit" }
+  },
+  "panels": {
+    "live": { "normal": "Jetzt live", "nerd": "Aktive Begegnung" },
+    "last": { "normal": "Zuletzt beendet", "nerd": "Letzter Sieg" },
+    "emptyLive": { "normal": "Keine Live-Spiele", "nerd": "Keine aktiven Begegnungen" },
+    "emptyLast": { "normal": "Noch keine Ergebnisse", "nerd": "Noch keine Siege" },
+    "wins": "{team} gewinnt {score}",
+    "draw": "Unentschieden {score}",
+    "versus": "gegen"
+  },
+  "schedule": {
+    "today": { "normal": "Rest des Tages", "nerd": "Heutige Quests" },
+    "tomorrow": { "normal": "Morgen", "nerd": "Nächste Quests" },
+    "empty": { "normal": "Keine Spiele geplant", "nerd": "Keine Quests geplant" },
+    "matchCount": {
+      "one": "({count} Spiel)",
+      "other": "({count} Spiele)"
+    },
+    "matchCountNerd": {
+      "one": "({count} Begegnung)",
+      "other": "({count} Begegnungen)"
+    },
+    "groupPrefix": "Gruppe "
+  },
+  "knockout": {
+    "bracketTitle": "K.-o.-Baum",
+    "scheduleTitle": "K.-o.-Zeitplan",
+    "now": "Jetzt:",
+    "begins": "Beginn",
+    "final": "Finale",
+    "third": "3.",
+    "matchUnavailable": "Spieldaten nicht verfügbar"
+  },
+  "rounds": {
+    "roundOf32": "Achtzehntelfinale",
+    "roundOf16": "Achtelfinale",
+    "quarterFinals": "Viertelfinale",
+    "semiFinals": "Halbfinale",
+    "thirdPlace": "Spiel um Platz 3",
+    "final": "Finale",
+    "groupStage": "Gruppenphase"
+  },
+  "status": {
+    "NS": "Nicht begonnen",
+    "LIVE": "Läuft",
+    "FT": "Abpfiff",
+    "AET": "Nach Verlängerung",
+    "PEN": "Elfmeterschießen",
+    "HT": "Halbzeit",
+    "1H": "1. Halbzeit",
+    "2H": "2. Halbzeit",
+    "ET": "Verlängerung",
+    "BT": "Pause",
+    "P": "Elfmeter",
+    "AWD": "Gewertet",
+    "WO": "Walkover"
+  },
+  "cup": {
+    "title": "Pokal füllen",
+    "gameProgress": "Spielfortschritt",
+    "campaignTime": "Kampagnenzeit",
+    "emptying": "Pokal leert sich…",
+    "hint": "🏆 klicken zum Wechseln — Spielfortschritt, Kampagnenzeit, dann Dashboard",
+    "ariaFillTheCup": "Pokal füllen",
+    "ariaTrophyFill": "Pokal gefüllt zu {percent} Prozent {label}"
+  },
+  "footer": {
+    "builtBy": "Erstellt von",
+    "language": "Sprache",
+    "refresh": { "normal": "Aktualisieren", "nerd": "Sync" },
+    "source": "Quelle: {source}",
+    "fixturesMatched": " · {matched}/{total} Spiele zugeordnet",
+    "nextRefresh": "Nächste Aktualisierung",
+    "nextRefreshTitle": "Aktualisierung jede Minute bei Live-Spielen und ~10 Minuten danach; sonst beim nächsten Anpfiff",
+    "cacheFreshTitle": "Cache noch aktuell — automatische Aktualisierung jede Minute während Live-Spiel",
+    "apiQuota": "API-Kontingent: {remaining}/{limit} übrig · pro Minute",
+    "apiQuotaResets": " · Reset",
+    "apiQuotaTooltip": "football-data.org Free-Tier: {limit} Anfragen pro Minute (gleitendes Fenster, kein Tageslimit).{reset}"
+  },
+  "common": {
+    "retry": "Erneut versuchen"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "header": {
+    "eventName": "Coppa del Mondo FIFA 2026",
+    "dateRange": "104 partite · 11 giugno – 19 luglio",
+    "dateRangeNerd": "Curva EXP · Lv. 1–99"
+  },
+  "progress": {
+    "pageTitle": { "normal": "Progresso del torneo", "nerd": "Progresso missione" },
+    "matchSection": { "normal": "Progresso partite", "nerd": "EXP missione" },
+    "currentLevelSection": { "normal": "Livello attuale", "nerd": "Livello attuale" },
+    "statDone": { "normal": "Completate", "nerd": "Superate" },
+    "statLive": { "normal": "In diretta", "nerd": "In combattimento" },
+    "statLeft": { "normal": "Rimanenti", "nerd": "Rimanenti" },
+    "matchAxisStart": { "normal": "Fase a gironi", "nerd": "Atto I" },
+    "matchAxisMid": { "normal": "Eliminatorie", "nerd": "Atto II" },
+    "matchAxisEnd": { "normal": "Finale", "nerd": "Finale" },
+    "timeSection": { "normal": "Tempo reale", "nerd": "Tempo campagna" }
+  },
+  "panels": {
+    "live": { "normal": "In diretta ora", "nerd": "Incontro attivo" },
+    "last": { "normal": "Ultima conclusa", "nerd": "Ultima vittoria" },
+    "emptyLive": { "normal": "Nessuna partita in diretta", "nerd": "Nessun incontro attivo" },
+    "emptyLast": { "normal": "Nessun risultato", "nerd": "Nessuna vittoria" },
+    "wins": "{team} vince {score}",
+    "draw": "Pareggio {score}",
+    "versus": "vs"
+  },
+  "schedule": {
+    "today": { "normal": "Resto di oggi", "nerd": "Missioni di oggi" },
+    "tomorrow": { "normal": "Domani", "nerd": "Prossime missioni" },
+    "empty": { "normal": "Nessuna partita in programma", "nerd": "Nessuna missione in programma" },
+    "matchCount": {
+      "one": "({count} partita)",
+      "other": "({count} partite)"
+    },
+    "matchCountNerd": {
+      "one": "({count} incontro)",
+      "other": "({count} incontri)"
+    },
+    "groupPrefix": "Gruppo "
+  },
+  "knockout": {
+    "bracketTitle": "Tabellone a eliminazione",
+    "scheduleTitle": "Calendario eliminatorie",
+    "now": "Ora:",
+    "begins": "Inizio",
+    "final": "Finale",
+    "third": "3°",
+    "matchUnavailable": "Dati partita non disponibili"
+  },
+  "rounds": {
+    "roundOf32": "Sedicesimi di finale",
+    "roundOf16": "Ottavi di finale",
+    "quarterFinals": "Quarti di finale",
+    "semiFinals": "Semifinali",
+    "thirdPlace": "Finale 3° posto",
+    "final": "Finale",
+    "groupStage": "Fase a gironi"
+  },
+  "status": {
+    "NS": "Non iniziata",
+    "LIVE": "In corso",
+    "FT": "Finale",
+    "AET": "Dopo i supplementari",
+    "PEN": "Rigori",
+    "HT": "Intervallo",
+    "1H": "1° tempo",
+    "2H": "2° tempo",
+    "ET": "Supplementari",
+    "BT": "Pausa",
+    "P": "Rigori",
+    "AWD": "Assegnata",
+    "WO": "Walkover"
+  },
+  "cup": {
+    "title": "Riempi la coppa",
+    "gameProgress": "Progresso partite",
+    "campaignTime": "Tempo campagna",
+    "emptying": "Svuotamento coppa…",
+    "hint": "Clicca 🏆 per alternare — progresso partite, tempo campagna, poi dashboard",
+    "ariaFillTheCup": "Riempi la coppa",
+    "ariaTrophyFill": "Coppa riempita al {percent} per cento {label}"
+  },
+  "footer": {
+    "builtBy": "Creato da",
+    "language": "Lingua",
+    "refresh": { "normal": "Aggiorna", "nerd": "Sync" },
+    "source": "Fonte: {source}",
+    "fixturesMatched": " · {matched}/{total} partite abbinate",
+    "nextRefresh": "Prossimo aggiornamento",
+    "nextRefreshTitle": "Aggiornamento ogni minuto durante le partite in diretta e per ~10 minuti dopo; altrimenti al prossimo calcio d'inizio",
+    "cacheFreshTitle": "Cache ancora valida — aggiornamento automatico ogni minuto durante il gioco in diretta",
+    "apiQuota": "Quota API: {remaining}/{limit} rimasti · al minuto",
+    "apiQuotaResets": " · reset",
+    "apiQuotaTooltip": "Piano gratuito football-data.org: {limit} richieste al minuto (finestra mobile, non un limite giornaliero).{reset}"
+  },
+  "common": {
+    "retry": "Riprova"
+  },
+  "locale": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "es": "Español",
+    "pt-BR": "Português (BR)"
+  }
+}

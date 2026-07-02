@@ -1,6 +1,6 @@
 "use client";
 
-import { label } from "@/lib/nerd-mode-labels";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { matchProgressKnockoutPercent } from "@/lib/types";
 import { ExpGauge } from "@/components/ExpGauge";
 
@@ -24,6 +24,7 @@ export function ProgressBar({
   total,
   nerdMode = false,
 }: ProgressBarProps) {
+  const { t } = useTranslation();
   const clampedPercent = Math.min(100, Math.max(0, percent));
 
   return (
@@ -32,7 +33,7 @@ export function ProgressBar({
         {nerdMode ? (
           <ExpGauge
             percent={clampedPercent}
-            sectionLabel={label("matchSection", true)}
+            sectionLabel={t("progress.matchSection", { nerd: true })}
             accent="match"
             size="lg"
             showBar={false}
@@ -48,17 +49,17 @@ export function ProgressBar({
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <StatPill
-            label={label("statDone", nerdMode)}
+            label={t("progress.statDone", { nerd: nerdMode })}
             value={completed}
             accent
           />
           <StatPill
-            label={label("statLive", nerdMode)}
+            label={t("progress.statLive", { nerd: nerdMode })}
             value={live}
             live={live > 0}
           />
           <StatPill
-            label={label("statLeft", nerdMode)}
+            label={t("progress.statLeft", { nerd: nerdMode })}
             value={remaining}
           />
           <span className="font-mono text-base text-muted">
@@ -73,7 +74,7 @@ export function ProgressBar({
         <>
           <ExpGauge
             percent={clampedPercent}
-            sectionLabel={label("matchSection", true)}
+            sectionLabel={t("progress.matchSection", { nerd: true })}
             accent="match"
             size="lg"
             fillMode="overall"
@@ -106,19 +107,21 @@ export function ProgressBar({
 }
 
 function MatchProgressAxis({ nerdMode }: { nerdMode: boolean }) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative h-3 text-[10px] text-muted/50">
       <span className="absolute left-0 top-0">
-        {label("matchAxisStart", nerdMode)}
+        {t("progress.matchAxisStart", { nerd: nerdMode })}
       </span>
       <span
         className="absolute top-0 -translate-x-1/2 whitespace-nowrap"
         style={{ left: `${KNOCKOUT_START_PERCENT}%` }}
       >
-        {label("matchAxisMid", nerdMode)}
+        {t("progress.matchAxisMid", { nerd: nerdMode })}
       </span>
       <span className="absolute right-0 top-0">
-        {label("matchAxisEnd", nerdMode)}
+        {t("progress.matchAxisEnd", { nerd: nerdMode })}
       </span>
     </div>
   );

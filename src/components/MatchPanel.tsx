@@ -9,6 +9,7 @@ import {
 import { FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import { useTranslation } from "@/contexts/LocaleContext";
 import { teamFlag } from "@/lib/team-flags";
 
 export function MatchRow({
@@ -24,10 +25,15 @@ export function MatchRow({
   timeOnly?: boolean;
   highlightWinner?: boolean;
 }) {
+  const { t, translateStatus, translateRound } = useTranslation();
   const hasScore = hasMatchScore(match);
   const winner = highlightWinner ? getMatchWinnerTeam(match) : null;
   const homeWins = hasScore && winner === match.homeTeam;
   const awayWins = hasScore && winner === match.awayTeam;
+  const statusLabel =
+    translateStatus(match.status) !== match.status
+      ? translateStatus(match.status)
+      : match.statusLong;
 
   return (
     <div className="flex flex-col gap-1 py-0.5 sm:flex-row sm:items-center sm:gap-3">
@@ -39,7 +45,7 @@ export function MatchRow({
             className="w-auto shrink-0 text-[10px] tabular-nums text-muted/60 sm:w-[5.5rem]"
           />
           <StatusBadge
-            status={match.statusLong}
+            status={statusLabel}
             variant={variant}
             className="sm:order-last"
           />
@@ -65,7 +71,7 @@ export function MatchRow({
                 {match.homeGoals}–{match.awayGoals}
               </span>
             ) : (
-              "vs"
+              t("panels.versus")
             )}
           </span>
           <span
@@ -89,7 +95,7 @@ export function MatchRow({
       </div>
 
       <span className="hidden shrink-0 truncate text-[10px] text-muted/50 xl:inline xl:max-w-[9rem]">
-        {match.round.replace("Group Stage - ", "")}
+        {translateRound(match.round)}
       </span>
 
       <BroadcastLabel
@@ -99,7 +105,7 @@ export function MatchRow({
       />
 
       {!showTime && (
-        <StatusBadge status={match.statusLong} variant={variant} />
+        <StatusBadge status={statusLabel} variant={variant} />
       )}
     </div>
   );
@@ -118,11 +124,15 @@ export function MatchPanel({
   emptyText?: string;
   highlightWinner?: boolean;
 }) {
+  const { t } = useTranslation();
   const isLive = variant === "live";
   const featured =
     highlightWinner && matches.length > 0 ? matches[0] : null;
   const winner = featured ? getMatchWinnerTeam(featured) : null;
   const hasScore = featured ? hasMatchScore(featured) : false;
+  const score = featured
+    ? `${featured.homeGoals}–${featured.awayGoals}`
+    : "";
 
   return (
     <div className="rounded-lg border border-border bg-surface-elevated/80 px-3 py-2">
@@ -144,10 +154,10 @@ export function MatchPanel({
                   {teamFlag(winner)}
                 </span>
               )}
-              {winner} wins {featured.homeGoals}–{featured.awayGoals}
+              {t("panels.wins", { vars: { team: winner, score } })}
             </>
           ) : (
-            `Draw ${featured.homeGoals}–${featured.awayGoals}`
+            t("panels.draw", { vars: { score } })
           )}
         </p>
       )}

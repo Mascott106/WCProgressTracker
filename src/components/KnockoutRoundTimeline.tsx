@@ -1,6 +1,7 @@
 "use client";
 
 import { FormattedDate } from "@/components/FormattedDate";
+import { useTranslation } from "@/contexts/LocaleContext";
 import type { KnockoutSchedule } from "@/lib/types";
 
 export function KnockoutRoundTimeline({
@@ -8,22 +9,24 @@ export function KnockoutRoundTimeline({
 }: {
   schedule: KnockoutSchedule;
 }) {
+  const { t, translateRound } = useTranslation();
+
   return (
     <div className="shrink-0 rounded-lg border border-border bg-surface-elevated/60 px-3 py-2">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[10px] font-medium uppercase tracking-wider text-muted-dim">
-          Knockout Schedule
+          {t("knockout.scheduleTitle")}
         </h2>
         {schedule.active && schedule.currentRound ? (
           <p className="text-[10px] text-muted/50">
-            Now:{" "}
+            {t("knockout.now")}{" "}
             <span className="font-medium text-accent">
-              {schedule.currentRound}
+              {translateRound(schedule.currentRound)}
             </span>
           </p>
         ) : !schedule.active ? (
           <p className="text-[10px] text-muted/50">
-            Begins{" "}
+            {t("knockout.begins")}{" "}
             {schedule.milestones[0]?.startsAt && (
               <FormattedDate
                 iso={schedule.milestones[0].startsAt}

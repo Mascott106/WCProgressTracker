@@ -34,6 +34,7 @@ const baseData = {
   progressPercent: 1,
   timeProgress: { startAt: "", endAt: "", percent: 0 },
   upcomingDays: [],
+  upcomingMatches: [],
   bracket: { active: false, rounds: [], thirdPlace: null, knockoutTree: null },
   knockoutSchedule: { active: false, milestones: [], currentRound: null },
   nextStatusChangeAt: "",

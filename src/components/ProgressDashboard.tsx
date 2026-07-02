@@ -1,6 +1,7 @@
 "use client";
 
 import { FormattedDate } from "@/components/FormattedDate";
+import { formatDateTime } from "@/lib/format-datetime";
 import { MatchPanel } from "@/components/MatchPanel";
 import { ProgressBar } from "@/components/ProgressBar";
 import { TimeProgressBar } from "@/components/TimeProgressBar";
@@ -85,8 +86,13 @@ export function ProgressDashboard() {
         />
       </div>
 
-      {data.upcomingDays.some((day) => day.matches.length > 0) && (
-        <UpcomingSchedule days={data.upcomingDays} nerdMode={nerdMode} />
+      {(data.upcomingDays.some((day) => day.matches.length > 0) ||
+        (data.upcomingMatches ?? []).length > 0) && (
+        <UpcomingSchedule
+          days={data.upcomingDays}
+          upcomingMatches={data.upcomingMatches}
+          nerdMode={nerdMode}
+        />
       )}
 
       {data.bracket.active && <KnockoutBracket bracket={data.bracket} />}
@@ -106,7 +112,7 @@ export function ProgressDashboard() {
                 <span
                   title={`football-data.org free tier: ${meta.apiRequestsLimit} requests per minute (rolling window, not a daily cap).${
                     meta.apiRequestResetAt
-                      ? ` Counter resets at ${new Date(meta.apiRequestResetAt).toLocaleTimeString()}.`
+                      ? ` Counter resets at ${formatDateTime(meta.apiRequestResetAt, { timeOnly: true })}.`
                       : ""
                   }`}
                 >

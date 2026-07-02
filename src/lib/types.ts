@@ -136,6 +136,8 @@ export interface ProgressData {
   lastCompleted: MatchSummary[];
   liveMatches: MatchSummary[];
   upcomingDays: ScheduleDay[];
+  /** Flat NS matches for client-side local schedule bucketing */
+  upcomingMatches: MatchSummary[];
   bracket: BracketData;
   knockoutSchedule: KnockoutSchedule;
   /** When the next live/complete status transition is expected */

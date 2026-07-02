@@ -102,6 +102,15 @@ export function buildProgressData(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
+  const upcomingMatches = resolved
+    .filter((m) => {
+      if (m.status !== "NS") return false;
+      return new Date(m.date).getTime() >= now;
+    })
+    .sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
   const upcomingDays = [0, 1, 2].map((offset) => {
     const window = getScheduleDayWindow(now, offset);
     return {
@@ -134,6 +143,7 @@ export function buildProgressData(
     lastCompleted: completedSorted.slice(0, 2),
     liveMatches: live,
     upcomingDays,
+    upcomingMatches,
     bracket: buildBracket(resolved, now),
     knockoutSchedule: buildKnockoutSchedule(resolved, now),
     nextStatusChangeAt: new Date(now + ttlMs).toISOString(),

@@ -1,26 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const DATE_TIME_FORMAT: Intl.DateTimeFormatOptions = {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZoneName: "short",
-};
-
-const TIME_FORMAT: Intl.DateTimeFormatOptions = {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZoneName: "short",
-};
-
-const DATE_ONLY_FORMAT: Intl.DateTimeFormatOptions = {
-  month: "short",
-  day: "numeric",
-};
+import { formatDateTime, formatDayLabel } from "@/lib/format-datetime";
 
 interface FormattedDateProps {
   iso: string;
@@ -39,12 +20,7 @@ export function FormattedDate({
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect(() => {
-    const format = dateOnly
-      ? DATE_ONLY_FORMAT
-      : timeOnly
-        ? TIME_FORMAT
-        : DATE_TIME_FORMAT;
-    setFormatted(new Date(iso).toLocaleString("en-US", format));
+    setFormatted(formatDateTime(iso, { timeOnly, dateOnly }));
   }, [iso, timeOnly, dateOnly]);
 
   return (
@@ -65,14 +41,7 @@ export function FormattedDayLabel({
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect(() => {
-    setFormatted(
-      new Date(iso).toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        ...(timeZone ? { timeZone } : {}),
-      }),
-    );
+    setFormatted(formatDayLabel(iso, timeZone ? { timeZone } : {}));
   }, [iso, timeZone]);
 
   return <span suppressHydrationWarning>{formatted ?? "Tomorrow"}</span>;

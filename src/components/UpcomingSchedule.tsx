@@ -4,11 +4,11 @@ import type { ReactNode } from "react";
 import { FormattedDayLabel, FormattedDate } from "@/components/FormattedDate";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import { useLocalizedScheduleDays } from "@/hooks/useLocalizedScheduleDays";
 import {
   label,
   scheduleMatchCount,
 } from "@/lib/nerd-mode-labels";
-import { SCHEDULE_DAY_TIMEZONE } from "@/lib/schedule-day";
 import type { MatchSummary, ScheduleDay } from "@/lib/types";
 import { formatMatchVenue } from "@/lib/types";
 
@@ -50,9 +50,7 @@ function ScheduleRow({ match }: { match: MatchSummary }) {
 }
 
 function scheduleDayLabel(iso: string) {
-  return (
-    <FormattedDayLabel iso={iso} timeZone={SCHEDULE_DAY_TIMEZONE} />
-  );
+  return <FormattedDayLabel iso={iso} />;
 }
 
 function dayHeading(day: ScheduleDay, nerdMode: boolean): ReactNode {
@@ -112,12 +110,15 @@ function ScheduleDayBox({
 
 export function UpcomingSchedule({
   days,
+  upcomingMatches,
   nerdMode = false,
 }: {
   days: ScheduleDay[];
+  upcomingMatches?: MatchSummary[];
   nerdMode?: boolean;
 }) {
-  const [today, ...laterDays] = days;
+  const localizedDays = useLocalizedScheduleDays(upcomingMatches, days);
+  const [today, ...laterDays] = localizedDays;
 
   return (
     <div className="flex shrink-0 flex-col gap-2">

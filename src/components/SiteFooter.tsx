@@ -29,7 +29,7 @@ export function SiteFooter() {
   const { toggleNerdMode, ready } = useNerdMode();
   const { cycleCupMode } = useCupMode();
   const { locale, setLocale, ready: localeReady } = useLocale();
-  const { selection, setSelection, timeZone, ready: timeZoneReady } =
+  const { selection, setSelection, timeZone, nowMs, ready: timeZoneReady } =
     useTimeZone();
   const { t } = useTranslation();
   const timeZoneOptions = useTimeZonePickerOptions(locale);
@@ -37,7 +37,7 @@ export function SiteFooter() {
 
   const autoLabel =
     selection === TIMEZONE_AUTO
-      ? `${t("footer.timezoneAuto")} (${timeZonePickerCode(timeZone, intlLocale)})`
+      ? `${t("footer.timezoneAuto")} (${timeZonePickerCode(timeZone, intlLocale, nowMs)})`
       : t("footer.timezoneAuto");
 
   return (

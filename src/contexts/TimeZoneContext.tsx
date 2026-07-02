@@ -9,6 +9,7 @@ import {
   PICKER_TIMEZONES,
   parseStoredTimeZone,
   TIMEZONE_AUTO,
+  TOURNAMENT_TZ_REFERENCE_MS,
   type TimeZoneSelection,
 } from "@/lib/timezones";
 import { localeToIntlTag, type SupportedLocale } from "@/i18n/resolve-locale";
@@ -30,6 +31,8 @@ interface TimeZoneContextValue {
   /** Picker value: "auto" or a curated IANA zone. */
   selection: TimeZoneSelection;
   setSelection: (selection: TimeZoneSelection) => void;
+  /** Live clock for DST-aware "Auto" badge refresh. */
+  nowMs: number;
   ready: boolean;
 }
 
@@ -53,6 +56,7 @@ function resolveEffectiveTimeZone(
 export function TimeZoneProvider({ children }: { children: ReactNode }) {
   const [selection, setSelectionState] = useState<TimeZoneSelection>(TIMEZONE_AUTO);
   const [systemTimeZone, setSystemTimeZone] = useState(getSystemTimeZone);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -63,10 +67,12 @@ export function TimeZoneProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const sync = () => {
+      setNowMs(Date.now());
       const next = getSystemTimeZone();
       setSystemTimeZone((prev) => (prev === next ? prev : next));
     };
 
+    sync();
     document.addEventListener("visibilitychange", sync);
     const interval = window.setInterval(sync, 60_000);
 
@@ -92,8 +98,8 @@ export function TimeZoneProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ timeZone, selection, setSelection, ready }),
-    [timeZone, selection, setSelection, ready],
+    () => ({ timeZone, selection, setSelection, nowMs, ready }),
+    [timeZone, selection, setSelection, nowMs, ready],
   );
 
   return (
@@ -109,14 +115,18 @@ export function useTimeZone(): TimeZoneContextValue {
   return ctx;
 }
 
-/** Footer timezone picker options with localized labels. */
+/** Footer timezone picker options (labels use tournament reference for summer DST). */
 export function useTimeZonePickerOptions(locale: SupportedLocale) {
   const intlLocale = localeToIntlTag(locale);
   return useMemo(
     () =>
       PICKER_TIMEZONES.map((zone) => ({
         id: zone,
-        label: formatTimeZonePickerLabel(zone, intlLocale),
+        label: formatTimeZonePickerLabel(
+          zone,
+          intlLocale,
+          TOURNAMENT_TZ_REFERENCE_MS,
+        ),
       })),
     [intlLocale],
   );

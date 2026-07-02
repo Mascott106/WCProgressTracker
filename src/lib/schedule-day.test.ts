@@ -5,6 +5,7 @@ import {
   SCHEDULE_DAY_TIMEZONE,
   zonedWallTimeToUtc,
 } from "./schedule-day";
+import { formatTimeZoneSuffix } from "./timezones";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -50,6 +51,28 @@ const explicitNy = getScheduleDayWindow(lateNightUtc, 0, SCHEDULE_DAY_TIMEZONE);
 assert(
   defaultWindow.start === explicitNy.start,
   "default timezone should remain America/New_York",
+);
+
+// US spring forward 2026: Mar 8 02:00 → 03:00 — 6 AM local still exists (EDT)
+const springForwardSixAm = zonedWallTimeToUtc(2026, 3, 8, 6, 0, "America/New_York");
+const springParts = getZonedParts(springForwardSixAm, "America/New_York");
+assert(
+  springParts.hour === SCHEDULE_DAY_CUTOFF_HOUR,
+  "6 AM wall time should exist on US spring-forward day",
+);
+assert(
+  formatTimeZoneSuffix("America/New_York", "en-US", springForwardSixAm).includes("DT") ||
+    formatTimeZoneSuffix("America/New_York", "en-US", springForwardSixAm).includes("-4"),
+  "spring-forward 6 AM should be EDT",
+);
+
+// US fall back 2026: Nov 1 — schedule day boundary at 6 AM local
+const fallBackSixAm = zonedWallTimeToUtc(2026, 11, 1, 6, 0, "America/New_York");
+const fallWindow = getScheduleDayWindow(fallBackSixAm, 0, "America/New_York");
+const fallStartParts = getZonedParts(fallWindow.start, "America/New_York");
+assert(
+  fallStartParts.hour === SCHEDULE_DAY_CUTOFF_HOUR,
+  "schedule day should start at 6 AM local on fall-back day",
 );
 
 console.log("schedule-day tests passed");

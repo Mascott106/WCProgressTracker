@@ -91,6 +91,7 @@ export function ProgressDashboard() {
         <UpcomingSchedule
           days={data.upcomingDays}
           upcomingMatches={data.upcomingMatches}
+          generatedAt={data.generatedAt}
           nerdMode={nerdMode}
         />
       )}

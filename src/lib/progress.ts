@@ -144,6 +144,7 @@ export function buildProgressData(
     liveMatches: live,
     upcomingDays,
     upcomingMatches,
+    generatedAt: new Date(now).toISOString(),
     bracket: buildBracket(resolved, now),
     knockoutSchedule: buildKnockoutSchedule(resolved, now),
     nextStatusChangeAt: new Date(now + ttlMs).toISOString(),

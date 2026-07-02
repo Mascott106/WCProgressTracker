@@ -111,13 +111,19 @@ function ScheduleDayBox({
 export function UpcomingSchedule({
   days,
   upcomingMatches,
+  generatedAt,
   nerdMode = false,
 }: {
   days: ScheduleDay[];
   upcomingMatches?: MatchSummary[];
+  generatedAt?: string;
   nerdMode?: boolean;
 }) {
-  const localizedDays = useLocalizedScheduleDays(upcomingMatches, days);
+  const localizedDays = useLocalizedScheduleDays(
+    upcomingMatches,
+    days,
+    generatedAt,
+  );
   const [today, ...laterDays] = localizedDays;
 
   return (

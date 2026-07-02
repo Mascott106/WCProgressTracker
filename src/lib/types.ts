@@ -138,6 +138,8 @@ export interface ProgressData {
   upcomingDays: ScheduleDay[];
   /** Flat NS matches for client-side local schedule bucketing */
   upcomingMatches: MatchSummary[];
+  /** ISO timestamp used as "now" when this payload was built (schedule bucketing anchor) */
+  generatedAt: string;
   bracket: BracketData;
   knockoutSchedule: KnockoutSchedule;
   /** When the next live/complete status transition is expected */

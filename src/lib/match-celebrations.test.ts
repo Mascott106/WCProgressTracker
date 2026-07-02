@@ -35,6 +35,7 @@ const baseData = {
   timeProgress: { startAt: "", endAt: "", percent: 0 },
   upcomingDays: [],
   upcomingMatches: [],
+  generatedAt: new Date().toISOString(),
   bracket: { active: false, rounds: [], thirdPlace: null, knockoutTree: null },
   knockoutSchedule: { active: false, milestones: [], currentRound: null },
   nextStatusChangeAt: "",

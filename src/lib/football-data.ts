@@ -287,6 +287,17 @@ function isInActivePollingWindow(summaries: MatchSummary[], now: number): boolea
   });
 }
 
+function msUntilNextKickoff(summaries: MatchSummary[], now: number): number {
+  let next = Infinity;
+  for (const match of summaries) {
+    const kickoff = new Date(match.date).getTime();
+    if (kickoff > now) {
+      next = Math.min(next, kickoff - now);
+    }
+  }
+  return next;
+}
+
 /**
  * 1-minute polling during live play (+ 30 min after expected full time).
  * Otherwise poll every 5 minutes, or sooner if the next kickoff is within 5 minutes.
@@ -304,7 +315,7 @@ export function computeCacheTtl(summaries: MatchSummary[], now: number): number 
     }
   }
 
-  return Math.max(nextFetch, API_FETCH_INTERVAL_MS);
+  return Math.max(nextFetch, 0);
 }
 
 async function readDiskCache(): Promise<CacheEntry | null> {
@@ -334,10 +345,20 @@ function clampCacheForActiveWindow(entry: CacheEntry, now: number): CacheEntry {
   return { ...entry, expiresAt: maxExpires };
 }
 
-function canFetchUpstream(now: number, requestsRemaining: number | null): boolean {
+function canFetchUpstream(
+  now: number,
+  requestsRemaining: number | null,
+  summaries?: MatchSummary[],
+): boolean {
   if (now < rateLimitUntil) return false;
-  if (now - lastUpstreamFetchAt < API_FETCH_INTERVAL_MS) return false;
   if (requestsRemaining !== null && requestsRemaining <= 0) return false;
+  if (
+    summaries &&
+    msUntilNextKickoff(summaries, now) <= API_FETCH_INTERVAL_MS
+  ) {
+    return true;
+  }
+  if (now - lastUpstreamFetchAt < API_FETCH_INTERVAL_MS) return false;
   return true;
 }
 
@@ -537,7 +558,8 @@ export async function getProgressFromApi(
 
   if (needsFetch) {
     const remaining = entry?.requestsRemaining ?? null;
-    if (!canFetchUpstream(now, remaining) && entry) {
+    const summaries = entry ? mergeExternalMatches(entry.matches) : undefined;
+    if (!canFetchUpstream(now, remaining, summaries) && entry) {
       return toResponse(entry, "cache", now);
     }
 

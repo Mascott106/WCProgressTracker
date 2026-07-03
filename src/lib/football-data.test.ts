@@ -41,6 +41,12 @@ assert(
   "should fetch before kickoff when it is within 5 minutes",
 );
 
+const kickoffIn30Sec = new Date(quietNow + 30_000).toISOString();
+assert(
+  computeCacheTtl([scheduledMatch(kickoffIn30Sec)], quietNow) === 30_000,
+  "should fetch at kickoff when it is less than 60 seconds away",
+);
+
 const liveKickoff = new Date(quietNow - 30 * 60_000).toISOString();
 assert(
   computeCacheTtl([scheduledMatch(liveKickoff)], quietNow) ===

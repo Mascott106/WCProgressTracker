@@ -1,5 +1,5 @@
 import type { BracketData, BracketSlot, FixturesFile, MatchSummary } from "./types";
-import { isFinished, isLive, KNOCKOUT_ROUND_ORDER, roundShortName } from "./types";
+import { getMatchWinnerSide, isFinished, isLive, KNOCKOUT_ROUND_ORDER, roundShortName } from "./types";
 import { KNOCKOUT_START_MS } from "./knockout-schedule";
 import fixturesData from "@/data/fixtures.json";
 import {
@@ -10,14 +10,6 @@ import {
 const WINNER_RE = /^Match (\d+) Winner$/;
 const LOSER_RE = /^Match (\d+) Loser$/;
 
-function matchWinner(summary: MatchSummary): "home" | "away" | null {
-  if (!isFinished(summary.status)) return null;
-  if (summary.homeGoals === null || summary.awayGoals === null) return null;
-  if (summary.homeGoals > summary.awayGoals) return "home";
-  if (summary.awayGoals > summary.homeGoals) return "away";
-  return null;
-}
-
 function resolveLabel(
   label: string,
   byId: Map<number, MatchSummary>,
@@ -26,7 +18,7 @@ function resolveLabel(
   if (winner) {
     const source = byId.get(Number(winner[1]));
     if (!source) return label;
-    const side = matchWinner(source);
+    const side = getMatchWinnerSide(source);
     if (side === "home") return source.homeTeam;
     if (side === "away") return source.awayTeam;
     return label;
@@ -36,7 +28,7 @@ function resolveLabel(
   if (loser) {
     const source = byId.get(Number(loser[1]));
     if (!source) return label;
-    const side = matchWinner(source);
+    const side = getMatchWinnerSide(source);
     if (side === "home") return source.awayTeam;
     if (side === "away") return source.homeTeam;
     return label;

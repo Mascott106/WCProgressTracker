@@ -131,4 +131,36 @@ assert(
   "penalty winner should come from API winner or penalties node",
 );
 
+assert(
+  extractPenaltyWinnerSide({
+    status: "FINISHED",
+    utcDate: "2026-07-03T18:00:00.000Z",
+    homeTeam: { name: "Australia" },
+    awayTeam: { name: "Egypt" },
+    score: {
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 3, away: 5 },
+      regularTime: { home: 1, away: 1 },
+    },
+  }) === "away",
+  "penalty winner should fall back to fullTime when penalties node is missing",
+);
+
+assert(
+  extractPenaltyWinnerSide({
+    status: "FINISHED",
+    utcDate: "2026-07-03T18:00:00.000Z",
+    homeTeam: { name: "Australia" },
+    awayTeam: { name: "Egypt" },
+    score: {
+      winner: null,
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 3, away: 5 },
+      regularTime: { home: 1, away: 1 },
+      penalties: { home: 4, away: 4 },
+    },
+  }) === "away",
+  "penalty winner should fall back to fullTime when penalties are tied in API",
+);
+
 console.log("football-data score tests passed");

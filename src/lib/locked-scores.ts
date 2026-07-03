@@ -18,6 +18,7 @@ export interface LockedMatchScore {
   awayGoals: number | null;
   status: string;
   statusLong: string;
+  winnerSide?: "home" | "away" | null;
   lockedAt: string;
 }
 
@@ -54,6 +55,7 @@ function toLockedRecord(match: MatchSummary, now: number): LockedMatchScore {
     awayGoals: match.awayGoals,
     status: match.status,
     statusLong: match.statusLong,
+    winnerSide: match.winnerSide ?? null,
     lockedAt: new Date(now).toISOString(),
   };
 }
@@ -65,6 +67,7 @@ function applyLockedRecord(match: MatchSummary, locked: LockedMatchScore): Match
     awayGoals: locked.awayGoals,
     status: locked.status,
     statusLong: locked.statusLong,
+    winnerSide: match.winnerSide ?? locked.winnerSide ?? null,
   };
 }
 
@@ -105,7 +108,8 @@ export function applyScoreLocks(
         apiHasScores &&
         (match.homeGoals !== existing.homeGoals ||
           match.awayGoals !== existing.awayGoals ||
-          match.status !== existing.status);
+          match.status !== existing.status ||
+          (match.winnerSide ?? null) !== (existing.winnerSide ?? null));
 
       if (apiCorrected) {
         store[key] = toLockedRecord(match, now);

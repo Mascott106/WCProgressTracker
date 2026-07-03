@@ -216,10 +216,24 @@ export function getMatchWinnerTeam(
   >,
 ): string | null {
   if (!isFinished(match.status) || !hasMatchScore(match)) return null;
-  if (match.status === "PEN" && match.winnerSide) {
+  if (match.winnerSide) {
     return match.winnerSide === "home" ? match.homeTeam : match.awayTeam;
   }
   if (match.homeGoals! > match.awayGoals!) return match.homeTeam;
   if (match.awayGoals! > match.homeGoals!) return match.awayTeam;
+  return null;
+}
+
+/** Which side won, for bracket resolution and styling. */
+export function getMatchWinnerSide(
+  match: Pick<
+    MatchSummary,
+    "status" | "homeTeam" | "awayTeam" | "homeGoals" | "awayGoals" | "winnerSide"
+  >,
+): "home" | "away" | null {
+  const winner = getMatchWinnerTeam(match);
+  if (!winner) return null;
+  if (winner === match.homeTeam) return "home";
+  if (winner === match.awayTeam) return "away";
   return null;
 }

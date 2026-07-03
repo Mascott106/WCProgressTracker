@@ -230,10 +230,23 @@ export function extractPenaltyWinnerSide(
   if (winner === "AWAY_TEAM") return "away";
 
   const pens = extractGoals(match.score?.penalties);
-  if (pens.home == null || pens.away == null || pens.home === pens.away) {
-    return null;
+  if (pens.home != null && pens.away != null && pens.home !== pens.away) {
+    return pens.home > pens.away ? "home" : "away";
   }
-  return pens.home > pens.away ? "home" : "away";
+
+  // Matches list often omits penalties/winner; fullTime still reflects the winner.
+  if (match.score?.duration === "PENALTY_SHOOTOUT") {
+    const full = extractGoals(match.score.fullTime);
+    if (
+      full.home != null &&
+      full.away != null &&
+      full.home !== full.away
+    ) {
+      return full.home > full.away ? "home" : "away";
+    }
+  }
+
+  return null;
 }
 
 /** Prefer goal-event score over stale fullTime while a match is live. */

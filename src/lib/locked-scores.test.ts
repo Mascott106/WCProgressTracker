@@ -1,4 +1,5 @@
 import { applyScoreLocks, clearLockedScores } from "./locked-scores";
+import { getMatchWinnerTeam } from "./types";
 import type { MatchSummary } from "./types";
 
 function assert(condition: boolean, message: string): void {
@@ -47,6 +48,27 @@ const liveAfterLock = applyScoreLocks(
 assert(liveAfterLock[0].homeGoals === 1, "live match should use API score");
 assert(liveAfterLock[0].awayGoals === 1, "live match should use API score");
 assert(liveAfterLock[0].status === "LIVE", "live match should not inherit FT status from lock");
+
+const penMatch = applyScoreLocks(
+  [
+    sampleMatch({
+      id: 88,
+      homeTeam: "Australia",
+      awayTeam: "Egypt",
+      status: "PEN",
+      statusLong: "Penalties",
+      homeGoals: 1,
+      awayGoals: 1,
+      winnerSide: "away",
+    }),
+  ],
+  Date.parse("2026-07-03T22:00:00.000Z"),
+);
+
+assert(
+  getMatchWinnerTeam(penMatch[0]) === "Egypt",
+  "penalty winnerSide should resolve winner on a tied scoreline",
+);
 
 clearLockedScores();
 console.log("locked-scores tests passed");

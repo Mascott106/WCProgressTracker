@@ -2,7 +2,7 @@ import {
   API_FETCH_INTERVAL_MS,
   QUIET_POLL_MS,
 } from "./api-limits";
-import { computeCacheTtl, extractMatchGoals, scoreFromGoalEvents } from "./football-data";
+import { computeCacheTtl, extractMatchGoals, extractPenaltyWinnerSide, scoreFromGoalEvents } from "./football-data";
 import type { MatchSummary } from "./types";
 
 function assert(condition: boolean, message: string): void {
@@ -93,6 +93,42 @@ const finished = extractMatchGoals({
 assert(
   finished.home === 2 && finished.away === 1,
   "finished match should keep fullTime",
+);
+
+const penShootout = extractMatchGoals({
+  status: "FINISHED",
+  utcDate: "2026-07-03T18:00:00.000Z",
+  homeTeam: { name: "Australia" },
+  awayTeam: { name: "Egypt" },
+  score: {
+    duration: "PENALTY_SHOOTOUT",
+    winner: "AWAY_TEAM",
+    fullTime: { home: 3, away: 5 },
+    regularTime: { home: 1, away: 1 },
+    penalties: { home: 2, away: 4 },
+  },
+});
+
+assert(
+  penShootout.home === 1 && penShootout.away === 1,
+  "penalty shootout should display regular-time score, not fullTime aggregate",
+);
+
+assert(
+  extractPenaltyWinnerSide({
+    status: "FINISHED",
+    utcDate: "2026-07-03T18:00:00.000Z",
+    homeTeam: { name: "Australia" },
+    awayTeam: { name: "Egypt" },
+    score: {
+      duration: "PENALTY_SHOOTOUT",
+      winner: "AWAY_TEAM",
+      fullTime: { home: 3, away: 5 },
+      regularTime: { home: 1, away: 1 },
+      penalties: { home: 2, away: 4 },
+    },
+  }) === "away",
+  "penalty winner should come from API winner or penalties node",
 );
 
 console.log("football-data score tests passed");

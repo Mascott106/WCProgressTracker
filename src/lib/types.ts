@@ -63,6 +63,8 @@ export interface MatchSummary {
   apiHomeTeam?: string | null;
   /** Raw away team from football-data.org (for precedence checks). */
   apiAwayTeam?: string | null;
+  /** Penalty-shootout winner when status is PEN and the scoreline is tied. */
+  winnerSide?: "home" | "away" | null;
 }
 
 export interface BracketSlot {
@@ -210,10 +212,13 @@ export function formatMatchVenue(
 export function getMatchWinnerTeam(
   match: Pick<
     MatchSummary,
-    "status" | "homeTeam" | "awayTeam" | "homeGoals" | "awayGoals"
+    "status" | "homeTeam" | "awayTeam" | "homeGoals" | "awayGoals" | "winnerSide"
   >,
 ): string | null {
   if (!isFinished(match.status) || !hasMatchScore(match)) return null;
+  if (match.status === "PEN" && match.winnerSide) {
+    return match.winnerSide === "home" ? match.homeTeam : match.awayTeam;
+  }
   if (match.homeGoals! > match.awayGoals!) return match.homeTeam;
   if (match.awayGoals! > match.homeGoals!) return match.awayTeam;
   return null;

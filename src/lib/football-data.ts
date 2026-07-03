@@ -86,7 +86,10 @@ interface FootballDataMatch {
   goals?: FootballDataGoal[];
   score?: {
     duration?: string | null;
+    winner?: string | null;
     fullTime?: FootballDataScoreSide | null;
+    regularTime?: FootballDataScoreSide | null;
+    penalties?: FootballDataScoreSide | null;
   };
 }
 
@@ -208,11 +211,41 @@ export function scoreFromGoalEvents(
   return null;
 }
 
+/** Prefer 90-minute score when a knockout match ended on penalties. */
+function extractRegularTimeGoals(match: FootballDataMatch): {
+  home: number | null;
+  away: number | null;
+} | null {
+  if (match.score?.duration !== "PENALTY_SHOOTOUT") return null;
+  const regular = extractGoals(match.score.regularTime);
+  if (regular.home == null || regular.away == null) return null;
+  return regular;
+}
+
+export function extractPenaltyWinnerSide(
+  match: FootballDataMatch,
+): "home" | "away" | null {
+  const winner = match.score?.winner;
+  if (winner === "HOME_TEAM") return "home";
+  if (winner === "AWAY_TEAM") return "away";
+
+  const pens = extractGoals(match.score?.penalties);
+  if (pens.home == null || pens.away == null || pens.home === pens.away) {
+    return null;
+  }
+  return pens.home > pens.away ? "home" : "away";
+}
+
 /** Prefer goal-event score over stale fullTime while a match is live. */
 export function extractMatchGoals(match: FootballDataMatch): {
   home: number | null;
   away: number | null;
 } {
+  const regularTime = extractRegularTimeGoals(match);
+  if (regularTime) {
+    return regularTime;
+  }
+
   const fullTime = extractGoals(match.score?.fullTime);
 
   if (!LIVE_API_STATUSES.has(match.status)) {
@@ -255,6 +288,7 @@ export function toExternalMatches(
   return apiMatches.map((match) => {
     const mapped = mapStatus(match.status, match.score?.duration);
     const goals = extractMatchGoals(match);
+    const winnerSide = extractPenaltyWinnerSide(match);
 
     return {
       apiId: match.id,
@@ -267,6 +301,7 @@ export function toExternalMatches(
       awayTeam: match.awayTeam?.name ?? null,
       homeGoals: goals.home,
       awayGoals: goals.away,
+      winnerSide,
     };
   });
 }

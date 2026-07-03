@@ -29,6 +29,8 @@ export interface ExternalMatch {
   awayTeam: string | null;
   homeGoals: number | null;
   awayGoals: number | null;
+  /** Set when a knockout match was decided on penalties (display score may be tied). */
+  winnerSide?: "home" | "away" | null;
 }
 
 const KICKOFF_TOLERANCE_MS = 90 * 60 * 1000;
@@ -192,6 +194,7 @@ export function mergeExternalMatches(
       onTubi,
       apiHomeTeam: api?.homeTeam ?? null,
       apiAwayTeam: api?.awayTeam ?? null,
+      winnerSide: api?.winnerSide ?? null,
     };
   });
 }

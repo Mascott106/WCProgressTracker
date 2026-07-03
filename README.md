@@ -8,23 +8,59 @@ Live World Cup 2026 progress for all **104 matches**. Scores and statuses come f
 - **Real time bar** — elapsed tournament time from first kickoff to two hours after the final
 - **Live scores** from football-data.org merged onto the canonical schedule
 - **Live / last completed** match cards with flags and winners
-- **Upcoming schedule** — rest of today, tomorrow, and the day after (6 AM Eastern day boundaries)
-- **Knockout bracket** — auto-activates June 28 with winner/loser propagation
+- **Upcoming schedule** — rest of today, tomorrow, and the day after (6 AM local day boundaries in your timezone)
+- **Knockout bracket** — auto-activates June 28 with full R32 tree and winner/loser propagation
+- **Knockout schedule timeline** — round milestones with current-round indicator
 - **FOX / FS1 / Tubi** broadcast labels per match
+- **Regional time display** — match times formatted in your locale and timezone with friendly zone names (not bare GMT offsets when possible)
+- **Language picker** — English, French, German, Italian, Spanish, Brazilian Portuguese (auto-detected from browser, overridable in footer)
+- **Timezone picker** — auto-detect from OS or choose a curated IANA zone (DST-aware; footer selector next to language)
 - **Live-aware polling** — refreshes every minute during live matches and for ~30 minutes after; otherwise waits until the next kickoff
 - **Kickoff-based fallback** — live games still show if the API is down or delayed
 - **Mock mode** — schedule + time-based status without an API key
-- **Nerd Mode** — RPG-style EXP gauges (Lv 1–99) and labels; toggle in the header (saved in `localStorage`)
+- **Nerd Mode** — RPG-style EXP gauges (Lv 1–99) and labels; toggle via the footer “Built by” link (saved in `localStorage`)
+- **Fill The Cup** — trophy easter egg in the footer cycles dashboard → animated match-progress cup → campaign-time cup
 
 ## Nerd Mode
 
-Toggle **Nerd Mode** in the page header to swap tournament percentages for RPG-style leveling:
+Toggle **Nerd Mode** by clicking **Scott Mendenko** in the footer to swap tournament percentages for RPG-style leveling:
 
 - **0% progress → Lv 1** (0 EXP); **100% → Lv 99** (2,452,783 EXP)
 - Match completion and campaign time each have their own EXP track and intra-level gauge
 - Labels switch to RPG wording (Quest Progress, Active Encounter, Sync, etc.)
 
 Level thresholds come from [`exp-levels.txt`](exp-levels.txt). The toggle persists in your browser via `localStorage` (`wc-progress-nerd-mode`).
+
+## Fill The Cup
+
+Click the **🏆** in the footer to cycle views:
+
+1. **Dashboard** — normal progress tracker
+2. **Fill The Cup (match progress)** — animated trophy filling to match-completion %
+3. **Fill The Cup (campaign time)** — same trophy driven by elapsed tournament time
+
+Cup mode does not persist across reloads (always starts on the dashboard).
+
+## Internationalization & timezones
+
+UI copy lives in plain JSON at [`locales/`](locales/) — one file per language (`en`, `fr`, `de`, `it`, `es`, `pt-BR`). Translators edit JSON only; no TypeScript changes required for wording updates.
+
+| Setting | Storage key | Default |
+|---------|-------------|---------|
+| Language | `wc-progress-locale` | Browser language (falls back to English) |
+| Timezone | `wc-progress-timezone` | `auto` (OS timezone) |
+
+Both pickers are in the **footer** (compact dropdowns next to the trophy). Changing language updates labels and date/time formatting. Changing timezone re-buckets the upcoming schedule (Today / Tomorrow / day 3) and reformats kickoff times. DST is handled via IANA zones and `Intl` — picker labels show abbreviations like EDT/EST where available.
+
+Validate translations after editing JSON:
+
+```bash
+npm run i18n:check   # also runs automatically in npm run build
+```
+
+See [`locales/README.md`](locales/README.md) for key conventions, plural syntax, and nerd-mode `{ normal, nerd }` pairs.
+
+**Not translated (by design):** team names, stadiums, FOX/Tubi channel labels, API-sourced scores, and knockout placeholder text (e.g. “Match 73 Winner”).
 
 ## Setup
 
@@ -35,13 +71,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Register for a free token at [football-data.org](https://www.football-data.org/client/register), then create your local env file (`.env.local` is **not** in Git — secrets stay off GitHub):
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
+Register for a free token at [football-data.org](https://www.football-data.org/client/register), then edit `.env.local` (gitignored — secrets stay off GitHub):
 
 ```
 FOOTBALL_DATA_API_KEY=your_token_here
@@ -96,6 +126,9 @@ Browser → GET /api/progress
          merge-api.ts — overlay scores/status on fixtures.json
               ↓
          progress.ts — shared UI logic (bracket, schedule, bars)
+              ↓
+         Client — LocaleContext + TimeZoneContext re-bucket schedule
+                  and format dates; i18n from locales/*.json
 ```
 
 Status mapping from football-data.org:
@@ -321,17 +354,31 @@ sudo ufw allow 3000
 
 ## Data
 
-| File | Purpose |
-|------|---------|
+| File / directory | Purpose |
+|------------------|---------|
 | `src/data/fixtures.json` | All 104 matches (June 11 – July 19, 2026) |
 | `src/lib/broadcast.ts` | FOX / FS1 / Tubi assignments per match |
+| `locales/*.json` | UI translations (see [`locales/README.md`](locales/README.md)) |
 | `scripts/build-fixtures.mjs` | Regenerates `fixtures.json` from the embedded schedule |
+| `scripts/check-locales.mjs` | Validates translation key parity across locale files |
 
 Regenerate fixtures after editing the schedule table:
 
 ```bash
 npm run fixtures
 ```
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Local dev server (Turbopack) |
+| `npm run build` | Fixtures + i18n check + production build |
+| `npm run start` | Serve production build |
+| `npm run fixtures` | Regenerate `fixtures.json` |
+| `npm run i18n:check` | Verify all locale files match `en.json` |
+| `npm run icons` | Regenerate favicon / app icons |
+| `npm run lint` | ESLint |
 
 ## Note on competition access
 

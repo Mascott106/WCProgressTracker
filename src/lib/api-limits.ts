@@ -7,6 +7,9 @@ export const FREE_TIER_REQUESTS_PER_MINUTE = 10;
 /** Poll every minute while a match is live (+ after full time until lock). */
 export const API_FETCH_INTERVAL_MS = 60_000;
 
+/** Poll every 5 minutes between matches (no live play). */
+export const QUIET_POLL_MS = 5 * 60 * 1000;
+
 /** Keep polling after expected full time for VAR / score corrections. */
 export const POST_LIVE_POLL_MS = 30 * 60 * 1000;
 

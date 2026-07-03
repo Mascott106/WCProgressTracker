@@ -15,7 +15,7 @@ Live World Cup 2026 progress for all **104 matches**. Scores and statuses come f
 - **Regional time display** — match times formatted in your locale and timezone with friendly zone names (not bare GMT offsets when possible)
 - **Language picker** — English, French, German, Italian, Spanish, Brazilian Portuguese (auto-detected from browser, overridable in footer)
 - **Timezone picker** — auto-detect from OS or choose a curated IANA zone (DST-aware; footer selector next to language)
-- **Live-aware polling** — refreshes every minute during live matches and for ~30 minutes after; otherwise waits until the next kickoff
+- **Live-aware polling** — refreshes every minute during live matches and for ~30 minutes after; otherwise every 5 minutes between kickoffs
 - **Kickoff-based fallback** — live games still show if the API is down or delayed
 - **Mock mode** — schedule + time-based status without an API key
 - **Nerd Mode** — RPG-style EXP gauges (Lv 1–99) and labels; toggle via the footer “Built by” link (saved in `localStorage`)
@@ -97,7 +97,7 @@ NEXT_PUBLIC_PREVIEW_BRACKET=true
 
 ## API usage strategy (free tier)
 
-football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute while a match is live and for ~30 minutes after full time** (before locking the final score), then caches until the next kickoff — typically a few calls per match day.
+football-data.org free plan: **10 requests/minute** ([docs](https://www.football-data.org/documentation/api)). This app polls **once per minute while a match is live and for ~30 minutes after full time** (before locking the final score), then **every 5 minutes** between kickoffs — typically a few calls per match day.
 
 One call fetches all 104 matches:
 

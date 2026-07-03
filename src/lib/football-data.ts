@@ -8,7 +8,7 @@ import {
   MATCH_DURATION_MS,
   OVERTIME_RETRY_MS,
   RATE_LIMIT_BACKOFF_MS,
-  REST_DAY_CACHE_MS,
+  QUIET_POLL_MS,
 } from "./api-limits";
 import {
   buildProgressFromExternal,
@@ -289,14 +289,14 @@ function isInActivePollingWindow(summaries: MatchSummary[], now: number): boolea
 
 /**
  * 1-minute polling during live play (+ 30 min after expected full time).
- * Otherwise cache until the next kickoff, or up to 24h on rest days.
+ * Otherwise poll every 5 minutes, or sooner if the next kickoff is within 5 minutes.
  */
 export function computeCacheTtl(summaries: MatchSummary[], now: number): number {
   if (isInActivePollingWindow(summaries, now)) {
     return API_FETCH_INTERVAL_MS;
   }
 
-  let nextFetch = REST_DAY_CACHE_MS;
+  let nextFetch = QUIET_POLL_MS;
   for (const match of summaries) {
     const kickoff = new Date(match.date).getTime();
     if (kickoff > now) {

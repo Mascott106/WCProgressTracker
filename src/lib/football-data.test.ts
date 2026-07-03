@@ -1,8 +1,52 @@
-import { extractMatchGoals, scoreFromGoalEvents } from "./football-data";
+import {
+  API_FETCH_INTERVAL_MS,
+  QUIET_POLL_MS,
+} from "./api-limits";
+import { computeCacheTtl, extractMatchGoals, scoreFromGoalEvents } from "./football-data";
+import type { MatchSummary } from "./types";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
+
+function scheduledMatch(dateIso: string): MatchSummary {
+  return {
+    id: 1,
+    date: dateIso,
+    status: "NS",
+    statusLong: "Not Started",
+    homeTeam: "A",
+    awayTeam: "B",
+    homeGoals: null,
+    awayGoals: null,
+    round: "Group Stage - A",
+    venue: "",
+    city: "",
+    foxChannel: null,
+    onTubi: false,
+  };
+}
+
+const quietNow = Date.UTC(2026, 6, 3, 21, 25); // 5:25 PM ET
+const kickoffIn35Min = new Date(quietNow + 35 * 60_000).toISOString();
+
+assert(
+  computeCacheTtl([scheduledMatch(kickoffIn35Min)], quietNow) === QUIET_POLL_MS,
+  "quiet window should poll every 5 minutes when next kickoff is far",
+);
+
+const kickoffIn3Min = new Date(quietNow + 3 * 60_000).toISOString();
+assert(
+  computeCacheTtl([scheduledMatch(kickoffIn3Min)], quietNow) === 3 * 60_000,
+  "should fetch before kickoff when it is within 5 minutes",
+);
+
+const liveKickoff = new Date(quietNow - 30 * 60_000).toISOString();
+assert(
+  computeCacheTtl([scheduledMatch(liveKickoff)], quietNow) ===
+    API_FETCH_INTERVAL_MS,
+  "live window should poll every minute",
+);
 
 const fromEvents = scoreFromGoalEvents([
   { score: { home: 1, away: 0 } },

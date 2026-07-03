@@ -90,7 +90,7 @@
     "source": "Fonte: {source}",
     "fixturesMatched": " · {matched}/{total} jogos correspondidos",
     "nextRefresh": "Próxima atualização",
-    "nextRefreshTitle": "Atualiza a cada minuto durante jogos ao vivo e por ~10 minutos depois; caso contrário, no próximo pontapé inicial",
+    "nextRefreshTitle": "Atualiza a cada minuto durante jogos ao vivo e por ~30 minutos depois; caso contrário, a cada 5 minutos",
     "cacheFreshTitle": "Cache ainda válido — atualização automática a cada minuto durante jogo ao vivo",
     "apiQuota": "Cota da API: {remaining}/{limit} restantes · por minuto",
     "apiQuotaResets": " · reinicia",

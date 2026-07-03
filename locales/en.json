@@ -90,7 +90,7 @@
     "source": "Source: {source}",
     "fixturesMatched": " · {matched}/{total} fixtures matched",
     "nextRefresh": "Next refresh",
-    "nextRefreshTitle": "Refreshes every minute during live matches and for ~10 minutes after; otherwise at the next kickoff",
+    "nextRefreshTitle": "Refreshes every minute during live matches and for ~30 minutes after; otherwise every 5 minutes",
     "cacheFreshTitle": "Cache still fresh — automatic refresh runs every minute during live play",
     "apiQuota": "API quota: {remaining}/{limit} left · per minute",
     "apiQuotaResets": " · resets",

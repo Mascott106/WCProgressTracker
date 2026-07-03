@@ -10,7 +10,7 @@
     "currentLevelSection": { "normal": "Nível atual", "nerd": "Nível atual" },
     "statDone": { "normal": "Concluídos", "nerd": "Completos" },
     "statLive": { "normal": "Ao vivo", "nerd": "Em combate" },
-    "statLeft": { "normal": "Restantes", "nerd": "Restantes" },
+    "statLeft": { "normal": "Restantes", "nerd": "Pendentes" },
     "matchAxisStart": { "normal": "Fase de grupos", "nerd": "Ato I" },
     "matchAxisMid": { "normal": "Mata-mata", "nerd": "Ato II" },
     "matchAxisEnd": { "normal": "Final", "nerd": "Grande final" },
@@ -49,7 +49,7 @@
     "matchUnavailable": "Dados do jogo indisponíveis"
   },
   "rounds": {
-    "roundOf32": "Trinta e dois avos de final",
+    "roundOf32": "Dezesseis avos de final",
     "roundOf16": "Oitavas de final",
     "quarterFinals": "Quartas de final",
     "semiFinals": "Semifinais",
@@ -86,7 +86,7 @@
     "language": "Idioma",
     "timezone": "Fuso horário",
     "timezoneAuto": "Auto",
-    "refresh": { "normal": "Atualizar", "nerd": "Sync" },
+    "refresh": { "normal": "Atualizar", "nerd": "Sincronizar" },
     "source": "Fonte: {source}",
     "fixturesMatched": " · {matched}/{total} jogos correspondidos",
     "nextRefresh": "Próxima atualização",

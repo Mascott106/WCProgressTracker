@@ -10,7 +10,7 @@
     "currentLevelSection": { "normal": "Niveau actuel", "nerd": "Niveau actuel" },
     "statDone": { "normal": "Terminés", "nerd": "Accomplis" },
     "statLive": { "normal": "En direct", "nerd": "En combat" },
-    "statLeft": { "normal": "Restants", "nerd": "Restants" },
+    "statLeft": { "normal": "Restants", "nerd": "En attente" },
     "matchAxisStart": { "normal": "Phase de groupes", "nerd": "Acte I" },
     "matchAxisMid": { "normal": "Éliminatoires", "nerd": "Acte II" },
     "matchAxisEnd": { "normal": "Finale", "nerd": "Finale" },

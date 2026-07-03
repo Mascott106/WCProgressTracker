@@ -49,7 +49,7 @@
     "matchUnavailable": "Spieldaten nicht verfügbar"
   },
   "rounds": {
-    "roundOf32": "Achtzehntelfinale",
+    "roundOf32": "Sechzehntelfinale",
     "roundOf16": "Achtelfinale",
     "quarterFinals": "Viertelfinale",
     "semiFinals": "Halbfinale",
@@ -86,7 +86,7 @@
     "language": "Sprache",
     "timezone": "Zeitzone",
     "timezoneAuto": "Auto",
-    "refresh": { "normal": "Aktualisieren", "nerd": "Sync" },
+    "refresh": { "normal": "Aktualisieren", "nerd": "Synchronisieren" },
     "source": "Quelle: {source}",
     "fixturesMatched": " · {matched}/{total} Spiele zugeordnet",
     "nextRefresh": "Nächste Aktualisierung",

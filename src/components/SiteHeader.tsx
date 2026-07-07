@@ -1,11 +1,13 @@
 "use client";
 
 import { useNerdMode } from "@/contexts/NerdModeContext";
+import { useFinalePreviewOptional } from "@/contexts/FinalePreviewContext";
 import { useTranslation } from "@/contexts/LocaleContext";
 
 export function SiteHeader() {
   const { nerdMode } = useNerdMode();
   const { t } = useTranslation();
+  const preview = useFinalePreviewOptional();
 
   return (
     <header className="mb-3 flex shrink-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
@@ -19,7 +21,21 @@ export function SiteHeader() {
       </div>
 
       <p className="text-xs text-muted/70 sm:text-right">
-        {nerdMode ? t("header.dateRangeNerd") : t("header.dateRange")}
+        {nerdMode ? (
+          t("header.dateRangeNerd")
+        ) : (
+          <>
+            {t("header.dateRangePrefix")}
+            <button
+              type="button"
+              onClick={() => preview?.cyclePreview()}
+              className="cursor-default hover:cursor-pointer hover:text-muted"
+              aria-label={t("header.previewFinaleAria")}
+            >
+              {t("header.dateRangeEnd")}
+            </button>
+          </>
+        )}
       </p>
     </header>
   );

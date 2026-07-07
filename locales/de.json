@@ -2,6 +2,9 @@
   "header": {
     "eventName": "FIFA-Weltmeisterschaft 2026",
     "dateRange": "104 Spiele · 11. Juni – 19. Juli",
+    "dateRangePrefix": "104 Spiele · 11. Juni – ",
+    "dateRangeEnd": "19. Juli",
+    "previewFinaleAria": "Finale-Vorschau",
     "dateRangeNerd": "EXP-Kurve · Lv. 1–99"
   },
   "progress": {

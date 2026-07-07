@@ -4,11 +4,16 @@ import {
 } from "./group-standings";
 import { applyApiTeamPrecedence } from "./api-team-precedence";
 import { buildBracket } from "./bracket";
+import { FINAL_MATCH_ID } from "./bracket-layout";
 import { applyScoreLocks } from "./locked-scores";
 import { applyManualScores } from "./manual-scores";
 import { applyScheduleStatuses } from "./match-status";
 import { buildKnockoutSchedule } from "./knockout-schedule";
 import { getScheduleDayWindow } from "./schedule-day";
+import {
+  computeTournamentTimePercent,
+  tournamentTimeEndAt,
+} from "./tournament-time";
 import {
   isFinished,
   isLive,
@@ -26,12 +31,6 @@ export function tournamentBounds(summaries: MatchSummary[]) {
   const start = Math.min(...kickoffs);
   const end = Math.max(...kickoffs) + MATCH_DURATION_MS;
   return { start, end };
-}
-
-function getTimeProgressPercent(now: number, start: number, end: number): number {
-  if (now <= start) return 0;
-  if (now >= end) return 100;
-  return ((now - start) / (end - start)) * 100;
 }
 
 /** When the next status transition is expected (kickoff or end of live window). */
@@ -125,9 +124,20 @@ export function buildProgressData(
     };
   });
 
-  const { start, end } = tournamentBounds(resolved);
+  const { start } = tournamentBounds(resolved);
+  const finalMatch = resolved.find((m) => m.id === FINAL_MATCH_ID);
+  const timeEndAt = finalMatch
+    ? tournamentTimeEndAt(finalMatch.date)
+    : new Date(start + MATCH_DURATION_MS).toISOString();
+  const timeResult = computeTournamentTimePercent(
+    now,
+    new Date(start).toISOString(),
+    timeEndAt,
+    finalMatch ?? null,
+  );
   const ttlMs = msUntilNextStatusChange(resolved, now);
   const completedCount = completed.length;
+  const tournamentComplete = completedCount >= TOTAL_GAMES;
 
   return {
     totalGames: TOTAL_GAMES,
@@ -137,14 +147,18 @@ export function buildProgressData(
     progressPercent: Math.round((completedCount / TOTAL_GAMES) * 1000) / 10,
     timeProgress: {
       startAt: new Date(start).toISOString(),
-      endAt: new Date(end).toISOString(),
-      percent: getTimeProgressPercent(now, start, end),
+      endAt: timeEndAt,
+      percent: timeResult.percent,
+      phase: timeResult.phase,
+      shouldShake: timeResult.shouldShake,
     },
     lastCompleted: completedSorted.slice(0, 2),
     liveMatches: live,
     upcomingDays,
     upcomingMatches,
     generatedAt: new Date(now).toISOString(),
+    tournamentComplete,
+    finalMatchStatus: finalMatch?.status ?? "NS",
     bracket: buildBracket(resolved, now),
     knockoutSchedule: buildKnockoutSchedule(resolved, now),
     nextStatusChangeAt: new Date(now + ttlMs).toISOString(),

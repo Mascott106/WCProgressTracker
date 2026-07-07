@@ -2,6 +2,9 @@
   "header": {
     "eventName": "FIFA World Cup 2026",
     "dateRange": "104 matches · June 11 – July 19",
+    "dateRangePrefix": "104 matches · June 11 – ",
+    "dateRangeEnd": "July 19",
+    "previewFinaleAria": "Preview finale sequence",
     "dateRangeNerd": "EXP curve · Lv 1–99"
   },
   "progress": {

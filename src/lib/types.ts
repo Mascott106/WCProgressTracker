@@ -2,6 +2,8 @@ import type { KnockoutTreeMeta } from "./bracket-layout";
 
 export const TOTAL_GAMES = 104;
 
+export type TournamentTimePhase = "normal" | "finalOvertime" | "complete";
+
 /** Minutes after kickoff before a match counts as complete */
 export const MATCH_DURATION_MINUTES = 120;
 
@@ -126,9 +128,11 @@ export interface ScheduleDay {
 export interface TimeProgress {
   /** First match kickoff */
   startAt: string;
-  /** Last match kickoff + match duration (2 hours) */
+  /** Final kickoff + tournament wall-clock end offset (105 min default) */
   endAt: string;
   percent: number;
+  phase: TournamentTimePhase;
+  shouldShake: boolean;
 }
 
 export interface ProgressData {
@@ -145,6 +149,10 @@ export interface ProgressData {
   upcomingMatches: MatchSummary[];
   /** ISO timestamp used as "now" when this payload was built (schedule bucketing anchor) */
   generatedAt: string;
+  /** All 104 matches finished */
+  tournamentComplete: boolean;
+  /** Status of match 104 for client-side tournament time rAF */
+  finalMatchStatus: string;
   bracket: BracketData;
   knockoutSchedule: KnockoutSchedule;
   /** When the next live/complete status transition is expected */

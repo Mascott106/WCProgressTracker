@@ -3,16 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 import type { CupMode } from "@/contexts/CupModeContext";
 import { useTranslation } from "@/contexts/LocaleContext";
+import { TournamentFireworks } from "@/components/TournamentFireworks";
+import { useCupFullFireworks } from "@/hooks/useCupFullFireworks";
 import { useProgressData } from "@/hooks/useProgressData";
 import {
   createCupFluid,
   prefersReducedMotion,
   type CupFluidController,
 } from "@/lib/cup-fluid";
-import { computeTimePercent } from "@/lib/time-progress";
+import { computeTournamentTimePercent } from "@/lib/tournament-time";
 
 interface FillTheCupProps {
   mode: Extract<CupMode, "cup-match" | "cup-time">;
+}
+
+function cupTimePercent(
+  now: number,
+  startAt: string,
+  endAt: string,
+  finalMatchStatus: string,
+): number {
+  return computeTournamentTimePercent(now, startAt, endAt, {
+    status: finalMatchStatus,
+  }).percent;
 }
 
 export function FillTheCup({ mode }: FillTheCupProps) {
@@ -28,6 +41,10 @@ export function FillTheCup({ mode }: FillTheCupProps) {
   const [transitioning, setTransitioning] = useState(false);
   const [timeFillReady, setTimeFillReady] = useState(mode === "cup-time");
   const [fluidReady, setFluidReady] = useState(false);
+  const { show: showFireworks, dismiss: dismissFireworks } = useCupFullFireworks(
+    mode,
+    displayPercent,
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,10 +98,11 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         const waitDrain = () => {
           frame++;
           if (fluid.getFillLevel() <= 0.02 || frame > 150) {
-            const pct = computeTimePercent(
+            const pct = cupTimePercent(
               Date.now(),
               data.timeProgress.startAt,
               data.timeProgress.endAt,
+              data.finalMatchStatus,
             );
             fluid.setTargetPercent(pct);
             setActiveMetric("time");
@@ -98,10 +116,11 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         prevModeRef.current = mode;
         return () => cancelAnimationFrame(raf);
       }
-      const pct = computeTimePercent(
+      const pct = cupTimePercent(
         Date.now(),
         data.timeProgress.startAt,
         data.timeProgress.endAt,
+        data.finalMatchStatus,
       );
       fluid.setTargetPercent(pct);
       setActiveMetric("time");
@@ -122,10 +141,11 @@ export function FillTheCup({ mode }: FillTheCupProps) {
         raf = requestAnimationFrame(tick);
         return;
       }
-      const pct = computeTimePercent(
+      const pct = cupTimePercent(
         Date.now(),
         data.timeProgress.startAt,
         data.timeProgress.endAt,
+        data.finalMatchStatus,
       );
       fluid.setTargetPercent(pct);
       raf = requestAnimationFrame(tick);
@@ -167,6 +187,8 @@ export function FillTheCup({ mode }: FillTheCupProps) {
 
   return (
     <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-4 py-6">
+      <TournamentFireworks show={showFireworks} onDone={dismissFireworks} />
+
       <div className="text-center">
         <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-accent">
           {t("cup.title")}

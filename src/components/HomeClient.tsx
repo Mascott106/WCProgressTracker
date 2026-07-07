@@ -5,9 +5,21 @@ import { ProgressDashboard } from "@/components/ProgressDashboard";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useCupMode } from "@/contexts/CupModeContext";
+import {
+  FinalePreviewProvider,
+  useFinalePreview,
+} from "@/contexts/FinalePreviewContext";
+import { useEffect } from "react";
 
-export function HomeClient() {
+function HomeContent() {
   const { cupMode } = useCupMode();
+  const { resetPreview } = useFinalePreview();
+
+  useEffect(() => {
+    if (cupMode !== "dashboard") {
+      resetPreview();
+    }
+  }, [cupMode, resetPreview]);
 
   return (
     <main className="field-pattern flex min-h-screen flex-col px-4 py-4 sm:px-10 sm:py-5">
@@ -21,5 +33,13 @@ export function HomeClient() {
 
       <SiteFooter />
     </main>
+  );
+}
+
+export function HomeClient() {
+  return (
+    <FinalePreviewProvider>
+      <HomeContent />
+    </FinalePreviewProvider>
   );
 }

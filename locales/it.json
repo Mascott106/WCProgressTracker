@@ -2,6 +2,9 @@
   "header": {
     "eventName": "Coppa del Mondo FIFA 2026",
     "dateRange": "104 partite · 11 giugno – 19 luglio",
+    "dateRangePrefix": "104 partite · 11 giugno – ",
+    "dateRangeEnd": "19 luglio",
+    "previewFinaleAria": "Anteprima sequenza finale",
     "dateRangeNerd": "Curva EXP · Lv. 1–99"
   },
   "progress": {

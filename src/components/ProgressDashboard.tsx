@@ -5,18 +5,25 @@ import { formatDateTime } from "@/lib/format-datetime";
 import { MatchPanel } from "@/components/MatchPanel";
 import { ProgressBar } from "@/components/ProgressBar";
 import { TimeProgressBar } from "@/components/TimeProgressBar";
+import { TournamentFireworks } from "@/components/TournamentFireworks";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { KnockoutRoundTimeline } from "@/components/KnockoutRoundTimeline";
 import { UpcomingSchedule } from "@/components/UpcomingSchedule";
+import { useFinalePreview } from "@/contexts/FinalePreviewContext";
 import { useMatchProgressCelebrations } from "@/hooks/useMatchProgressCelebrations";
 import { useProgressData } from "@/hooks/useProgressData";
+import { useTournamentFireworks } from "@/hooks/useTournamentFireworks";
 import { useTranslation } from "@/contexts/LocaleContext";
 import { useNerdMode } from "@/contexts/NerdModeContext";
 
 export function ProgressDashboard() {
   const { nerdMode } = useNerdMode();
   const { t } = useTranslation();
+  const { previewPhase } = useFinalePreview();
   const { data, meta, loading, error, refresh, setLoading } = useProgressData();
+  const previewFireworks = previewPhase === "complete";
+  const { show: showFireworks, dismiss: dismissFireworks } =
+    useTournamentFireworks(data, previewFireworks);
 
   useMatchProgressCelebrations(data, nerdMode);
 
@@ -50,6 +57,8 @@ export function ProgressDashboard() {
 
   return (
     <div className="flex flex-col gap-3 pb-4">
+      <TournamentFireworks show={showFireworks} onDone={dismissFireworks} />
+
       {error && (
         <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
           {error}
@@ -68,7 +77,9 @@ export function ProgressDashboard() {
       <TimeProgressBar
         startAt={data.timeProgress.startAt}
         endAt={data.timeProgress.endAt}
+        finalMatchStatus={data.finalMatchStatus}
         nerdMode={nerdMode}
+        previewActive={previewPhase !== "off"}
       />
 
       <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CupMode } from "@/contexts/CupModeContext";
 
 const STORAGE_KEYS: Record<"cup-match" | "cup-time", string> = {
@@ -44,5 +44,7 @@ export function useCupFullFireworks(
     }
   }, [mode, displayPercent]);
 
-  return { show, dismiss: () => setShow(false) };
+  const dismiss = useCallback(() => setShow(false), []);
+
+  return { show, dismiss };
 }

@@ -117,7 +117,7 @@ export function TournamentFireworks({ show, onDone }: TournamentFireworksProps) 
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
-  }, [show, mounted, onDone]);
+  }, [show, mounted]);
 
   if (!show || !mounted) return null;
 

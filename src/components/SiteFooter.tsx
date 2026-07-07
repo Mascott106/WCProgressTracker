@@ -48,7 +48,7 @@ export function SiteFooter() {
         onClick={toggleNerdMode}
         disabled={!ready}
         suppressHydrationWarning
-        className={hiddenBtn}
+        className={`${hiddenBtn} hover:cursor-pointer hover:text-muted/70`}
       >
         Scott Mendenko
       </button>

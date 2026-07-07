@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ProgressData } from "@/lib/types";
 
 const STORAGE_KEY = "wc-tournament-fireworks-shown";
@@ -37,5 +37,7 @@ export function useTournamentFireworks(
     }
   }, [data, previewFireworks]);
 
-  return { show, dismiss: () => setShow(false) };
+  const dismiss = useCallback(() => setShow(false), []);
+
+  return { show, dismiss };
 }

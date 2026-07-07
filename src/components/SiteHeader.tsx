@@ -29,7 +29,7 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => preview?.cyclePreview()}
-              className="cursor-default hover:cursor-pointer hover:text-muted"
+              className="cursor-default"
               aria-label={t("header.previewFinaleAria")}
             >
               {t("header.dateRangeEnd")}

@@ -1,7 +1,11 @@
 "use client";
 
 import { useTranslation } from "@/contexts/LocaleContext";
-import { matchProgressKnockoutPercent } from "@/lib/types";
+import {
+  matchProgressStageMarkPercents,
+  matchProgressStageMarks,
+  type MatchProgressStageMark,
+} from "@/lib/match-progress-stages";
 import { ExpGauge } from "@/components/ExpGauge";
 
 interface ProgressBarProps {
@@ -13,8 +17,8 @@ interface ProgressBarProps {
   nerdMode?: boolean;
 }
 
-const KNOCKOUT_START_PERCENT = matchProgressKnockoutPercent();
-const MATCH_BAR_MARKS = [25, KNOCKOUT_START_PERCENT, 75];
+const STAGE_MARKS = matchProgressStageMarks();
+const STAGE_MARK_PERCENTS = matchProgressStageMarkPercents();
 
 export function ProgressBar({
   percent,
@@ -79,9 +83,9 @@ export function ProgressBar({
             size="lg"
             fillMode="overall"
             showHeader={false}
-            barMarks={MATCH_BAR_MARKS}
+            barMarks={STAGE_MARK_PERCENTS}
           />
-          <MatchProgressAxis nerdMode />
+          <MatchProgressAxis nerdMode marks={STAGE_MARKS} />
         </>
       ) : (
         <>
@@ -90,37 +94,52 @@ export function ProgressBar({
               className="progress-glow absolute inset-y-0 left-0 rounded-xl bg-gradient-to-r from-accent-dim via-accent to-yellow-300 transition-all duration-1000 ease-out"
               style={{ width: `${clampedPercent}%` }}
             />
-            {MATCH_BAR_MARKS.map((mark) => (
+            {STAGE_MARK_PERCENTS.map((mark) => (
               <div
                 key={mark}
-                className="absolute top-1 bottom-1 w-px bg-border/50"
+                className="absolute top-1 bottom-1 z-10 w-px bg-border/50"
                 style={{ left: `${mark}%` }}
               />
             ))}
           </div>
 
-          <MatchProgressAxis nerdMode={false} />
+          <MatchProgressAxis nerdMode={false} marks={STAGE_MARKS} />
         </>
       )}
     </div>
   );
 }
 
-function MatchProgressAxis({ nerdMode }: { nerdMode: boolean }) {
+function MatchProgressAxis({
+  nerdMode,
+  marks,
+}: {
+  nerdMode: boolean;
+  marks: MatchProgressStageMark[];
+}) {
   const { t } = useTranslation();
 
   return (
-    <div className="relative h-3 text-[10px] text-muted/50">
-      <span className="absolute left-0 top-0">
+    <div className="relative h-4 text-[9px] text-muted/50 sm:text-[10px]">
+      <span className="absolute left-0 top-0 whitespace-nowrap">
         {t("progress.matchAxisStart", { nerd: nerdMode })}
       </span>
-      <span
-        className="absolute top-0 -translate-x-1/2 whitespace-nowrap"
-        style={{ left: `${KNOCKOUT_START_PERCENT}%` }}
-      >
-        {t("progress.matchAxisMid", { nerd: nerdMode })}
-      </span>
-      <span className="absolute right-0 top-0">
+      {marks.map((mark) => {
+        if (mark.round === "Final" || mark.round === "Third Place") {
+          return null;
+        }
+        return (
+          <span
+            key={mark.round}
+            className="absolute top-0 -translate-x-1/2 whitespace-nowrap"
+            style={{ left: `${mark.percent}%` }}
+            title={mark.round}
+          >
+            {mark.shortName}
+          </span>
+        );
+      })}
+      <span className="absolute right-0 top-0 whitespace-nowrap">
         {t("progress.matchAxisEnd", { nerd: nerdMode })}
       </span>
     </div>

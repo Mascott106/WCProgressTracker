@@ -46,7 +46,8 @@
     "begins": "Inizio",
     "final": "Finale",
     "third": "3°",
-    "matchUnavailable": "Dati partita non disponibili"
+    "matchUnavailable": "Dati partita non disponibili",
+    "matchNumber": "Partita {id}"
   },
   "rounds": {
     "roundOf32": "Sedicesimi di finale",

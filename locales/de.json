@@ -46,7 +46,8 @@
     "begins": "Beginn",
     "final": "Finale",
     "third": "3.",
-    "matchUnavailable": "Spieldaten nicht verfügbar"
+    "matchUnavailable": "Spieldaten nicht verfügbar",
+    "matchNumber": "Spiel {id}"
   },
   "rounds": {
     "roundOf32": "Sechzehntelfinale",

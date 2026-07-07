@@ -46,7 +46,8 @@
     "begins": "Begins",
     "final": "Final",
     "third": "3rd",
-    "matchUnavailable": "Match data unavailable"
+    "matchUnavailable": "Match data unavailable",
+    "matchNumber": "Match {id}"
   },
   "rounds": {
     "roundOf32": "Round of 32",

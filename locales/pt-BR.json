@@ -46,7 +46,8 @@
     "begins": "Começa",
     "final": "Final",
     "third": "3º",
-    "matchUnavailable": "Dados do jogo indisponíveis"
+    "matchUnavailable": "Dados do jogo indisponíveis",
+    "matchNumber": "Jogo {id}"
   },
   "rounds": {
     "roundOf32": "Dezesseis avos de final",

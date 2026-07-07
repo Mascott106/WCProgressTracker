@@ -1,5 +1,6 @@
 import fixtures from "../data/fixtures.json";
 import { buildBracket } from "./bracket";
+import { getFixtureSchedule } from "./fixture-schedule";
 import {
   buildKnockoutFeeders,
   collectBracketLeaves,
@@ -104,5 +105,15 @@ assert(treeLeaves.includes(73), "M73 should remain a tree leaf");
 assert(treeLeaves.includes(75), "M75 should remain a tree leaf");
 assert(treeLeaves.includes(77), "M77 should remain a tree leaf");
 assert(treeLeaves.includes(78), "M78 should remain a tree leaf");
+
+const finalRound = bracket.rounds.find((r) => r.name === "Final");
+const finalSlot = finalRound?.matches[0];
+assert(
+  Boolean(finalSlot?.date && finalSlot?.round && finalSlot?.statusLong),
+  "bracket slots should include schedule fields",
+);
+
+const finalFixture = getFixtureSchedule(104);
+assert(finalFixture?.round === "Final", "match 104 should be the Final");
 
 console.log("bracket tests passed");

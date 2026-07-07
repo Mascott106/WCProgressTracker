@@ -69,11 +69,14 @@ export interface MatchSummary {
 
 export interface BracketSlot {
   id: number;
+  date: string;
+  round: string;
   homeTeam: string;
   awayTeam: string;
   homeGoals: number | null;
   awayGoals: number | null;
   status: string;
+  statusLong: string;
   isLive: boolean;
   isFinished: boolean;
   venue: string;

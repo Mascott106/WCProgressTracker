@@ -43,11 +43,14 @@ function toBracketSlot(
 ): BracketSlot {
   return {
     id: summary.id,
+    date: summary.date,
+    round: summary.round,
     homeTeam: resolveLabel(summary.homeTeam, byId),
     awayTeam: resolveLabel(summary.awayTeam, byId),
     homeGoals: summary.homeGoals,
     awayGoals: summary.awayGoals,
     status: summary.status,
+    statusLong: summary.statusLong,
     isLive: isLive(summary.status),
     isFinished: isFinished(summary.status),
     venue: summary.venue,

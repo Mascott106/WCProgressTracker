@@ -5,7 +5,13 @@ import { formatMatchVenue } from "@/lib/types";
 import type { KnockoutTreeMeta } from "@/lib/bracket-layout";
 import { BroadcastLabel } from "@/components/BroadcastLabel";
 import { TeamName } from "@/components/TeamName";
+import {
+  BracketMatchId,
+  type BracketMatchScheduleInfo,
+} from "@/components/BracketMatchScheduleTooltip";
 import { useTranslation } from "@/contexts/LocaleContext";
+import { getBroadcast } from "@/lib/broadcast";
+import { getFixtureSchedule } from "@/lib/fixture-schedule";
 
 /** SF → QF → R16 → R32 on each half (0 = semi). */
 const KNOCKOUT_HALF_DEPTH = 3;
@@ -244,16 +250,51 @@ function KnockoutBracketFallback({ bracket }: { bracket: BracketData }) {
   );
 }
 
+function scheduleFromSlot(slot: BracketSlot): BracketMatchScheduleInfo {
+  return {
+    matchId: slot.id,
+    date: slot.date,
+    round: slot.round,
+    homeTeam: slot.homeTeam,
+    awayTeam: slot.awayTeam,
+    venue: slot.venue,
+    city: slot.city,
+    foxChannel: slot.foxChannel,
+    onTubi: slot.onTubi,
+    status: slot.status,
+    statusLong: slot.statusLong,
+  };
+}
+
+function scheduleFromMatchId(matchId: number): BracketMatchScheduleInfo {
+  const fixture = getFixtureSchedule(matchId);
+  const { foxChannel, onTubi } = getBroadcast(matchId);
+  return {
+    matchId,
+    date: fixture?.date ?? "",
+    round: fixture?.round ?? "",
+    homeTeam: fixture?.homeTeam ?? "—",
+    awayTeam: fixture?.awayTeam ?? "—",
+    venue: fixture?.venue ?? "",
+    city: fixture?.city ?? "",
+    foxChannel,
+    onTubi,
+    status: "NS",
+    statusLong: "Not Started",
+  };
+}
+
 function BracketMatchPlaceholder({ matchId }: { matchId: number }) {
   const { t } = useTranslation();
 
   return (
-    <div
-      className="w-full rounded border border-dashed border-amber-500/40 bg-amber-500/5 px-1.5 py-2"
-      title={`Match ${matchId} unavailable`}
-    >
+    <div className="w-full rounded border border-dashed border-amber-500/40 bg-amber-500/5 px-1.5 py-2">
       <p className="font-mono text-[8px] font-semibold tabular-nums text-amber-200/70">
-        M{matchId}
+        <BracketMatchId
+          matchId={matchId}
+          schedule={scheduleFromMatchId(matchId)}
+          className="font-mono text-[8px] font-semibold tabular-nums text-amber-200/70"
+        />
       </p>
       <p className="text-[9px] text-amber-200/50">{t("knockout.matchUnavailable")}</p>
     </div>
@@ -282,12 +323,13 @@ function BracketMatch({
   return (
     <div
       className={`w-full rounded border px-1.5 ${compact ? "py-1" : "py-2 sm:py-1"} ${border} ${large ? "sm:py-1.5" : ""}`}
-      title={`Match ${slot.id}`}
     >
       <div className="mb-0.5 flex items-center justify-between gap-1">
-        <span className="font-mono text-[8px] font-semibold tabular-nums text-muted/55">
-          M{slot.id}
-        </span>
+        <BracketMatchId
+          matchId={slot.id}
+          schedule={scheduleFromSlot(slot)}
+          className="font-mono text-[8px] font-semibold tabular-nums text-muted/55"
+        />
         <BroadcastLabel foxChannel={slot.foxChannel} onTubi={slot.onTubi} />
       </div>
       {!compact && (

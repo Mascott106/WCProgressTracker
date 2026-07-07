@@ -29,6 +29,9 @@ export function TournamentFireworks({ show, onDone }: TournamentFireworksProps) 
 
   useEffect(() => setMounted(true), []);
 
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
   useEffect(() => {
     if (!show || !mounted) return;
 
@@ -79,7 +82,7 @@ export function TournamentFireworks({ show, onDone }: TournamentFireworksProps) 
       const elapsed = now - start;
       if (elapsed >= DURATION_MS) {
         active = false;
-        onDone?.();
+        onDoneRef.current?.();
         return;
       }
 

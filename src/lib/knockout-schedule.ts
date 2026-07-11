@@ -24,27 +24,44 @@ function roundMilestoneStatus(
   return "upcoming";
 }
 
-/** Only the earliest incomplete round may be `current`; later rounds stay `upcoming`. */
+/** Furthest round with results or live play wins; earlier rounds display complete once a later round has started. */
 function normalizeMilestoneStatuses<
   T extends {
     status: "complete" | "current" | "upcoming";
     completedMatches: number;
+    totalMatches: number;
+    liveMatches: number;
   },
 >(milestones: T[]): T[] {
-  const firstIncompleteIdx = milestones.findIndex(
-    (m) => m.status !== "complete",
-  );
-  if (firstIncompleteIdx === -1) return milestones;
+  let furthestActivityIdx = -1;
+  for (let i = 0; i < milestones.length; i++) {
+    const milestone = milestones[i]!;
+    if (milestone.liveMatches > 0 || milestone.completedMatches > 0) {
+      furthestActivityIdx = i;
+    }
+  }
+
+  if (furthestActivityIdx === -1) return milestones;
+
+  const furthest = milestones[furthestActivityIdx]!;
+  const furthestComplete =
+    furthest.totalMatches > 0 &&
+    furthest.completedMatches >= furthest.totalMatches;
+
+  const currentIdx =
+    furthestComplete && furthestActivityIdx + 1 < milestones.length
+      ? furthestActivityIdx + 1
+      : furthestActivityIdx;
 
   return milestones.map((milestone, index) => {
-    if (index < firstIncompleteIdx) {
+    if (index < currentIdx) {
       return milestone.status === "complete"
         ? milestone
         : { ...milestone, status: "complete" as const };
     }
-    if (index === firstIncompleteIdx) {
+    if (index === currentIdx) {
       const hasStarted =
-        milestone.status === "current" || milestone.completedMatches > 0;
+        milestone.liveMatches > 0 || milestone.completedMatches > 0;
       return {
         ...milestone,
         status: hasStarted ? ("current" as const) : ("upcoming" as const),
@@ -90,6 +107,7 @@ export function buildKnockoutSchedule(
         totalMatches: roundMatches.length,
         completedMatches: roundMatches.filter((m) => isFinished(m.status))
           .length,
+        liveMatches: roundMatches.filter((m) => isLive(m.status)).length,
         status: roundMilestoneStatus(roundMatches),
       };
     }),

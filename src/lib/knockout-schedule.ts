@@ -24,6 +24,38 @@ function roundMilestoneStatus(
   return "upcoming";
 }
 
+/** Only the earliest incomplete round may be `current`; later rounds stay `upcoming`. */
+function normalizeMilestoneStatuses<
+  T extends {
+    status: "complete" | "current" | "upcoming";
+    completedMatches: number;
+  },
+>(milestones: T[]): T[] {
+  const firstIncompleteIdx = milestones.findIndex(
+    (m) => m.status !== "complete",
+  );
+  if (firstIncompleteIdx === -1) return milestones;
+
+  return milestones.map((milestone, index) => {
+    if (index < firstIncompleteIdx) {
+      return milestone.status === "complete"
+        ? milestone
+        : { ...milestone, status: "complete" as const };
+    }
+    if (index === firstIncompleteIdx) {
+      const hasStarted =
+        milestone.status === "current" || milestone.completedMatches > 0;
+      return {
+        ...milestone,
+        status: hasStarted ? ("current" as const) : ("upcoming" as const),
+      };
+    }
+    return milestone.status === "upcoming"
+      ? milestone
+      : { ...milestone, status: "upcoming" as const };
+  });
+}
+
 export function buildKnockoutSchedule(
   summaries: MatchSummary[],
   now: number,
@@ -40,23 +72,28 @@ export function buildKnockoutSchedule(
 
   const active = knockoutStarted || previewBracket;
 
-  const milestones = KNOCKOUT_TIMELINE_ROUNDS.map((name) => {
-    const roundMatches = knockout
-      .filter((m) => m.round === name)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const milestones = normalizeMilestoneStatuses(
+    KNOCKOUT_TIMELINE_ROUNDS.map((name) => {
+      const roundMatches = knockout
+        .filter((m) => m.round === name)
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
 
-    const dates = roundMatches.map((m) => m.date);
+      const dates = roundMatches.map((m) => m.date);
 
-    return {
-      name,
-      shortName: roundShortName(name),
-      startsAt: dates[0] ?? "",
-      endsAt: dates[dates.length - 1] ?? "",
-      totalMatches: roundMatches.length,
-      completedMatches: roundMatches.filter((m) => isFinished(m.status)).length,
-      status: roundMilestoneStatus(roundMatches),
-    };
-  });
+      return {
+        name,
+        shortName: roundShortName(name),
+        startsAt: dates[0] ?? "",
+        endsAt: dates[dates.length - 1] ?? "",
+        totalMatches: roundMatches.length,
+        completedMatches: roundMatches.filter((m) => isFinished(m.status))
+          .length,
+        status: roundMilestoneStatus(roundMatches),
+      };
+    }),
+  );
 
   const currentRound =
     milestones.find((m) => m.status === "current")?.name ??

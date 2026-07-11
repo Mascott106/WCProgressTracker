@@ -5,6 +5,7 @@ import {
   statusLabel,
   type MatchSummary,
 } from "./types";
+import { isPriorScheduleDay } from "./schedule-day";
 
 const MATCH_DURATION_MS = MATCH_DURATION_MINUTES * 60 * 1000;
 
@@ -20,11 +21,17 @@ export function resolveMatchStatus(
   const status = apiStatus ?? "NS";
 
   if (isFinished(status) || isLive(status)) {
-    return { status, statusLong: statusLabel(status) };
+    return closeIfPriorScheduleDay(kickoffIso, now, {
+      status,
+      statusLong: statusLabel(status),
+    });
   }
 
   if (status !== "NS") {
-    return { status, statusLong: statusLabel(status) };
+    return closeIfPriorScheduleDay(kickoffIso, now, {
+      status,
+      statusLong: statusLabel(status),
+    });
   }
 
   const kickoff = new Date(kickoffIso).getTime();
@@ -37,6 +44,17 @@ export function resolveMatchStatus(
     return { status: "LIVE", statusLong: statusLabel("LIVE") };
   }
 
+  const resolved = { status: "FT" as const, statusLong: statusLabel("FT") };
+  return closeIfPriorScheduleDay(kickoffIso, now, resolved);
+}
+
+function closeIfPriorScheduleDay(
+  kickoffIso: string,
+  now: number,
+  resolved: { status: string; statusLong: string },
+): { status: string; statusLong: string } {
+  if (isFinished(resolved.status)) return resolved;
+  if (!isPriorScheduleDay(kickoffIso, now)) return resolved;
   return { status: "FT", statusLong: statusLabel("FT") };
 }
 

@@ -142,3 +142,38 @@ export function getScheduleDayWindow(
     dateIso: new Date(start).toISOString(),
   };
 }
+
+/** 6 AM boundary start of the schedule day that contains `ms`. */
+export function getScheduleDayStartFor(
+  ms: number,
+  timeZone: string = SCHEDULE_DAY_TIMEZONE,
+): number {
+  const zoned = getZonedParts(ms, timeZone);
+  let { year, month, day } = zoned;
+
+  if (zoned.hour < SCHEDULE_DAY_CUTOFF_HOUR) {
+    ({ year, month, day } = addCalendarDays(year, month, day, -1));
+  }
+
+  return zonedWallTimeToUtc(
+    year,
+    month,
+    day,
+    SCHEDULE_DAY_CUTOFF_HOUR,
+    0,
+    timeZone,
+  );
+}
+
+/** True when the match kickoff falls in a schedule day before the current one. */
+export function isPriorScheduleDay(
+  kickoffIso: string,
+  now: number,
+  timeZone: string = SCHEDULE_DAY_TIMEZONE,
+): boolean {
+  const kickoff = new Date(kickoffIso).getTime();
+  return (
+    getScheduleDayStartFor(kickoff, timeZone) <
+    getScheduleDayWindow(now, 0, timeZone).start
+  );
+}

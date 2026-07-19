@@ -10,7 +10,7 @@ export function useTournamentFireworks(
   previewFireworks: boolean,
 ): { show: boolean; dismiss: () => void } {
   const [show, setShow] = useState(false);
-  const prevCompleteRef = useRef<boolean | null>(null);
+  const shownRef = useRef(false);
 
   useEffect(() => {
     if (previewFireworks) {
@@ -18,23 +18,21 @@ export function useTournamentFireworks(
       return;
     }
 
-    if (!data) return;
+    if (!data?.tournamentComplete) return;
+    if (shownRef.current) return;
 
-    const complete = data.tournamentComplete;
-    const prev = prevCompleteRef.current;
-    prevCompleteRef.current = complete;
-
-    if (prev === null) return;
-
-    if (!prev && complete) {
-      try {
-        if (sessionStorage.getItem(STORAGE_KEY) === "1") return;
-        sessionStorage.setItem(STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
+    try {
+      if (sessionStorage.getItem(STORAGE_KEY) === "1") {
+        shownRef.current = true;
+        return;
       }
-      setShow(true);
+      sessionStorage.setItem(STORAGE_KEY, "1");
+    } catch {
+      /* ignore */
     }
+
+    shownRef.current = true;
+    setShow(true);
   }, [data, previewFireworks]);
 
   const dismiss = useCallback(() => setShow(false), []);

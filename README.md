@@ -116,20 +116,19 @@ The footer shows your football-data.org **per-minute** quota as `remaining/limit
 
 ## Architecture
 
+**Tournament archived (post–July 19, 2026):** the site no longer calls football-data.org. Final scores are served from the committed snapshot [`src/data/tournament-results.json`](src/data/tournament-results.json). `FOOTBALL_DATA_API_KEY` is not required to run the app. Startup does not clear or re-fetch live cache.
+
 ```
 Browser → GET /api/progress
               ↓
-         football-data.ts (cache)
-              ↓ (on cache miss)
-         football-data.org v4: /competitions/WC/matches
+         football-data.ts (archive)
               ↓
-         merge-api.ts — overlay scores/status on fixtures.json
+         tournament-results.json → merge-api.ts → progress.ts
               ↓
-         progress.ts — shared UI logic (bracket, schedule, bars)
-              ↓
-         Client — LocaleContext + TimeZoneContext re-bucket schedule
-                  and format dates; i18n from locales/*.json
+         Client — LocaleContext + TimeZoneContext; i18n from locales/*.json
 ```
+
+Historical live path (disabled while `TOURNAMENT_ARCHIVED` is true): cache miss → football-data.org v4 → merge onto `fixtures.json`.
 
 Status mapping from football-data.org:
 
@@ -174,7 +173,7 @@ npm run build
 npm start
 ```
 
-Set `FOOTBALL_DATA_API_KEY` in your host's environment variables. Create a writable `data/` directory for the API cache.
+Archive mode does not need `FOOTBALL_DATA_API_KEY`. A writable `data/` directory is still fine for optional manual score pins.
 
 ### VPS (DigitalOcean)
 
@@ -357,6 +356,7 @@ sudo ufw allow 3000
 | File / directory | Purpose |
 |------------------|---------|
 | `src/data/fixtures.json` | All 104 matches (June 11 – July 19, 2026) |
+| `src/data/tournament-results.json` | Frozen final scores/status (archive source of truth) |
 | `src/lib/broadcast.ts` | FOX / FS1 / Tubi assignments per match |
 | `locales/*.json` | UI translations (see [`locales/README.md`](locales/README.md)) |
 | `scripts/build-fixtures.mjs` | Regenerates `fixtures.json` from the embedded schedule |
@@ -382,6 +382,4 @@ npm run fixtures
 
 ## Note on competition access
 
-[FIFA World Cup is included on the free tier](https://www.football-data.org/coverage) — register at [football-data.org](https://www.football-data.org/client/register), copy your token into `FOOTBALL_DATA_API_KEY`, and restart the dev server.
-
-If the API still fails, common causes are a missing/invalid token (400), rate limiting (429), or the 2026 season not being published yet (empty match list). The app falls back to schedule-only mode and shows the error in the footer banner.
+The 2026 tournament is **archived**. Live football-data.org polling is off; scores come from `tournament-results.json`. To re-enable live fetches, set `TOURNAMENT_ARCHIVED` to `false` in `src/lib/football-data.ts` and restore a valid `FOOTBALL_DATA_API_KEY` (see [football-data.org](https://www.football-data.org/client/register)).

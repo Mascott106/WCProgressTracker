@@ -23,16 +23,20 @@ import {
 } from "./group-standings";
 import type { MatchSummary, ProgressData } from "./types";
 import { statusLabel, TOTAL_GAMES } from "./types";
+import tournamentResults from "@/data/tournament-results.json";
 
 const API_BASE = "https://api.football-data.org/v4";
 const WORLD_CUP_CODE = "WC";
 const WORLD_CUP_SEASON = 2026;
 
+/** Permanent freeze — no football-data.org fetches after the tournament. */
+export const TOURNAMENT_ARCHIVED = true;
+
 const CACHE_DIR = path.join(process.cwd(), "data");
 const CACHE_FILE = path.join(CACHE_DIR, "cache.json");
 
 export interface ProgressApiMeta {
-  source: "api" | "cache" | "static-fallback";
+  source: "api" | "cache" | "static-fallback" | "archive";
   /** Server will not call football-data.org before this time. */
   cacheExpiresAt: string;
   /** Remaining calls in the current minute window (from X-Requests-Available-Minute). */
@@ -111,8 +115,16 @@ let memoryCache: CacheEntry | null = null;
 let lastUpstreamFetchAt = 0;
 let rateLimitUntil = 0;
 
-/** Clear API cache and warm progress data with a fresh upstream fetch on startup. */
+/** On startup: archive mode loads the committed snapshot; live mode used to re-fetch. */
 export async function warmProgressCacheOnStartup(): Promise<void> {
+  if (TOURNAMENT_ARCHIVED) {
+    memoryCache = archiveCacheEntry();
+    console.info(
+      `[wc-progress] Tournament archived — serving ${memoryCache.matches.length} matches from tournament-results.json`,
+    );
+    return;
+  }
+
   const { unlockMostRecentCompletedScore } = await import("./locked-scores");
   const unlocked = unlockMostRecentCompletedScore();
   await clearApiCache();
@@ -133,6 +145,19 @@ export async function warmProgressCacheOnStartup(): Promise<void> {
     const message = error instanceof Error ? error.message : "startup fetch failed";
     console.warn(`[wc-progress] Startup API refresh skipped: ${message}`);
   }
+}
+
+function archiveCacheEntry(): CacheEntry {
+  const matches = tournamentResults.matches as ExternalMatch[];
+  const standings = (tournamentResults.standings ?? {}) as ApiGroupStandings;
+  return {
+    matches,
+    standings: Object.keys(standings).length > 0 ? standings : undefined,
+    fetchedAt: Date.now(),
+    expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
+    requestsRemaining: null,
+    requestResetAt: null,
+  };
 }
 
 /** Remove persisted and in-memory API cache (called on server startup). */
@@ -576,6 +601,12 @@ export async function getProgressFromApi(
 ): Promise<ProgressApiResponse> {
   const now = Date.now();
   const { forceRefresh = false, useStaticFallback = false } = options;
+
+  if (TOURNAMENT_ARCHIVED) {
+    const entry = archiveCacheEntry();
+    memoryCache = entry;
+    return toResponse(entry, "archive", now);
+  }
 
   if (useStaticFallback) {
     return staticFallbackResponse(now);

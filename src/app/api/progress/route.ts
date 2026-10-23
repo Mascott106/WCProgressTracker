@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getProgressFromApi } from "@/lib/football-data";
+import {
+  getProgressFromApi,
+  TOURNAMENT_ARCHIVED,
+} from "@/lib/football-data";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +10,11 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forceRefresh = searchParams.get("refresh") === "true";
   const useMock = searchParams.get("mock") === "true";
+
+  if (TOURNAMENT_ARCHIVED) {
+    const result = await getProgressFromApi("");
+    return NextResponse.json(result);
+  }
 
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
   const useStaticFallback =

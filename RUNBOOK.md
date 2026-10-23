@@ -4,6 +4,12 @@ Operational playbook for the World Cup 2026 Progress Tracker in production. This
 
 Keep this doc updated as the deploy shape changes. If a scenario below is wrong or missing after an incident, fix it while the details are fresh.
 
+## Archived tournament
+
+The site is frozen: **`TOURNAMENT_ARCHIVED`** in `src/lib/football-data.ts` serves [`src/data/tournament-results.json`](src/data/tournament-results.json) only. Deploy/restart will **not** call football-data.org or refresh live scores. Footer shows source **archive**; the Refresh control is hidden.
+
+To correct a score after archive, edit the matching entry in `tournament-results.json` (or use `data/manual-scores.json` pins) and redeploy.
+
 ## Quick reference
 
 | Task | Command |
@@ -12,6 +18,7 @@ Keep this doc updated as the deploy shape changes. If a scenario below is wrong 
 | Tail logs | `pm2 logs wc-progress --lines 50` |
 | Restart app | `pm2 restart wc-progress` |
 | Health check (on VPS) | `curl -sf http://127.0.0.1:3000/api/progress \| head` |
+| Confirm archive | `curl -s http://127.0.0.1:3000/api/progress \| jq '{source:.meta.source, completed:.data.completedGames, final:.data.finalMatchStatus}'` |
 | Deploy latest `main` | `./scripts/update-site.sh` (on VPS) or `./scripts/update-site.sh --from-local` (from Mac) |
 | Pin a wrong score | `./scripts/pin-score.sh MATCH_ID HOME AWAY "note"` then `pm2 restart wc-progress` |
 | Remove a pin | `./scripts/unpin-score.sh MATCH_ID` then `pm2 restart wc-progress` |

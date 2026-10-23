@@ -118,7 +118,13 @@ export function ProgressDashboard() {
       <KnockoutRoundTimeline schedule={data.knockoutSchedule} />
 
       {meta && (
-        <footer className="flex shrink-0 flex-col items-start gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center sm:justify-between">
+        <footer
+          className={`flex shrink-0 flex-col gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center ${
+            meta.source === "archive"
+              ? "items-center justify-center text-center"
+              : "items-start sm:justify-between"
+          }`}
+        >
           <span className="capitalize">
             {t("footer.source", {
               vars: { source: meta.source.replace("-", " ") },
@@ -131,59 +137,62 @@ export function ProgressDashboard() {
                 },
               })}
           </span>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {meta.apiRequestsRemaining !== null &&
-              meta.apiRequestsLimit !== null && (
-                <span
-                  title={t("footer.apiQuotaTooltip", {
-                    vars: {
-                      limit: meta.apiRequestsLimit,
-                      reset: meta.apiRequestResetAt
-                        ? ` Counter resets at ${formatDateTime(meta.apiRequestResetAt, { timeOnly: true })}.`
-                        : "",
-                    },
-                  })}
-                >
-                  {t("footer.apiQuota", {
-                    vars: {
-                      remaining: meta.apiRequestsRemaining,
-                      limit: meta.apiRequestsLimit,
-                    },
-                  })}
-                  {meta.apiRequestResetAt &&
-                    new Date(meta.apiRequestResetAt).getTime() > Date.now() && (
-                      <>
-                        {t("footer.apiQuotaResets")}{" "}
-                        <FormattedDate
-                          iso={meta.apiRequestResetAt}
-                          timeOnly
-                        />
-                      </>
-                    )}
-                </span>
-              )}
-            <span title={t("footer.nextRefreshTitle")}>
-              {t("footer.nextRefresh")}{" "}
-              <FormattedDate iso={meta.cacheExpiresAt} timeOnly />
-            </span>
-            <button
-              type="button"
-              onClick={() => refresh(true)}
-              disabled={
-                !!meta.cacheExpiresAt &&
-                new Date(meta.cacheExpiresAt).getTime() > Date.now()
-              }
-              title={
-                meta.cacheExpiresAt &&
-                new Date(meta.cacheExpiresAt).getTime() > Date.now()
-                  ? t("footer.cacheFreshTitle")
-                  : undefined
-              }
-              className="rounded px-2 py-1 text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {t("footer.refresh", { nerd: nerdMode })}
-            </button>
-          </div>
+          {meta.source !== "archive" && (
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {meta.apiRequestsRemaining !== null &&
+                meta.apiRequestsLimit !== null && (
+                  <span
+                    title={t("footer.apiQuotaTooltip", {
+                      vars: {
+                        limit: meta.apiRequestsLimit,
+                        reset: meta.apiRequestResetAt
+                          ? ` Counter resets at ${formatDateTime(meta.apiRequestResetAt, { timeOnly: true })}.`
+                          : "",
+                      },
+                    })}
+                  >
+                    {t("footer.apiQuota", {
+                      vars: {
+                        remaining: meta.apiRequestsRemaining,
+                        limit: meta.apiRequestsLimit,
+                      },
+                    })}
+                    {meta.apiRequestResetAt &&
+                      new Date(meta.apiRequestResetAt).getTime() >
+                        Date.now() && (
+                        <>
+                          {t("footer.apiQuotaResets")}{" "}
+                          <FormattedDate
+                            iso={meta.apiRequestResetAt}
+                            timeOnly
+                          />
+                        </>
+                      )}
+                  </span>
+                )}
+              <span title={t("footer.nextRefreshTitle")}>
+                {t("footer.nextRefresh")}{" "}
+                <FormattedDate iso={meta.cacheExpiresAt} timeOnly />
+              </span>
+              <button
+                type="button"
+                onClick={() => refresh(true)}
+                disabled={
+                  !!meta.cacheExpiresAt &&
+                  new Date(meta.cacheExpiresAt).getTime() > Date.now()
+                }
+                title={
+                  meta.cacheExpiresAt &&
+                  new Date(meta.cacheExpiresAt).getTime() > Date.now()
+                    ? t("footer.cacheFreshTitle")
+                    : undefined
+                }
+                className="rounded px-2 py-1 text-accent/70 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t("footer.refresh", { nerd: nerdMode })}
+              </button>
+            </div>
+          )}
         </footer>
       )}
     </div>

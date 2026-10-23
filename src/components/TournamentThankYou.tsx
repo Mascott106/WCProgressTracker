@@ -46,7 +46,7 @@ export function TournamentThankYou({ show, onClose }: TournamentThankYouProps) {
         />
 
         <p className="thank-you-flag relative text-5xl leading-none sm:text-6xl" aria-hidden>
-          🇧🇷
+          🏆
         </p>
 
         <p className="relative mt-3 text-[10px] font-medium uppercase tracking-[0.28em] text-accent">

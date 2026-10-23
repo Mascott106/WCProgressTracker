@@ -60,7 +60,7 @@ export function ProgressDashboard() {
   if (!data) return null;
 
   return (
-    <div className="flex flex-col gap-3 pb-4">
+    <div className="flex w-full min-w-0 flex-col gap-3 pb-4">
       <TournamentThankYou show={showThankYou} onClose={dismissThankYou} />
       <TournamentFireworks show={showFireworks} onDone={dismissFireworks} />
 
@@ -119,7 +119,7 @@ export function ProgressDashboard() {
 
       {meta && (
         <footer
-          className={`flex shrink-0 flex-col gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center ${
+          className={`flex w-full shrink-0 flex-col gap-2 text-[10px] text-muted/40 sm:flex-row sm:items-center ${
             meta.source === "archive"
               ? "items-center justify-center text-center"
               : "items-start sm:justify-between"

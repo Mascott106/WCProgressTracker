@@ -22,7 +22,7 @@ function HomeContent() {
   }, [cupMode, resetPreview]);
 
   return (
-    <main className="field-pattern flex min-h-screen flex-col px-4 py-4 sm:px-10 sm:py-5">
+    <main className="field-pattern flex min-h-screen w-full flex-col px-4 py-4 sm:px-10 sm:py-5">
       <SiteHeader />
 
       {cupMode === "dashboard" ? (

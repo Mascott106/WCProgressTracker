@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  useLayoutEffect,
+  useRef,
+  type ChangeEvent,
+  type SelectHTMLAttributes,
+} from "react";
 import { useCupMode } from "@/contexts/CupModeContext";
 import { useLocale, useTranslation } from "@/contexts/LocaleContext";
 import { useNerdMode } from "@/contexts/NerdModeContext";
@@ -23,7 +29,44 @@ const hiddenBtn =
   "cursor-default border-0 bg-transparent p-0 font-inherit text-[10px] text-muted/40 disabled:cursor-default";
 
 const selectClass =
-  "min-w-0 max-w-[9rem] cursor-pointer appearance-none truncate border-0 bg-transparent p-0 font-inherit text-[10px] uppercase tracking-wide text-muted/50 hover:text-muted/70 disabled:cursor-default";
+  "cursor-pointer appearance-none border-0 bg-transparent p-0 font-inherit text-[10px] uppercase tracking-wide text-muted/50 hover:text-muted/70 disabled:cursor-default";
+
+/** Native <select> sizes to its longest option — shrink to the selected label instead. */
+function FitWidthSelect({
+  value,
+  className,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  const selectRef = useRef<HTMLSelectElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const select = selectRef.current;
+    const mirror = mirrorRef.current;
+    if (!select || !mirror) return;
+    mirror.textContent = select.selectedOptions[0]?.text ?? "";
+    select.style.width = `${Math.ceil(mirror.getBoundingClientRect().width)}px`;
+  }, [value, children]);
+
+  return (
+    <span className="relative inline-flex">
+      <span
+        ref={mirrorRef}
+        aria-hidden
+        className={`pointer-events-none invisible absolute left-0 top-0 whitespace-pre ${className ?? ""}`}
+      />
+      <select
+        ref={selectRef}
+        value={value}
+        className={className}
+        {...props}
+      >
+        {children}
+      </select>
+    </span>
+  );
+}
 
 export function SiteFooter() {
   const { toggleNerdMode, ready } = useNerdMode();
@@ -62,13 +105,15 @@ export function SiteFooter() {
           🏆
         </button>
         <span className="text-muted/25">·</span>
-        <label className="inline-flex min-w-0 max-w-full items-center gap-1">
+        <label className="inline-flex items-center gap-1">
           <span className="sr-only">{t("footer.language")}</span>
-          <select
+          <FitWidthSelect
             value={locale}
             disabled={!localeReady}
             suppressHydrationWarning
-            onChange={(e) => setLocale(e.target.value as SupportedLocale)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setLocale(e.target.value as SupportedLocale)
+            }
             className={selectClass}
             aria-label={t("footer.language")}
           >
@@ -77,16 +122,16 @@ export function SiteFooter() {
                 {localePickerCode(code)}
               </option>
             ))}
-          </select>
+          </FitWidthSelect>
         </label>
         <span className="text-muted/25">·</span>
-        <label className="inline-flex min-w-0 max-w-full items-center gap-1">
+        <label className="inline-flex items-center gap-1">
           <span className="sr-only">{t("footer.timezone")}</span>
-          <select
+          <FitWidthSelect
             value={selection}
             disabled={!timeZoneReady}
             suppressHydrationWarning
-            onChange={(e) =>
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setSelection(e.target.value as TimeZoneSelection)
             }
             className={selectClass}
@@ -98,7 +143,7 @@ export function SiteFooter() {
                 {label}
               </option>
             ))}
-          </select>
+          </FitWidthSelect>
         </label>
       </div>
     </footer>

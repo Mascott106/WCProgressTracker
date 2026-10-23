@@ -85,4 +85,32 @@ assert(
   "header stays on R16 before QF",
 );
 
+// Entire tournament finished — Final complete, nothing "current"
+const allDone: MatchSummary[] = [
+  ...Array.from({ length: 16 }, (_, i) =>
+    koMatch(73 + i, "Round of 32", "FT"),
+  ),
+  ...Array.from({ length: 8 }, (_, i) =>
+    koMatch(89 + i, "Round of 16", "FT"),
+  ),
+  ...Array.from({ length: 4 }, (_, i) =>
+    koMatch(97 + i, "Quarter-finals", "FT"),
+  ),
+  koMatch(101, "Semi-finals", "FT"),
+  koMatch(102, "Semi-finals", "FT"),
+  koMatch(103, "Third Place", "FT"),
+  koMatch(104, "Final", "FT"),
+];
+
+const doneSchedule = buildKnockoutSchedule(allDone, KNOCKOUT_START_MS + 1);
+assert(
+  doneSchedule.milestones.every((m) => m.status === "complete"),
+  "all milestones complete when Final is finished",
+);
+assert(
+  doneSchedule.milestones.filter((m) => m.status === "current").length === 0,
+  "no current milestone after Final",
+);
+assert(doneSchedule.currentRound === null, "currentRound is null when done");
+
 console.log("knockout-schedule.test.ts: all assertions passed");

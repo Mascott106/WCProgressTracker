@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { CupMode } from "@/contexts/CupModeContext";
 import { useTranslation } from "@/contexts/LocaleContext";
 import { TournamentFireworks } from "@/components/TournamentFireworks";
+import { TournamentThankYou } from "@/components/TournamentThankYou";
 import { useCupFullFireworks } from "@/hooks/useCupFullFireworks";
 import { useProgressData } from "@/hooks/useProgressData";
+import { useTournamentThankYou } from "@/hooks/useTournamentThankYou";
 import {
   createCupFluid,
   prefersReducedMotion,
@@ -45,6 +47,8 @@ export function FillTheCup({ mode }: FillTheCupProps) {
     mode,
     displayPercent,
   );
+  const { show: showThankYou, dismiss: dismissThankYou } =
+    useTournamentThankYou(!!data?.tournamentComplete);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -187,6 +191,7 @@ export function FillTheCup({ mode }: FillTheCupProps) {
 
   return (
     <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center gap-4 py-6">
+      <TournamentThankYou show={showThankYou} onClose={dismissThankYou} />
       <TournamentFireworks show={showFireworks} onDone={dismissFireworks} />
 
       <div className="text-center">

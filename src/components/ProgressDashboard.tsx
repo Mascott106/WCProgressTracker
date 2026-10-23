@@ -6,6 +6,7 @@ import { MatchPanel } from "@/components/MatchPanel";
 import { ProgressBar } from "@/components/ProgressBar";
 import { TimeProgressBar } from "@/components/TimeProgressBar";
 import { TournamentFireworks } from "@/components/TournamentFireworks";
+import { TournamentThankYou } from "@/components/TournamentThankYou";
 import { KnockoutBracket } from "@/components/KnockoutBracket";
 import { KnockoutRoundTimeline } from "@/components/KnockoutRoundTimeline";
 import { UpcomingSchedule } from "@/components/UpcomingSchedule";
@@ -13,6 +14,7 @@ import { useFinalePreview } from "@/contexts/FinalePreviewContext";
 import { useMatchProgressCelebrations } from "@/hooks/useMatchProgressCelebrations";
 import { useProgressData } from "@/hooks/useProgressData";
 import { useTournamentFireworks } from "@/hooks/useTournamentFireworks";
+import { useTournamentThankYou } from "@/hooks/useTournamentThankYou";
 import { useTranslation } from "@/contexts/LocaleContext";
 import { useNerdMode } from "@/contexts/NerdModeContext";
 
@@ -24,6 +26,8 @@ export function ProgressDashboard() {
   const previewFireworks = previewPhase === "complete";
   const { show: showFireworks, dismiss: dismissFireworks } =
     useTournamentFireworks(data, previewFireworks);
+  const { show: showThankYou, dismiss: dismissThankYou } =
+    useTournamentThankYou(!!data?.tournamentComplete);
 
   useMatchProgressCelebrations(data, nerdMode);
 
@@ -57,6 +61,7 @@ export function ProgressDashboard() {
 
   return (
     <div className="flex flex-col gap-3 pb-4">
+      <TournamentThankYou show={showThankYou} onClose={dismissThankYou} />
       <TournamentFireworks show={showFireworks} onDone={dismissFireworks} />
 
       {error && (

@@ -47,10 +47,16 @@
     "scheduleTitle": "Knockout Schedule",
     "now": "Now:",
     "begins": "Begins",
+    "complete": "Complete",
     "final": "Final",
     "third": "3rd",
     "matchUnavailable": "Match data unavailable",
     "matchNumber": "Match {id}"
+  },
+  "thankYou": {
+    "title": "Thanks for following along",
+    "body": "Thank you for using this site during the World Cup. See you for the Women's World Cup 🇧🇷 — June 24 – July 25, 2027.",
+    "close": "Close"
   },
   "rounds": {
     "roundOf32": "Round of 32",

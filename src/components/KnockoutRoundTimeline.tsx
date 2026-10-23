@@ -24,6 +24,10 @@ export function KnockoutRoundTimeline({
               {translateRound(schedule.currentRound)}
             </span>
           </p>
+        ) : schedule.active && !schedule.currentRound ? (
+          <p className="text-[10px] font-medium text-accent/80">
+            {t("knockout.complete")}
+          </p>
         ) : !schedule.active ? (
           <p className="text-[10px] text-muted/50">
             {t("knockout.begins")}{" "}

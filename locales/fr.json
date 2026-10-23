@@ -47,10 +47,16 @@
     "scheduleTitle": "Calendrier des éliminatoires",
     "now": "En cours :",
     "begins": "Début",
+    "complete": "Terminé",
     "final": "Finale",
     "third": "3e",
     "matchUnavailable": "Données du match indisponibles",
     "matchNumber": "Match {id}"
+  },
+  "thankYou": {
+    "title": "Merci de nous avoir suivis",
+    "body": "Merci d'avoir utilisé ce site pendant la Coupe du Monde. Rendez-vous à la Coupe du Monde féminine 🇧🇷 — 24 juin – 25 juillet 2027.",
+    "close": "Fermer"
   },
   "rounds": {
     "roundOf32": "Seizièmes de finale",

@@ -47,10 +47,16 @@
     "scheduleTitle": "Calendario eliminatorie",
     "now": "Ora:",
     "begins": "Inizio",
+    "complete": "Completato",
     "final": "Finale",
     "third": "3°",
     "matchUnavailable": "Dati partita non disponibili",
     "matchNumber": "Partita {id}"
+  },
+  "thankYou": {
+    "title": "Grazie per averci seguito",
+    "body": "Grazie per aver usato questo sito durante i Mondiali. Ci vediamo ai Mondiali femminili 🇧🇷 — 24 giugno – 25 luglio 2027.",
+    "close": "Chiudi"
   },
   "rounds": {
     "roundOf32": "Sedicesimi di finale",

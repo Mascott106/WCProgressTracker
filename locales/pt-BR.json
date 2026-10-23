@@ -47,10 +47,16 @@
     "scheduleTitle": "Calendário do mata-mata",
     "now": "Agora:",
     "begins": "Começa",
+    "complete": "Concluído",
     "final": "Final",
     "third": "3º",
     "matchUnavailable": "Dados do jogo indisponíveis",
     "matchNumber": "Jogo {id}"
+  },
+  "thankYou": {
+    "title": "Obrigado por acompanhar",
+    "body": "Obrigado por usar este site durante a Copa do Mundo. Nos vemos na Copa do Mundo Feminina 🇧🇷 — 24 de junho – 25 de julho de 2027.",
+    "close": "Fechar"
   },
   "rounds": {
     "roundOf32": "Dezesseis avos de final",

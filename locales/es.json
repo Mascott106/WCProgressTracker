@@ -47,10 +47,16 @@
     "scheduleTitle": "Calendario eliminatorio",
     "now": "Ahora:",
     "begins": "Comienza",
+    "complete": "Completo",
     "final": "Final",
     "third": "3.º",
     "matchUnavailable": "Datos del partido no disponibles",
     "matchNumber": "Partido {id}"
+  },
+  "thankYou": {
+    "title": "Gracias por acompañarnos",
+    "body": "Gracias por usar este sitio durante el Mundial. Nos vemos en la Copa Mundial Femenina 🇧🇷 — 24 de junio – 25 de julio de 2027.",
+    "close": "Cerrar"
   },
   "rounds": {
     "roundOf32": "Dieciseisavos de final",

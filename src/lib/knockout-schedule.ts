@@ -48,6 +48,13 @@ function normalizeMilestoneStatuses<
     furthest.totalMatches > 0 &&
     furthest.completedMatches >= furthest.totalMatches;
 
+  // Last round fully done: everything complete, no "current"
+  if (furthestComplete && furthestActivityIdx + 1 >= milestones.length) {
+    return milestones.map((m) =>
+      m.status === "complete" ? m : { ...m, status: "complete" as const },
+    );
+  }
+
   const currentIdx =
     furthestComplete && furthestActivityIdx + 1 < milestones.length
       ? furthestActivityIdx + 1
@@ -113,10 +120,12 @@ export function buildKnockoutSchedule(
     }),
   );
 
-  const currentRound =
-    milestones.find((m) => m.status === "current")?.name ??
-    milestones.find((m) => m.status === "upcoming")?.name ??
-    null;
+  const allComplete = milestones.every((m) => m.status === "complete");
+  const currentRound = allComplete
+    ? null
+    : (milestones.find((m) => m.status === "current")?.name ??
+      milestones.find((m) => m.status === "upcoming")?.name ??
+      null);
 
   return { active, milestones, currentRound };
 }

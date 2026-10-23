@@ -55,8 +55,9 @@
   },
   "thankYou": {
     "title": "Thanks for following along",
-    "body": "Thank you for using this site during the World Cup. See you for the Women's World Cup 🇧🇷 — June 24 – July 25, 2027.",
-    "close": "Close"
+    "body": "Thank you for using this site during the World Cup. See you for the Women's World Cup!",
+    "badge": "🇧🇷 Brazil 2027 · June 24 – July 25",
+    "close": "Can't wait"
   },
   "rounds": {
     "roundOf32": "Round of 32",

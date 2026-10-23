@@ -55,8 +55,9 @@
   },
   "thankYou": {
     "title": "Obrigado por acompanhar",
-    "body": "Obrigado por usar este site durante a Copa do Mundo. Nos vemos na Copa do Mundo Feminina 🇧🇷 — 24 de junho – 25 de julho de 2027.",
-    "close": "Fechar"
+    "body": "Obrigado por usar este site durante a Copa do Mundo. Nos vemos na Copa do Mundo Feminina!",
+    "badge": "🇧🇷 Brasil 2027 · 24 de junho – 25 de julho",
+    "close": "Mal posso esperar"
   },
   "rounds": {
     "roundOf32": "Dezesseis avos de final",
